@@ -2,7 +2,7 @@
 title: "Skill + CLI vs MCP：为什么 Agent 工具还不能一次配置，到处使用？"
 created: 2026-11-11
 updated: 2026-11-11
-status: draft
+status: ready
 tags:
   - agent
   - skills
@@ -11,6 +11,8 @@ tags:
 ---
 
 # Skill + CLI vs MCP：为什么 Agent 工具还不能一次配置，到处使用？
+
+> 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
 手动配置同一个 MCP 服务，在 Cursor 里要写进 `mcp.json`，换到 Codex，又要改成 `config.toml` 中的 TOML 配置。服务没变，启动命令或地址也没变，用户却要重新寻找配置入口、转换字段和格式。既然 MCP 已经统一了工具通信，为什么配置还不能跨客户端复用？
 
