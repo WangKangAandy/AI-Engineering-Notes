@@ -1,5 +1,5 @@
 ---
-title: 在 WSL Ubuntu 中用 Docker 部署 Gemma 4 12B、llama.cpp 并接入 OpenClaw
+title: 大模型推理实践：Gemma 4 12B 的 llama.cpp 部署与 OpenClaw 接入
 tags:
   - gemma
   - llama-cpp
@@ -10,7 +10,7 @@ created: 2026-11-12
 status: evergreen
 ---
 
-# 在 WSL Ubuntu 中用 Docker 部署 Gemma 4 12B、llama.cpp 并接入 OpenClaw
+# 大模型推理实践：Gemma 4 12B 的 llama.cpp 部署与 OpenClaw 接入
 
 本文从一个已经可用的 WSL2 Ubuntu 开始，完成四件事：配置 CUDA 容器环境、从 ModelScope 下载 Gemma 4 12B、用 `llama-server` 提供 OpenAI 兼容 API、让同一 WSL Ubuntu 中的 OpenClaw 调用这套服务。
 
