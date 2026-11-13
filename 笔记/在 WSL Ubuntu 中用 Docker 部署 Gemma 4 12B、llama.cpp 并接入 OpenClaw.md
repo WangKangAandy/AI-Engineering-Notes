@@ -12,9 +12,9 @@ status: evergreen
 
 # 在 WSL Ubuntu 中用 Docker 部署 Gemma 4 12B、llama.cpp 并接入 OpenClaw
 
-本文从一个已经可用的 WSL2 Ubuntu 开始，完成四件事：配置 CUDA 容器环境、从 ModelScope 下载 Gemma 4 12B、用 `llama-server` 提供 OpenAI 兼容 API、让 Windows 或 WSL 中的 OpenClaw 调用这套服务。
+本文从一个已经可用的 WSL2 Ubuntu 开始，完成四件事：配置 CUDA 容器环境、从 ModelScope 下载 Gemma 4 12B、用 `llama-server` 提供 OpenAI 兼容 API、让同一 WSL Ubuntu 中的 OpenClaw 调用这套服务。
 
-实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存、6GB Swap 和 OpenClaw 2026.11.3。模型使用 Google 官方 QAT Q4_0 GGUF，初始上下文为 16K。
+实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存和 6GB Swap；OpenClaw CLI 固定为 2026.11.3。模型使用 Google 官方 QAT Q4_0 GGUF，初始上下文为 16K。
 
 ## 1. 检查 Ubuntu、GPU 和内存
 
@@ -41,7 +41,7 @@ swap=8GB
 wsl --shutdown
 ```
 
-重新进入 Ubuntu，再用 `free -h` 确认。这里只调整已有 WSL 的资源，不涉及 WSL 安装过程。
+重新进入 Ubuntu，再用 `free -h` 确认。`memory` 和 `swap` 是 WSL 的资源上限，应按 Windows 主机的实际物理内存调整，不要直接照搬示例值。这里只调整已有 WSL 的资源，不涉及 WSL 安装过程。
 
 ## 2. 安装 Docker Engine
 
@@ -173,6 +173,12 @@ docker image inspect ghcr.io/ggml-org/llama.cpp:server-cuda-b12282 \
   --format '{{index .RepoDigests 0}}'
 ```
 
+实测镜像索引摘要为：
+
+```text
+ghcr.io/ggml-org/llama.cpp@sha256:17934f68b6efc68671800735f25e209b489f47b610cfbb5c0a5c30965b54023c
+```
+
 ## 6. 启动 llama-server
 
 ```bash
@@ -202,6 +208,16 @@ docker logs -f gemma4-llamacpp
 
 看到模型加载完成后按 `Ctrl+C` 退出日志，不会停止容器。
 
+检查模型加载后的资源占用：
+
+```bash
+nvidia-smi
+free -h
+docker stats --no-stream gemma4-llamacpp
+```
+
+分别观察 GPU 显存、WSL 内存与 Swap、容器 CPU 和内存占用。
+
 ## 7. 用 curl 验证 API
 
 ### 健康检查
@@ -230,15 +246,50 @@ curl -fsS http://127.0.0.1:8080/v1/chat/completions \
   }'
 ```
 
+### 工具调用生成
+
+下面的请求验证模型能否根据工具定义生成结构化调用。它只验证 tool call 的生成，不代表工具已经被执行：
+
+```bash
+curl -fsS http://127.0.0.1:8080/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer local-model' \
+  -d '{
+    "model": "gemma-4-12b-it-qat-q4_0.gguf",
+    "messages": [{
+      "role": "user",
+      "content": "调用 echo_code，参数 code 必须是 GEMMA4_TOOL_OK，不要直接回答。"
+    }],
+    "tools": [{
+      "type": "function",
+      "function": {
+        "name": "echo_code",
+        "description": "返回输入的校验码",
+        "parameters": {
+          "type": "object",
+          "properties": {"code": {"type": "string"}},
+          "required": ["code"]
+        }
+      }
+    }],
+    "tool_choice": "required",
+    "max_tokens": 64,
+    "chat_template_kwargs": {"enable_thinking": false}
+  }'
+```
+
+成功时，响应中的 `tool_calls` 应包含 `echo_code` 和参数 `{"code":"GEMMA4_TOOL_OK"}`。
+
 ### 图片、音频和视频
 
-多模态请求也走 `/v1/chat/completions`。把媒体文件路径替换为自己的文件，下面的 Python 脚本会把文件编码为 data URL 并依次测试图片、音频和视频：
+多模态请求也走 `/v1/chat/completions`。把媒体文件路径替换为自己的文件，下面的 Python 脚本会把图片编码为 data URL、把音频和视频编码为原始 Base64，再依次发起测试：
 
 ```python
 import base64
 import json
 import mimetypes
 import pathlib
+import urllib.error
 import urllib.request
 
 BASE = "http://127.0.0.1:8080/v1/chat/completions"
@@ -266,9 +317,12 @@ def ask(label, content):
             "Authorization": "Bearer local-model",
         },
     )
-    with urllib.request.urlopen(request, timeout=300) as response:
-        result = json.load(response)
-    print(label, result["choices"][0]["message"])
+    try:
+        with urllib.request.urlopen(request, timeout=300) as response:
+            result = json.load(response)
+        print(label, result["choices"][0]["message"])
+    except urllib.error.HTTPError as error:
+        print(label, error.code, error.read().decode())
 
 ask("image", [
     {"type": "text", "text": "简要描述图片内容。"},
@@ -298,47 +352,30 @@ ask("video", [
 | `/health`、`/v1/models` | 通过，模型加载完成并报告多模态能力 |
 | 文本 | 通过，`17 + 25` 返回 `42` |
 | 图片 | 通过，测试图返回 `Blue and yellow` |
-| 工具调用 | 通过，返回 `echo_code` 与 `GEMMA4_TOOL_OK` |
-| OpenClaw Provider | 配置可发现，Windows `openclaw models list` 能列出 `gemma4-local`；当前环境的 Windows → WSL API 未连通，端到端 agent 调用未通过 |
-| 音频 | 当前 12B QAT + b12282 对合成正弦音未给出有效识别，不宣称通过 |
-| 视频 | 当前测试请求返回 400，不宣称通过 |
+| 工具调用生成 | 通过，模型返回 `echo_code` 与 `GEMMA4_TOOL_OK` 参数；未在该请求中执行工具 |
+| 音频 | 当前模型、投影文件、b12282 与测试音频组合未给出有效识别，不宣称通过 |
+| 视频 | 当前模型、投影文件、b12282 与请求格式组合返回 HTTP 400：`Failed to load image or audio file`，不宣称通过 |
 
-“模型元数据列出支持某种模态”不等于该模态在这份 checkpoint、投影文件和请求格式组合下已经验证通过；部署结论以实际请求结果为准。
+“模型元数据列出支持某种模态”不等于该模态在这份 checkpoint、投影文件和请求格式组合下已经验证通过；部署结论以实际请求结果为准。OpenClaw Provider 的输入模态也只声明本次已验证通过的文本和图片。
 
-## 8. 接入 Windows OpenClaw
+## 8. 在 WSL Ubuntu 中接入 OpenClaw
 
-llama-server 只绑定到本机回环地址。WSL 的 localhost 转发开启时，Windows 可以直接访问：
+OpenClaw 与 llama-server 运行在同一个 WSL Ubuntu 中，直接使用回环地址调用 API。
 
-调用期间保持对应的 WSL Ubuntu 发行版处于运行状态。
+安装 OpenClaw CLI：
 
-```powershell
-curl.exe http://127.0.0.1:8080/health
+```bash
+curl -fsSL https://openclaw.ai/install-cli.sh \
+  | bash -s -- --version 2026.11.3 --runtime-only
+export PATH="$HOME/.openclaw/bin:$PATH"
+openclaw --version
+openclaw setup --baseline
 ```
 
-在现有 `models.providers` 中只新增 `gemma4-local`，保留原有默认模型和业务配置：
+创建 Provider 补丁：
 
-```json
-{
-  "baseUrl": "http://127.0.0.1:8080/v1",
-  "apiKey": "local-model",
-  "api": "openai-completions",
-  "models": [
-    {
-      "id": "gemma-4-12b-it-qat-q4_0.gguf",
-      "name": "Gemma 4 12B QAT Q4_0",
-      "reasoning": false,
-      "input": ["text", "image"],
-      "contextWindow": 16384,
-      "maxTokens": 2048
-    }
-  ]
-}
-```
-
-也可以直接用 OpenClaw CLI 写入这个 Provider（不改默认模型）：
-
-```powershell
-$provider = @'
+```bash
+cat >/tmp/openclaw-gemma4-provider.json5 <<'EOF'
 {
   models: {
     providers: {
@@ -360,23 +397,35 @@ $provider = @'
     }
   }
 }
-'@
-Set-Content "$env:TEMP\openclaw-gemma4-provider.json5" -Value $provider -Encoding utf8
-openclaw config patch --file "$env:TEMP\openclaw-gemma4-provider.json5"
-Remove-Item "$env:TEMP\openclaw-gemma4-provider.json5"
+EOF
 ```
 
-测试时显式选择 `gemma4-local/gemma-4-12b-it-qat-q4_0.gguf`，不修改已有默认模型。
+先做 dry-run，再应用并验证配置：
 
-Windows PowerShell 中可用 OpenClaw CLI 验证 Provider：
+```bash
+openclaw config patch --file /tmp/openclaw-gemma4-provider.json5 --dry-run
+openclaw config patch --file /tmp/openclaw-gemma4-provider.json5
+rm /tmp/openclaw-gemma4-provider.json5
 
-```powershell
-openclaw --version
+openclaw config validate
 openclaw models list
-openclaw agent exec --model gemma4-local/gemma-4-12b-it-qat-q4_0.gguf "只回答一个数字：17 加 25 等于多少？" --json
 ```
 
-本文命令按 OpenClaw 2026.11.3 验证；旧版本的 CLI 子命令可能不同。
+`models list` 应能看到 `gemma4-local/gemma-4-12b-it-qat-q4_0.gguf`。最后显式选择该模型完成一次 Agent 调用，不修改已有默认模型：
+
+```bash
+openclaw agent exec \
+  --model gemma4-local/gemma-4-12b-it-qat-q4_0.gguf \
+  --local-model-lean \
+  --code-mode direct \
+  --thinking off \
+  "只回答一个数字：17 加 25 等于多少？" \
+  --json
+```
+
+成功时，JSON 结果应包含 `"ok": true`、`"status": "ok"`，并且 `final` 字段包含 `42`。
+
+本文固定安装 OpenClaw 2026.11.3，因此命令以该版本为准。
 
 ## 9. 常用维护命令
 
