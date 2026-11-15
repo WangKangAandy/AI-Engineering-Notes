@@ -9,6 +9,21 @@ Obsidian vault + Git。细则：`.cursor/rules/vault.mdc`（建设与编辑）�
 - 笔记正文只写读者要跟着做的内容与结论。禁止把与 Agent 的纠偏、格式/语法争论、工具限制辨析、编辑过程说明写进正文；这类取舍在对话或本文件解决，正文直接采用正确写法
 - Markdown 加粗内容以括号等标点结尾且后面紧接正文时，将标点移出加粗范围（如 `**反向传播**（Backpropagation）沿……`）或在结束的 `**` 后加空格，避免 CommonMark 无法识别加粗闭合。
 
+## 笔记 metadata 规范
+
+每篇博客笔记（`笔记/**/*.md`）的 YAML frontmatter 必须包含 `summary`（摘要）字段：用一两句话概括文章在讲什么、读者能得到什么；新建或编辑时补齐。不适用于 `AGENTS.md`、`SKILL.md` 等项目配置或指令文件。
+
+```yaml
+---
+title: 示例标题
+summary: 一两句摘要，说明主题与读者收益。
+tags:
+  - example
+created: 2026-11-15
+status: evergreen
+---
+```
+
 ## 笔记开头规范
 
 每篇 Markdown 笔记（`.md`）都应在正文一级标题后、文章内容前放置以下仓库介绍，使用 Markdown 引用块和可点击链接；新建或编辑笔记时补齐，已有时不重复添加。本规则适用于笔记正文文件，不适用于 `AGENTS.md`、`SKILL.md` 等项目配置或指令文件。
