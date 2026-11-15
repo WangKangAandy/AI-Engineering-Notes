@@ -27,7 +27,7 @@ Agent-Notes/
 
 ## 编辑
 
-1. 保留 frontmatter（勿无故删 `tags` / `status` / `created` / `summary`）；博客笔记须有 `summary`，见 `AGENTS.md`。
+1. 保留 frontmatter（勿无故删 `title` / `summary` / `tags` / `created` / `status`）；完整约定见 `AGENTS.md`「笔记 metadata 规范」。
 2. 站内 `[[wikilink]]`；优先 `vault_patch` / 按章节改，忌整文件覆盖。
 3. 删、批量改标签、重命名 → 先确认。
 4. 新主题先搜 vault，再写 `笔记/<标题>.md`。
