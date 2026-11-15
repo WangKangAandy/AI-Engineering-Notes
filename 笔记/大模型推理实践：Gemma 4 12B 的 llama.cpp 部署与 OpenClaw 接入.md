@@ -347,10 +347,14 @@ OpenClaw 与 llama-server 运行在同一个 WSL Ubuntu 中，直接使用回环
 ```bash
 curl -fsSL https://openclaw.ai/install-cli.sh \
   | bash -s -- --version 2026.11.3 --runtime-only
+echo 'export PATH="$HOME/.openclaw/bin:$PATH"' >> ~/.bashrc
 export PATH="$HOME/.openclaw/bin:$PATH"
+hash -r
 openclaw --version
 openclaw setup --baseline
 ```
+
+`openclaw --version` 应显示 `2026.11.3`。若不是，先执行 `which openclaw`，确认指向 `~/.openclaw/bin/openclaw`。
 
 用官方 onboard 接入自定义 OpenAI 兼容端点：
 
