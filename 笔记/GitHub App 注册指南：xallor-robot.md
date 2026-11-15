@@ -1,6 +1,6 @@
 ---
 title: GitHub App 注册指南：xallor-robot
-summary: 在 xallor-ai 创建安装型 App xallor-robot：基本信息、Webhook、按当前创建页名称配置的 Repository permissions 清单，以及创建后凭证与主分支保护要点；供 GitHub Agent Channel 的 App Adapter 使用。
+summary: 在 xallor-ai 创建安装型 App xallor-robot 的逐步填写说明：基本信息、Webhook、权限与事件、私钥与安装；供 GitHub Agent Channel 的 App Adapter 使用。
 tags:
   - github-app
   - openclaw
@@ -13,20 +13,9 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-在组织 `xallor-ai` 注册安装型 App `xallor-robot`。
+在组织 `xallor-ai` 创建安装型 App `xallor-robot`：页面怎么填、权限怎么选、创建后保存什么。整体产品架构见 [[GitHub Agent Channel 架构与阶段计划]]。
 
-**定位**：GitHub App 是 **GitHub Agent Channel** 的一种 Integration Adapter（推荐正式路径），负责身份、权限上限与事件投递；不是唯一前置。Channel 对接用户选定的 Agent Runtime（V1 先接 OpenClaw）。无 App、仅仓库级 Webhook（± PAT）见整体方案。整体架构与阶段：[[GitHub Agent Channel 架构与阶段计划]]。
-
-权限名称以**当前 Create GitHub App 页 Repository permissions 展示名为准**（勿与 REST 文档里的旧别名混用）。
-
-## 两层分工
-
-| 层 | 在哪 | 做什么 |
-| --- | --- | --- |
-| GitHub App（本文） | Developer settings | 工牌、权限上限、App Webhook |
-| OpenClaw Plugin | 自建接收端 | 多 Adapter 接入、验签、Credential、Tools/Policy、投递 Agent |
-
-页面上 Create 只完成 App Adapter 配置。App 权限是能力上限；具体请求仍可用 Installation Token 再收窄。
+权限名称以 **Create GitHub App** 页 **Repository permissions** 展示名为准。
 
 ## 入口
 
@@ -47,19 +36,17 @@ status: ready
 | Expire user authorization tokens | 勾选 |
 | Request user authorization (OAuth) during installation | 不勾选 |
 
-## Webhook / Permissions / 安装范围
+## Webhook
+
+向下滚到 Webhook / Permissions 区域（示意见下图）：
 
 ![Create GitHub App：Webhook、Permissions、安装范围](./_assets/github-app/create-github-app-webhook-perms.png)
 
-### Webhook
-
 | 项 | 建议 |
 | --- | --- |
-| Active | 先不勾选；Plugin 有公网 HTTPS 后再开 |
-| Webhook URL | 创建时可空；就绪后填 Plugin 路由（本地可用隧道） |
-| Secret | 页面无「生成」按钮。本机造高熵随机串粘贴；与接收端同一串，用于 HMAC |
-
-生成示例（任意可信机器即可，与运行环境无关）：
+| Active | 先不勾选；接收端有公网 HTTPS 后再开 |
+| Webhook URL | 创建时可空；就绪后填接收端 HTTPS 路径（本地可用隧道） |
+| Secret | 页面**无**生成按钮；本机造高熵随机串粘贴，与接收端同一串做 HMAC |
 
 ```bash
 openssl rand -hex 32
@@ -69,131 +56,100 @@ openssl rand -hex 32
 -join ((1..64) | ForEach-Object { '{0:x}' -f (Get-Random -Max 16) })
 ```
 
-离线保存；勿进 Git。接收端就绪后：勾选 Active → 填 URL（及 Secret）→ Save。
+Secret 离线保存，勿进 Git。就绪后：勾选 Active → 填 URL → Save。
 
-### Repository permissions
+## Repository permissions
 
-只展开 **Repository permissions**。名称按下表与页面逐项对齐；**未列出的项一律 `No access`**。
+只改 **Repository permissions**；**未列出的项一律 `No access`**。Organization / Account / Enterprise 全部 **No access**。
 
-目标：Agent 能读改代码、处理 Issue/PR、跑/管 CI、参与协作；**不把**仓库管理权、Actions/Dependabot/Codespaces 密钥、GitHub 自带 Agent 相关权限交给 App。禁止私自合入默认分支靠**分支保护**（禁直推、需 PR；`xallor-robot` 不进 bypass）+ Plugin 策略，不是靠关掉 Contents Write。
+默认分支安全靠仓库**分支保护**（禁直推、需 PR；本 App 不进 bypass），不是靠把 Contents 设成只读。
 
-#### 建议 Read and write
+### Read and write
 
 | 页面名称 | 用途 |
 | --- | --- |
-| Actions | 查看 Workflow / 运行 / 日志；触发或管理工作流 |
-| Checks | 查看与创建 Check Runs / Suites |
-| Commit statuses | 读取与设置 Commit Status |
+| Actions | Workflow / 运行 / 日志；触发或管理工作流 |
+| Checks | Check Runs / Suites |
+| Commit statuses | Commit Status |
 | Contents | 读代码；建分支、提交、推送 |
-| Issues | 创建/修改/关闭 Issue；评论与标签 |
-| Pull requests | 创建/修改 PR；评论与 Review（合并能力受分支保护约束） |
-| Discussions | 参与仓库 Discussions（扩展协作） |
-| Deployments | 创建与管理部署记录 |
-| Pages | 管理 GitHub Pages |
-| Variables | 管理 Actions Repository Variables（**不是** Secrets） |
-| Custom properties | 管理仓库自定义属性 |
+| Issues | Issue 与评论、标签 |
+| Pull requests | PR、评论与 Review |
+| Discussions | Discussions |
+| Deployments | 部署记录 |
+| Pages | GitHub Pages |
+| Variables | Actions Repository Variables（不是 Secrets） |
+| Custom properties | 仓库自定义属性 |
 
-#### 建议 Read-only
+### Read-only
 
 | 页面名称 | 用途 |
 | --- | --- |
-| Metadata | 仓库基础信息（必需；界面常已锁定） |
+| Metadata | 仓库基础信息（必需；常已锁定） |
 | Code scanning alerts | 代码扫描告警 |
 | Dependabot alerts | 依赖漏洞告警 |
 | Secret scanning alerts | 密钥扫描告警 |
-| Environments | 部署环境配置（只读） |
-| Repository security advisories | 仓库安全公告（只需读时保持 Read；要维护公告再升 Write） |
+| Environments | 部署环境（只读） |
+| Repository security advisories | 安全公告（要维护再升 Write） |
 
-#### 单独设置
+### 单独设置
 
 | 页面名称 | 设置 | 说明 |
 | --- | --- | --- |
-| Workflows | **Write**（页面常仅此档） | 与 Actions 不同；改 `.github/workflows` 必须另开此项 |
+| Workflows | **Write**（常仅此档） | 与 Actions 不同；改 `.github/workflows` 须另开 |
 
-#### 明确 No access
+### No access（明确关掉）
 
-| 页面名称 | 原因 |
-| --- | --- |
-| Administration | 仓库设置、成员、删除等高危管理 |
-| Agent secrets / Agent tasks / Agent variables | GitHub 自带 Agent 体系；非 OpenClaw 自建 Plugin 所需 |
-| Secrets | Actions Secrets，敏感 |
-| Dependabot secrets | Dependabot 密钥 |
-| Webhooks | 仓库级 Webhook 管理；App 自身 Webhook 在 App 配置里 |
-| Codespaces / Codespaces lifecycle admin / Codespaces metadata / Codespaces secrets | 非当前目标 |
-| Artifact metadata | 除非要管构建产物元数据 |
-| Attestations | 除非要管构建来源证明 |
-| Code quality | 除非要读/管 GitHub Code Quality 数据 |
+Administration；Agent secrets / Agent tasks / Agent variables；Secrets；Dependabot secrets；Webhooks；Codespaces 及相关项；Artifact metadata；Attestations；Code quality。其余未点名项也保持 `No access`。
 
-列表中若还有未点名项，默认也保持 `No access`。
+## 订阅事件
 
-### Organization / Account / Enterprise
+建议至少：
 
-全部 **No access**。仓库级权限已够当前方案；不开放组织成员、组织 Secrets、组织 Webhooks 等。
-
-### 订阅事件
-
-权限设好后勾选（名称以页面为准）。与 [[GitHub Agent Channel 架构与阶段计划]] 中 `@机器人` 入口对齐，建议至少：
-
-- **Issue comment**（Issue / PR 普通评论主入口）
+- **Issue comment**（Issue / PR 普通评论）
 - **Pull request review comment**（行内评论）
-- **Pull request**（上下文；非默认自动跑全量逻辑）
+- **Pull request**
 
-按需再开：`Issues`、`Pull request review`、`Check run` / `Check suite`、`Workflow run` 等。Active 未开时勾选只作就绪清单。无 `@App` 的评论默认不唤醒 Agent。
+按需：`Issues`、`Pull request review`、`Check run` / `Check suite`、`Workflow run` 等。Active 未开时勾选只作就绪清单。
 
-### 安装范围
+## 安装范围
 
-选 **Only on this account**（仅 `@xallor-ai`）。不要选 Any account。
+**Only on this account**（仅 `@xallor-ai`）。不要选 Any account。
 
-## 创建后保存
+点绿色 **Create GitHub App**。
 
-1. **App ID**（App 设置页 / General 可见）  
-2. **Private key**（`.pem`，见下方生成步骤）  
-3. **Webhook secret**（与创建时填写的同一串）  
-4. 安装后的 **Installation ID**（安装页 URL 或 API / Webhook payload）
+## 创建后：凭证与安装
 
-只放本机密钥库 / 环境变量 / OpenClaw SecretRef；勿提交 Git、勿贴进公开笔记正文。
+保存：
+
+1. **App ID**（General）  
+2. **Private key**（`.pem`，见下）  
+3. **Webhook secret**  
+4. **Installation ID**（安装后；安装页 URL / API / Webhook payload）
+
+只放本机密钥库或环境变量；勿提交 Git、勿写进公开笔记。
 
 ### 生成 Private key
 
-App 创建完成后进入该 App 设置：
-
-1. 左侧点 **Credentials**  
-2. 打开 **Key pairs** 子页（与 Client secrets 并列）  
-3. 点绿色 **New key**
+App 设置 → **Credentials** → **Key pairs** → **New key**
 
 ![Credentials → Key pairs → New key](./_assets/github-app/credentials-new-key.png)
 
-浏览器会下载一份 `.pem`。GitHub **只在此刻提供私钥**；公钥留在 App 上，用于校验你用私钥签的 JWT，进而换 Installation Access Token。私钥丢失只能再 **New key** 一对新密钥，旧 `.pem` 作废前可先撤销对应 key pair。
+浏览器下载 `.pem`。私钥只在此刻可下；丢失需再 New key。
 
-## 安装与主分支
+### 安装到仓库
 
-App 设置 → **Install App** → `xallor-ai` → 勾选仓库 → Install。
+**Install App** → `xallor-ai` → 勾选仓库 → Install。
 
-对默认分支启用分支保护：禁止直推、必须 PR、按需要求评审/CI；不要把本 App 加入 bypass。
-
-## 与 OpenClaw
-
-```text
-GitHub App（本文）
-  → Webhook
-  → OpenClaw Plugin（验签 / 收窄 Token / Tools）
-  → OpenClaw Agent
-```
-
-Plugin 另文。官方参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Permissions required for GitHub Apps](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
+对默认分支开分支保护：禁直推、必须 PR；不要把本 App 加入 bypass。
 
 ## 核对清单
 
-- [ ] 基本信息按上表；未开安装时用户 OAuth  
-- [ ] Webhook：Active 暂关；Secret 已自备并保存  
-- [ ] R/W：Actions、Checks、Commit statuses、Contents、Issues、Pull requests、Discussions、Deployments、Pages、Variables、Custom properties  
-- [ ] Read：Metadata、Code scanning / Dependabot / Secret scanning alerts、Environments、Repository security advisories  
-- [ ] Workflows = Write  
-- [ ] Administration、Agent\*、Secrets、Dependabot secrets、Webhooks、Codespaces\*、Artifact metadata、Attestations、Code quality = No access  
-- [ ] Organization / Account / Enterprise = No access  
-- [ ] 事件至少 Issue comment + Pull request review comment（及按需 Pull request）  
+- [ ] 基本信息与 OAuth 相关项按上表  
+- [ ] Webhook：Active 暂关；Secret 已生成并保存  
+- [ ] Repository / Org / Account / Enterprise 权限按上表  
+- [ ] 事件至少 Issue comment + Pull request review comment（及 Pull request）  
+- [ ] Only on this account；已安装目标仓；默认分支已保护且 App 不在 bypass  
+- [ ] 已下载 `.pem`；App ID / Webhook secret / Installation ID 已离线保存  
+- [ ] 接收端就绪后再开 Active 并填 Webhook URL  
 
-- [ ] Only on this account；已安装目标仓库；默认分支已保护且 App 不在 bypass  
-- [ ] Credentials → Key pairs → New key 已下载 `.pem`；App ID / Webhook secret / Installation ID 已离线保存  
-
-- [ ] Plugin 就绪后再开 Active 并填 Webhook URL  
+参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Permissions required for GitHub Apps](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
