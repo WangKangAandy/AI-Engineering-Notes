@@ -97,36 +97,85 @@ status: ready
 
 接收端就绪后的改法：App 设置页 → 勾选 Active → 填入最终 Webhook URL（及 Secret，若创建时未填）→ Save。
 
-### 仓库权限（展开 Repository permissions）
+### 权限怎么点（Permissions）
 
-点开 **Repository permissions**，只改下列项；其余保持 **No access**。Organization / Account / Enterprise 三组第一期全部不配。
+截图里四个分组默认是折叠的。**第一期只动 Repository permissions**；下面三组整组保持默认（全部 No access / 不展开也可）：
 
-| Permission | 级别 | 用途 |
-| --- | --- | --- |
-| Metadata | Read-only | 必选底座；装 App 后自动具备 |
-| Contents | Read-only | 读仓库文件 / 树；暂不写代码 |
-| Issues | Read & write | 读 Issue、评论、关单等 |
-| Pull requests | Read & write | 读 PR、评论、改状态等 |
-| Checks | Read-only（可选） | 若机器人要读 CI 结论再开 |
+| 分组 | 第一期 |
+| --- | --- |
+| **Repository permissions** | 展开，按细表改 |
+| Organization permissions | **不改** |
+| Account permissions | **不改**（那是用户 OAuth 流用的） |
+| Enterprise permissions | **不改** |
+
+#### 操作顺序
+
+1. 点击 **Repository permissions** 展开长列表（每项右侧是下拉：`No access` / `Read-only` / `Read & write`）。  
+2. 只改下表列出的几行；**列表里没点名的项一律保持 `No access`**。  
+3. 改完权限后，同一页下方会出现 / 可勾选 **Subscribe to events**——事件勾选见下一节（权限不够时部分事件勾不上或无效）。  
+4. 再确认安装范围为 Only on this account，最后点 **Create GitHub App**。
+
+#### 第一期：Repository permissions 逐项
+
+| 页面上的权限名 | 下拉选 | 机器人因此能做什么 | 不能做什么（刻意不开） |
+| --- | --- | --- | --- |
+| **Metadata** | `Read-only`（通常创建后强制具备） | 读仓库基础信息、列表已安装仓库 | 不含代码 / Issue / PR 正文 |
+| **Contents** | `Read-only` | 读文件、目录树、commit、分支信息；Agent 需要看仓库内容时用 | **不能** push、改文件、建 release；需要写代码时再升到 `Read & write` |
+| **Issues** | `Read & write` | 读/写 Issue；开关注释、关单、改标签/指派等；**PR 评论在 API 上常与 Issue 评论同源，写评论通常也要这项** | — |
+| **Pull requests** | `Read & write` | 读/写 PR；评论、改状态、合并相关能力（是否真合并取决于你写的逻辑） | — |
+| **Checks** | `Read-only`（可选；第一期可先 `No access`） | 读 CI Check 结论，便于「失败了再评论」 | 不写 Check Run；要机器人自己报检查结果再开 `Read & write` |
+
+说明：
+
+- 下拉只有三档时，选表中那一档即可；若某项没有 `Read-only`（只有 No access / Read & write），按表意图选最低够用档。  
+- **Issues 与 Pull requests 建议第一期都开 Write**：只开 PR、不开 Issues，常见踩坑是「听得到 PR 事件，但发评论 403」。  
+- Metadata 若界面已锁在 Read-only，无需也无法关掉。
+
+#### 第一期明确保持 No access 的（常见项）
+
+这些在 Repository 列表里很容易误开，**全部保持 `No access`**：
+
+| 权限名（常见英文） | 为什么先不开 |
+| --- | --- |
+| Administration | 改仓库设置、协作者等高危 |
+| Actions | 读/写 workflow 运行；非第一期目标 |
+| Secrets / Dependabot secrets / Environments 等 | 密钥与部署环境 |
+| Workflows | 改 `.github/workflows`；与 Contents 写权限叠加风险大 |
+| Deployments / Packages / Pages | 发布与制品面 |
+| Members / Single file 等 | 非机器人主路径；需要再单开 |
 
 > [!warning] 最小够用
-> 不要一次打开 Administration、Secrets、Workflows 等高危权限。需要 Checkout / Push 时再单独把 Contents 升到 Read & write，并记入变更原因。
+> 权限一改大，已安装仓库的管理员通常要**重新批准**。先按上表上线；真要 Checkout + Push 时，再把 **Contents** 升到 `Read & write`，并在笔记或变更记录里写原因。
+
+#### 权限与能力对照（方便自检）
+
+| 你想做的事 | 至少需要 |
+| --- | --- |
+| 收到 PR 开/改/关事件 | `Pull requests` Read + 订阅 `Pull request` |
+| 在 PR / Issue 下发评论、关 Issue | `Issues` **Write**（+ 视情况 `Pull requests` Write） |
+| Agent 读仓库里的 md / 代码 | `Contents` Read |
+| 读 Actions 是否红了 | `Checks` Read（或以后再开 Actions Read） |
+| 机器人直接改仓库文件并 push | `Contents` **Write**（本期不要） |
 
 ### 订阅事件（Subscribe to events）
 
-权限保存后，页面会出现 **Subscribe to events**（或创建后在 App 设置里改）。第一期只勾：
+在 **Repository permissions** 设好之后，勾选事件。第一期只勾下面两项（名称以页面英文为准）：
 
-- `Pull request`
-- `Issue comment`
+- [x] **Pull request**  
+- [x] **Issue comment**
 
-按需再开：
+其余先不勾。按需再开：
 
-| 事件 | 何时再开 |
+| 事件（页面名） | 何时再勾 |
 | --- | --- |
-| `Issues` | 要监听开/关 Issue、改标签等，而不只是评论 |
-| `Pull request review` / `Pull request review comment` | 要处理行内 Review 评论 |
+| **Issues** | 要监听开/关 Issue、改标签等，而不只是评论 |
+| **Pull request review** / **Pull request review comment** | 要处理 Approve / 行内 Review 评论 |
 
-Webhook 未 Active 时，勾选事件只是「就绪清单」：真正投递要等 Active + 有效 URL。
+注意：
+
+- **有权限 ≠ 会推送**：还要 Webhook **Active** + 有效 URL。创建时 Active 关闭也可以先勾事件，等于「就绪清单」。  
+- **有事件 ≠ 能回写**：回评论仍依赖上面的 Issues / Pull requests **Write**。  
+- `Issue comment` 覆盖 Issue 与多数 PR 时间线评论；行内 diff 评论要另开 review comment 类事件。
 
 ### 安装范围（Where can this GitHub App be installed?）
 
@@ -167,9 +216,11 @@ GitHub App（本文）
 - [ ] 未开启「安装时请求用户 OAuth」  
 - [ ] Webhook：创建时 Active 关闭；Secret 已用本机命令生成并粘贴（页面无生成按钮），或创建后补填  
 
-- [ ] Repository permissions：Metadata / Contents / Issues / Pull requests（及可选 Checks）按上表  
-- [ ] Organization / Account / Enterprise 权限未乱开  
-- [ ] 事件：至少 `Pull request` + `Issue comment`  
+- [ ] 只展开并修改 Repository permissions；Org / Account / Enterprise 未改  
+- [ ] Contents = Read-only；Issues = Read & write；Pull requests = Read & write；其余常见高危项 = No access  
+- [ ] Checks 仅在需要读 CI 时开 Read-only，否则 No access  
+- [ ] 事件：勾选 `Pull request` + `Issue comment`；其余先不勾  
+
 - [ ] 安装范围：Only on this account  
 - [ ] 创建后保存 App ID、私钥 `.pem`、Webhook secret  
 - [ ] Install App 到目标仓库，记下 Installation ID  
