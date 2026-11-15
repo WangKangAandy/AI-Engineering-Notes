@@ -1,5 +1,5 @@
 ---
-title: "mHC: Manifold-Constrained Hyper-Connections"
+title: "mHC 流形约束超连接"
 tags:
   - deep-learning
   - transformer
@@ -10,7 +10,7 @@ updated: 2026-10-30
 status: reviewed
 ---
 
-# 从残差连接到 mHC：原理、Transformer 接入与训练实践
+# mHC 流形约束超连接
 
 一层神经网络处理完输入后，下一层收到什么？在常见的残差结构里，答案是：**原来的信息，加上这一层算出的更新。** mHC 把沿途传递的信息扩展成多条流，再学习如何读取、混合和更新它们。
 
@@ -42,7 +42,7 @@ $$
 
 这里的 x、h、y 是同一组 token 在三个计算位置的状态。用 C 表示每个 token 的隐藏向量长度，输入张量通常包含 batch、序列和特征三个维度；残差相加前，两侧形状必须一致。
 
-![Pre-Norm Transformer 中 Attention 和 FFN 各自的残差连接](../../_assets/mhc/transformer-residual.png)
+![Pre-Norm Transformer 中 Attention 和 FFN 各自的残差连接](_assets/mhc/transformer-residual.png)
 
 *图 1：Attention 的残差保存 x，FFN 的残差保存 Attention 更新后的 h。每次相加都发生在相同 token、相同特征位置上。*
 
@@ -120,7 +120,7 @@ HC 把连接也变成学习对象。可以分两步理解这个变化。
 
 Hyper-Connections（HC）给每个 token 保存 n 条流，每条仍是完整的 C 维向量，总状态宽度是 nC。例如 C=4096、n=4 时，保存四个 4096 维向量。子层先读取它们的加权组合，仍用一个 4096 维输入执行一次 Attention 或 FFN，再把结果写回各流。
 
-![普通残差与四流结构对照：每条流都有 C 维，子层仍计算一次](../../_assets/mhc/mhc-streams.png)
+![普通残差与四流结构对照：每条流都有 C 维，子层仍计算一次](_assets/mhc/mhc-streams.png)
 
 *图 2：扩宽的是层间状态。Attention/FFN 的输入和输出宽度仍为 C；内部读写路径在图 3 展开。*
 
@@ -159,7 +159,7 @@ HC 与 mHC 使用相同的读取、混合、写回骨架；mHC 的主要区别�
 
 先看一个 token 的残差状态，把各流排成矩阵 X（n 行、C 列的实数矩阵）。令 p 是 pre 的 n 个系数，q 是 post 的 n 个系数，R 是 n ×  n 的残差混合矩阵。这里省略了 batch 和序列维度；Attention 仍会按模型的注意力规则读取序列中的其他位置。
 
-![mHC 单层计算：pre 汇总后进行一次子层计算，post 写回，并与 res 混合结果相加](../../_assets/mhc/mhc-paths.png)
+![mHC 单层计算：pre 汇总后进行一次子层计算，post 写回，并与 res 混合结果相加](_assets/mhc/mhc-paths.png)
 
 *图 3：实线表示特征的流动，虚线表示当前输入生成的映射系数。Norm 是子层输入的归一化；生成映射的分支也有自己的归一化。*
 
@@ -231,7 +231,7 @@ $$
 
 再补上计算分支：取读取系数 p=[0.25,0.75]，子层输入是 z=0.25 × 2+0.75 × 6=5。假设子层对此输入产生更新 u=F(z)=1，取写回系数 q = [1, 1]ᵀ，就分别给两条流加 1，得到 Y = [4, 6]ᵀ。这里的 u=1 是为了演示连接而给定的结果；真正模型中的更新由 Attention 或 FFN 计算。
 
-![双随机混合保留流均值，加入子层更新后均值可以变化](../../_assets/mhc/mhc-mixing.png)
+![双随机混合保留流均值，加入子层更新后均值可以变化](_assets/mhc/mhc-mixing.png)
 
 *图 4：均值守恒适用于残差混合。图中取子层输出 u=1，两条流的写回系数都为 1，加入更新后均值从 4 变成 5。*
 
@@ -263,7 +263,7 @@ mHC 放在 Attention 与 FFN 的外侧，替代各自的残差连接。分词、
 
 用 B 表示 batch 大小，T 表示序列长度，n 表示流数，C 表示隐藏宽度，V 表示词表大小。一个小型 decoder-only 模型可以这样连接：
 
-![mHC 语言模型的完整训练路径](../../_assets/mhc/mhc-training.png)
+![mHC 语言模型的完整训练路径](_assets/mhc/mhc-training.png)
 
 *图 5：一个块包含两套独立 mHC。loss 的梯度沿计算图更新 Attention、FFN 和连接参数。*
 
@@ -282,7 +282,7 @@ mHC 放在 Attention 与 FFN 的外侧，替代各自的残差连接。分词、
 
 ### 5.2 一个 mHC 模块负责什么？
 
-下面的 `forward` 是[完整可运行脚本](../../_assets/mhc/mhc_tiny_lm.py)中的核心。`maps(x)` 根据输入生成读取系数 `p`、写回系数 `q`、双随机混合矩阵 `r`。`sublayer` 接收 `[B,T,C]`，内部包含 Norm 和一次 Attention 或 FFN。
+下面的 `forward` 是[完整可运行脚本](_assets/mhc/mhc_tiny_lm.py)中的核心。`maps(x)` 根据输入生成读取系数 `p`、写回系数 `q`、双随机混合矩阵 `r`。`sublayer` 接收 `[B,T,C]`，内部包含 Norm 和一次 Attention 或 FFN。
 
 ```python
 # qa:skip — MHC 类的方法节选，完整定义和运行入口见附件 mhc_tiny_lm.py
@@ -357,7 +357,7 @@ Sinkhorn 使用 50 轮迭代，并检查最大行列和误差小于 `1e-4`。这
 
 任务是学习循环 token 序列 `0,1,…,10,0,1,…` 的下一个 token，从不同起点采样训练片段。这样无需下载语料、tokenizer 或模型，CPU 即可运行；它检验结构接入和训练流程，不用于评估语言理解能力。
 
-下载 [mhc_tiny_lm.py](../../_assets/mhc/mhc_tiny_lm.py)，放在一个空目录，并在该目录打开终端。使用 Python 3.12；Windows PowerShell 的 CPU 运行命令如下：
+下载 [mhc_tiny_lm.py](_assets/mhc/mhc_tiny_lm.py)，放在一个空目录，并在该目录打开终端。使用 Python 3.12；Windows PowerShell 的 CPU 运行命令如下：
 
 ```powershell
 python -m venv .venv
@@ -407,63 +407,6 @@ sinkhorn_max_error=1.788e-06 stream_spread=0.477637
 固定探测批次的 loss 用来观察这个简单任务是否被学会；逐步 loss 不要求单调下降。模型重载的一致性也不等于训练中断恢复的一致性：附件虽保存优化器和 RNG 状态，但没有做恢复优化器后继续训练的对照实验。
 
 将代码迁移到更大模型时，还需处理混合精度、重计算、并行通信与性能。尤其是生成映射和 Sinkhorn 的数值精度，要单独验证；不能把整个模块直接转成低精度就假定稳定。已有普通残差模型的权重，也不能靠增加一个开关就变成训练好的 mHC 模型：新增连接参数和状态传递改变了模型函数，需要明确初始化与训练方案。
-
-## 6. 从 mHC 实现到模型训练：以 GLM-5.3-Flash 为例
-
-前面的 PyTorch 小模型把多流状态、Attention、FFN 和训练循环放在同一份代码里。真实的大模型训练通常把这些工作分给多个组件。GLM-5.3-Flash 是一个具体例子：它的文本主干已经采用 mHC，同时组合了 KDA 线性注意力、KPool-DSA 稀疏注意力和 MoE。因此，训练它既需要 mHC 的实现，也需要这些模块在同一模型中正确配合。[模型实现](https://github.com/huggingface/transformers/blob/v5.16.1/src/transformers/models/glm5_next/modeling_glm5_next.py)
-
-### 6.1 谁实现 mHC，谁负责把训练跑起来？
-
-可以直接用 Transformers 中的模型配合 PyTorch 训练器，也可以采用 Megatron-SWIFT 的 Megatron 后端。两条路径使用各自的模型实现。走 Megatron 路径时，bridge 根据 Hugging Face 的模型配置和权重构造 Core 模型，实际前向、反向由 Core 模型执行。
-
-| 组件 | 在 Flash 训练中的工作 | 与 mHC 的关系 |
-| --- | --- | --- |
-| **Transformers** | 提供 `glm5_next` 模型、配置及 Hugging Face 权重加载接口 | 模型内部实现多流状态、动态映射和 Sinkhorn；直接使用该模型训练时执行这份实现 |
-| **mcore-bridge** | 将模型配置、层结构与权重对应到 Megatron Core | 把 HF 的流数等配置转换成 Core 使用的字段，并衔接模型构造与权重转换 |
-| **Megatron Core** | 执行模型层计算，提供模型并行、重计算等能力 | 提供原生 mHC 模块、Transformer 层、Sinkhorn 和可选融合算子 |
-| **ms-swift / Megatron-SWIFT** | 组织数据处理、训练参数、SFT 或预训练流程 | 通过 bridge 接入 Core 模型，并传递重计算、融合算子等训练选项 |
-
-以 Megatron-SWIFT 为入口，一次训练会经历：读取数据和模型配置 → bridge 构造 Core 模型并加载权重 → Core 执行前向、反向 → 更新参数并保存 checkpoint。mHC 的映射参数是模型参数的一部分，与 Attention、FFN 参数一起训练。不同组件需要对流数、层类型和参数形状达成一致。[Swift 参数文档](https://github.com/modelscope/ms-swift/blob/d907e329cf27391cd21ae19a7cb0b3c07dc46173/docs/source_en/Megatron-SWIFT/Command-line-parameters.md)
-
-### 6.2 Core 的正式发布版已经支持 mHC 吗？
-
-截至 **2026-10-30**，最新 PyPI **`megatron-core 0.20.0`** 与当前 `main` 都已包含原生 mHC；`0.19.2` 尚无这组实现。`0.20.0` 于北京时间当天 05:05 发布，其源码包和 Python 3.12 wheel 已包含：
-
-- `HyperConnectionModule`：实现多流读取、写回与残差混合。
-- `HyperConnectionTransformerLayer`：把 mHC 接入 Attention 和 FFN 子层。
-- 原生 Sinkhorn、可选融合 mHC 算子，以及 `enable_mhc_connections`、`mhc_num_residual_streams`、`use_fused_mhc` 等配置。
-
-发布版的 `HyperConnectionTransformerLayer` 位于 `transformer_layer.py`；核对的 `main` 提交 `a77288b` 将它放进独立文件。两者均有这个类。[PyPI 0.20.0](https://pypi.org/project/megatron-core/0.20.0/) · [发布版模型层](https://github.com/NVIDIA/Megatron-LM/blob/core_v0.20.0/megatron/core/transformer/transformer_layer.py) · [main 模型层](https://github.com/NVIDIA/Megatron-LM/blob/a77288b18f1a3e5a7bfe2e680f6f693a7366c2e5/megatron/core/transformer/hyper_connection_transformer_layer.py)
-
-这里需要区分三层能力：**通用 mHC 实现**提供多流状态、连接参数、Sinkhorn 和 Transformer 层接入；**GLM 专用架构实现**提供目标模型所需的 KDA、KPool-DSA 及混合层配置；**bridge 模型接入**把 HF 配置和权重对应到这些实现，并正确构造主干与 MTP。Core `0.20.0` 已具备第一层能力，Flash 能否直接训练还取决于后两层。
-
-### 6.3 两个 mcore-bridge PR 补在哪一环？
-
-以下两项 PR 以 Transformers `5.16.1`、Core 源码提交 `01ac4e83` 为目标。截至 **2026-10-30**，两项均已向社区提交，状态仍为 **Open，尚未合入**。
-
-**[PR #245：正确识别 KDA 层配置](https://github.com/modelscope/mcore-bridge/pull/245)。** Core 的 [#7054](https://github.com/NVIDIA/Megatron-LM/pull/7054) 将 GLM 风格的 KDA 能力接入 hybrid 模型，`kda_two_stage_gates` 定义在注册的 `KDALayerConfig` 中。bridge 原先只查通用的 `TransformerConfig`，会把“字段位于另一处”误判成“Core 缺少能力”，在构造模型前就报错。修复增加对注册 KDA 层配置的检查，同时保留其他能力检查。它解决的是 Flash 的 KDA 接入，mHC 之外的模块也必须通过这一关。
-
-**[PR #246：对齐模型配置和复制行为](https://github.com/modelscope/mcore-bridge/pull/246)。** 通过能力检查之后，bridge 还需要让 Core 按 Flash 的语义构造模型：
-
-| 修复点 | 为什么需要 |
-| --- | --- |
-| Core 声明新字段时，设置 `enable_mhc_connections` 和 `mhc_num_residual_streams` | 让 Core 按正确开关和流数构造 mHC 主干；只设置早期 dev 接口的字段可能无法启用当前实现 |
-| 在 MTP 的配置副本上关闭新的 mHC 开关 | 多 token 预测辅助层有自己的配置路径；关闭辅助层开关时保留主干的 mHC 设置 |
-| 深复制配置时共享 bridge 对象 | Core 的逐层配置构造会复制配置字典；共享 bridge 可避免复制进入它持有的进程组，并保持既有配置复制语义 |
-
-其中 mHC 字段对应 Core [#4531](https://github.com/NVIDIA/Megatron-LM/pull/4531)，逐层配置复制路径对应 [#6313](https://github.com/NVIDIA/Megatron-LM/pull/6313)。#246 保留官方发布 checkpoint 的键映射；这些修改也不涉及 GPU 算子移植。
-
-两个 PR 的定向单元测试覆盖能力检查、配置转换和复制行为，未覆盖完整模型训练。它们修复的是 bridge 接入，不会补齐 Core 中缺失的模型实现。
-
-2026-10-30 的服务器对照验证中，原 Core `01ac4e83` 通过 Flash 能力检查；PyPI `0.20.0` 的上述三个通用字段 `enable_mhc_connections`、`mhc_num_residual_streams`、`use_fused_mhc` **均存在**，但与该目标源码组合相比，缺少以下能力：
-
-| 类别 | `0.20.0` 发布包中的具体缺口 |
-| --- | --- |
-| KDA 层 | 缺少 `KDALayerConfig`、`gated_delta_net/kda.py` 和 `LAYER_CONFIG_MAP['K']` 注册，无法提供层配置中的 `kda_two_stage_gates` |
-| KPool-DSA 配置 | 缺少 `dsa_indexer_kpool`、`dsa_indexer_kpool_always_select_tail` |
-| GLM 路径要求的 mHC 扩展配置 | 缺少 `mhc_norm_eps_inside_sqrt`、`mhc_keep_mappings_in_fp32`、`mhc_learned_output_contract`；这些与前述通用开关、流数和融合选项是不同字段 |
-
-因此，**通用 mHC 支持不等于 GLM-5.3-Flash 已能在该发布包上直接训练**。`0.20.0` 在模型构造前被能力检查拒绝，不能直接替代本例的 Flash Core 源码组合；本次发布包验证未进入完整模型训练。
 
 ## 参考资料
 
