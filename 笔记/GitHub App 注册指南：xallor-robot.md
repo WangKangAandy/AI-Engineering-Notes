@@ -15,7 +15,7 @@ status: ready
 
 在组织 `xallor-ai` 注册安装型 App `xallor-robot`。
 
-**定位**：GitHub App 是 OpenClaw GitHub Plugin 的一种 **Integration Adapter**（推荐正式路径），负责身份、权限上限与事件投递；不是 Plugin 的唯一前置。无 App、仅仓库级 Webhook（± PAT）的路径见整体方案。Plugin 只做通道与能力桥接；决策在既有 Agent。整体架构与阶段：[[OpenClaw GitHub Plugin 架构与阶段计划]]。
+**定位**：GitHub App 是 **GitHub Agent Channel** 的一种 Integration Adapter（推荐正式路径），负责身份、权限上限与事件投递；不是唯一前置。Channel 对接用户选定的 Agent Runtime（V1 先接 OpenClaw）。无 App、仅仓库级 Webhook（± PAT）见整体方案。整体架构与阶段：[[GitHub Agent Channel 架构与阶段计划]]。
 
 权限名称以**当前 Create GitHub App 页 Repository permissions 展示名为准**（勿与 REST 文档里的旧别名混用）。
 
