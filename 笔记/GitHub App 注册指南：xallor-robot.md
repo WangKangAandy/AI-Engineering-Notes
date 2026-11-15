@@ -153,6 +153,7 @@ status: ready
 | --- | --- |
 | Administration | 改仓库设置、协作者；还可能削弱保护相关配置 |
 | Actions | 读/写 workflow 运行；非第一期目标 |
+| **Discussions** | 管的是仓库 **Discussions 论坛**（问答/公告帖），**不是** Issue / PR 评论。第一期机器人只走 Issue/PR，保持 `No access`；以后要在 Discussions 里回帖再开 Read/Write，并另订 `discussion` / `discussion_comment` 事件 |
 | Secrets / Dependabot secrets / Environments 等 | 密钥与部署环境 |
 | Workflows | 改 `.github/workflows`；与 Contents Write 叠加风险大 |
 | Deployments / Packages / Pages | 发布与制品面 |
