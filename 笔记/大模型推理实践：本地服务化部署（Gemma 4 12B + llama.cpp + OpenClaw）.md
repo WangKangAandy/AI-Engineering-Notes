@@ -187,6 +187,14 @@ docker run -d \
   --port 8080
 ```
 
+关键参数：
+
+- `--mmproj`：多模态投影；没有它则图片/音频/视频请求不可用
+- `--alias gemma-4-12b`：对外模型名，客户端 `model` 填这个
+- `-c 131072`：服务端上下文（约 128K）；OpenClaw 的 `contextWindow` 须与此一致
+- `--api-key local-model`：Bearer Key；客户端 `api_key` 填这个
+- `-ngl 99`：尽量把层放到 GPU；`--flash-attn on` / `--jinja` 按当前镜像与聊天模板需要开启
+
 服务起来后，对任何 OpenAI 兼容客户端只需要三件事：
 
 ```text
@@ -370,7 +378,7 @@ openclaw --version
 openclaw setup --baseline
 ```
 
-在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）：
+在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）。该文件是严格 JSON，不能写 `//` 注释；字段含义见配置块下方：
 
 ```json
 {
@@ -405,6 +413,19 @@ openclaw setup --baseline
   }
 }
 ```
+
+字段说明：
+
+- `models.mode: merge`：与已有配置合并，避免整文件覆盖丢掉其他 provider
+- `baseUrl`：Windows 访问 WSL 中 llama-server 的 OpenAI 兼容入口（须带 `/v1`）
+- `apiKey`：对应服务端 `--api-key`
+- `api: openai-completions`：走 Chat Completions 协议，与本镜像一致
+- `timeoutSeconds`：本地首包/长上下文可能较慢，适当加大避免客户端过早超时
+- `id`：对应服务端 `--alias`；OpenClaw 里完整模型名为 `gemma4-local/gemma-4-12b`
+- `input`：声明模型可接受的模态；须与 `--mmproj` 及上文多模态实测一致（含 audio/video）
+- `contextWindow`：须与服务端 `-c 131072` 对齐，否则 TUI/会话计量会偏
+- `maxTokens`：单次回复生成上限（不是上下文总长）
+- `agents.defaults.model.primary`：默认选用上面的本地模型
 
 若文件里已有其他字段，只合并 `models` 与 `agents.defaults.model`，不要整文件覆盖。
 
