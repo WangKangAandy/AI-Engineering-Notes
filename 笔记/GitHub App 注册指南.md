@@ -174,14 +174,4 @@ App 设置 → **Credentials** → **Key pairs** → **New key**
 
 若 App 有 Contents 写权限：给默认分支开保护（禁直推、必须 PR），不要把本 App 加入 bypass。
 
-## 核对清单
-
-- [ ] 基本信息已填；未做用户 OAuth 则未勾安装时 OAuth，Redirect URI 已删或留空
-- [ ] Webhook Secret 已用密码学随机生成并离线保存
-- [ ] 权限按实际场景最小勾选（非无脑全开写）
-- [ ] 事件与已开权限匹配；有接收端后再开 Active、填 HTTPS URL、保存
-- [ ] 安装范围与是否对外可装一致
-- [ ] 已下载 `.pem`；App ID / Client ID / Webhook secret / Installation ID 已保存
-- [ ] 若 Contents 可写：默认分支已保护且 App 不在 bypass
-
 参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Authenticating as a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
