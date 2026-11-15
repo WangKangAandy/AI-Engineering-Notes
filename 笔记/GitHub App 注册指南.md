@@ -15,7 +15,7 @@ status: ready
 
 ## GitHub App 是什么
 
-GitHub App 是 GitHub 提供的一种**一等集成身份**：以「应用」而不是某个个人账号去访问仓库。创建后装到组织或仓库上，用自己的权限集与 Webhook 收事件，再用安装凭证调 API。
+GitHub App 是独立于个人账号的集成身份：在用户或组织账号下**注册**，再**安装**到该账号并授权访问选定仓库。用 App 自己的权限集与 Webhook 收事件，再用安装凭证调 API。
 
 和常见替代比：
 
@@ -51,11 +51,13 @@ GitHub App 是 GitHub 提供的一种**一等集成身份**：以「应用」而
   `https://github.com/organizations/<你的组织>/settings/apps/new`
 - **个人账号**：`https://github.com/settings/apps/new`
 
-名称最长约 34 字符；安装后评论里常显示为 `<slug>[bot]`。
+名称不超过 34 字符；安装后评论里常显示为 `<slug>[bot]`。
 
 ## 基本信息
 
 ![Create GitHub App 基本信息填写示意](./_assets/github-app/create-github-app-basic.png)
+
+截图里 Redirect URI 填了组织主页，是未清理状态。本文不做用户 OAuth，应 **Delete / 留空**，不要用主页占位。
 
 | 字段 | 建议 | 示例 |
 | --- | --- | --- |
@@ -91,54 +93,44 @@ $bytes = [byte[]]::new(32)
 [BitConverter]::ToString($bytes).Replace('-', '').ToLower()
 ```
 
-Secret 离线保存，勿进 Git。就绪后到 App 的 **General**：勾选 Active → 填 URL → 建议保持 **Enable SSL verification** → **Save changes**。
+Secret 与接收服务各留一份用于验签，勿进 Git。就绪后到 App 的 **General**：勾选 Active → 填 URL → 建议保持 **Enable SSL verification** → **Save changes**。
 
 ## Repository permissions
 
-**最小权限**：只开实际会调用的资源。**Metadata** 为 Read-only（常已锁定）。Organization / Account / Enterprise 默认全部 **No access**。未用到的 Repository 项保持 **No access**。
+**最小权限**：只开会用到的资源。Metadata 为 Read-only（常已锁定）。Organization / Account / Enterprise 与未用到的 Repository 项保持 **No access**（含 Administration、Secrets、仓库级 Webhooks、Codespaces 等，除非你明确要管）。
 
-能勾选的 Webhook 事件，往往取决于这里已开的权限（例如没有 Pull requests 权限，就订不了相关事件）。
+能订阅哪些 Webhook 事件，取决于已开的权限（无 Pull requests 权限就订不了 PR 类事件）。页面下拉多为 `No access` / `Read-only` / `Read and write`。改 `.github/workflows` 需要 Workflows 的 Read and write，通常还要 Contents 写。
 
-下拉框展示多为 `No access` / `Read-only` / `Read and write`。文档里的 `write` 对应页面的 **Read and write**。改 `.github/workflows` 需要 **Workflows** 的 Read and write，并通常还要 **Contents** 写权限。
+App **已安装后再加权限**，还须由安装账号批准权限更新，未批准前仍是旧权限集。
 
-### 按场景勾选（示例）
+### 按场景勾选
 
-| 场景 | 至少需要 |
+| 场景 | 权限 |
 | --- | --- |
-| 只收事件、只读仓库信息 | Metadata Read |
-| Issue / PR 评论机器人 | Issues、Pull requests：Read and write |
-| 读 CI 结论并评论 | 上一项 + Checks Read（或 Actions Read） |
-| 推非默认分支 / 改文件 | Contents Read and write |
-| 触发或管理工作流运行 | Actions Read and write |
+| 读仓库基础信息 | Metadata Read |
+| 订阅某类事件（只收、不写） | 该类资源至少 Read（如 PR 事件要 Pull requests Read） |
+| Issue / PR **时间线**评论 | Issues **或** Pull requests 其一为 Read and write 即可 |
+| PR **行内**评论 | Pull requests Read and write，并订 `Pull request review comment` |
+| 读 CI 并评论 | 评论所需权限 + Checks Read（或 Actions Read） |
+| 推非默认分支 / 改文件 | Contents Read and write；仓库应对默认分支开保护（禁直推、需 PR，本 App 不进 bypass） |
+| 触发工作流运行 | Actions Read and write |
 | 改 workflow 文件 | Workflows Read and write + Contents 写 |
 
-**不要**把下面这张表当成所有 App 的必开清单。它是「会写代码、管 CI、评 PR」这一类机器人的**示例**（截图对应的 `xallor-robot`）。只做分流或只读告警时，按上表收窄。
-
-#### 示例：全功能协作机器人（可整表跳过）
-
-**Read and write**：Actions、Checks、Commit statuses、Contents、Issues、Pull requests、Discussions、Deployments、Pages、Variables（不是 Secrets）、Custom properties。
-
-**Read-only**：Metadata；以及按需 Code scanning / Dependabot / Secret scanning alerts、Environments、Repository security advisories。
-
-**Workflows**：需要改 workflow 文件时再开 Read and write。
-
-**建议保持 No access**（除非你明确要管它们）：Administration；Agent secrets / tasks / variables；Secrets；Dependabot secrets；Webhooks（App 自身 Webhook 在 App 设置里，不必开仓库级 Webhooks 权限）；Codespaces 及相关；Artifact metadata；Attestations；Code quality。页面上未点名的新权限，默认也 No access。
-
-Contents 一旦可写，应在目标仓库给默认分支开**分支保护**（禁直推、需 PR），且不要把本 App 放进 bypass。这是仓库策略，不能代替少开权限。
+不要把多场景权限并成一份「推荐全开」清单；最终取你真实会用到的并集。
 
 ## 订阅事件
 
-在 **Permissions & events** 勾选。先设权限，再订事件；只订会处理的类型。
+在 **Permissions & events** 勾选。先设权限，再订事件。
 
-| 事件 | 常见用途 |
-| --- | --- |
-| Issue comment | Issue / PR 时间线评论 |
-| Pull request review comment | 行内评论 |
-| Pull request | PR 开/改/关等 |
-| Issues | 开/关 Issue、改标签（不只评论时） |
-| Check run / Check suite / Workflow run | CI 相关 |
+| 事件 | 常见用途 | 通常还要 |
+| --- | --- | --- |
+| Issue comment | Issue / PR 时间线评论 | Issues 或 Pull requests |
+| Pull request review comment | 行内评论 | Pull requests |
+| Pull request | PR 开/改/关 | Pull requests |
+| Issues | 开/关 Issue、改标签 | Issues |
+| Check run / suite、Workflow run | CI | Checks 或 Actions |
 
-无公网接收端时可以先不订、不 Active；有 URL 后再开 Active 并保存事件。
+无公网接收端可先不 Active；有 URL 后再开 Active 并保存事件。
 
 ## 安装范围
 
@@ -151,14 +143,14 @@ Contents 一旦可写，应在目标仓库给默认分支开**分支保护**（�
 
 ## 创建后：凭证与安装
 
-保存（勿提交 Git、勿写进公开笔记）：
+**标识符**（可记在配置里，但不能当认证）：App ID、Client ID（General）、Installation ID（安装页 URL、`GET /app/installations`，或 Webhook payload）。
 
-1. **App ID**、**Client ID**（General）
-2. **Private key**（`.pem`，见下）
-3. **Webhook secret**（与创建时同一串）
-4. **Installation ID**（安装后：安装页 URL、`GET /app/installations`，或 Webhook payload）
+**密钥**（本机密码库 / 环境变量；勿进 Git、勿写进公开笔记；接收服务要持有 Webhook secret 才能验签）：
 
-`.pem` 不是 API Token，也不是 Client secret。服务端用私钥签发短时 JWT（`iss` 填 App ID 或 Client ID，文档更推荐后者），再换成大约一小时有效的 Installation Access Token。Webhook secret 用来校验 `X-Hub-Signature-256`。Client secret 只用于**用户 OAuth**，纯安装型一般不需要。
+1. **Private key**（`.pem`，见下）
+2. **Webhook secret**（与创建时同一串）
+
+`.pem` 不是 API Token，也不是 Client secret。服务端用私钥签发短时 JWT（`iss` 填 App ID 或 Client ID，文档更推荐后者），再换成大约一小时有效的 Installation Access Token。Client secret 只用于用户 OAuth，纯安装型一般不需要。
 
 ### 生成 Private key
 
@@ -171,7 +163,5 @@ App 设置 → **Credentials** → **Key pairs** → **New key**
 ### 安装到仓库
 
 **Install App** → 选择组织/账号 → 勾选仓库 → Install。从安装成功页 URL 可抄 Installation ID。
-
-若 App 有 Contents 写权限：给默认分支开保护（禁直推、必须 PR），不要把本 App 加入 bypass。
 
 参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Authenticating as a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
