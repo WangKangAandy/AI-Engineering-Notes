@@ -125,7 +125,8 @@ status: ready
 | **Contents** | **`Read & write`** | 读文件；**push 分支、API 改文件/提交**；发 release 等写接口 | 要「能写操作」就必须开 Write；只读挡不住合主分支，也挡不住写 |
 | **Issues** | `Read & write` | 读/写 Issue；评论、关单、改标签等；**发 PR 评论常也依赖这项** | 只开 PR、不开 Issues 易 403 |
 | **Pull requests** | `Read & write` | 读/写 PR、评论、开 PR；API 上也具备「合并 PR」的权限位 | **合不进主分支**靠仓库分支保护，不是靠这里选 Read |
-| **Checks** | `Read-only`（可选；可先 `No access`） | 读 CI Check 结论 | 要机器人自己报检查结果再开 Write |
+| **Checks** | `Read-only`（可选；可先 `No access`） | 读 **Checks API** 结论（GitHub Actions 等多走这套） | 要机器人自己创建 Check Run 再开 Write |
+| **Commit statuses** | 第一期 **`No access`**（可选以后 `Read-only`） | 旧版 **Status API**（commit 上的 pending/success/failure 小点） | 与 Checks 不是同一权限；写代码 / 评 PR **不需要**它。仅当要读仍走 Status API 的 CI，或机器人自己 `POST` 状态点时再开 Read / Write |
 
 说明：
 
@@ -168,7 +169,9 @@ status: ready
 | Agent 读仓库里的 md / 代码 | `Contents` Read（已含在 Write 里） |
 | 推 feature 分支 / API 改文件 | `Contents` **Write** |
 | 开 PR、更新 PR | `Pull requests` Write |
-| 读 Actions 是否红了 | `Checks` Read（或以后再开 Actions Read） |
+| 读 Actions / Check Run 是否红了 | `Checks` Read（或以后再开 Actions Read） |
+| 读旧版 commit status 小点 | `Commit statuses` Read（与 Checks 分开；多数新 CI 可先不开） |
+| 机器人自己打 status / Check | `Commit statuses` Write 或 `Checks` Write |
 | **阻止私自合入 / 直推主分支** | **不是**关掉 Contents Write；用分支保护 + 禁止 App bypass + 接收端拒合主分支 |
 
 ### 订阅事件（Subscribe to events）
