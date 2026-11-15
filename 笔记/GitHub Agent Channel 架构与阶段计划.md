@@ -1,6 +1,6 @@
 ---
 title: GitHub Agent Channel 架构与阶段计划
-summary: Agent-agnostic 的 GitHub 协作入口：Channel 负责接入、@Mention、事件、回写与 Policy；经 Connector 对接 OpenClaw 等 Runtime。V1 做 Channel 核心 + OpenClaw Connector（模式 A），App 优先。
+summary: Agent-agnostic 的 GitHub 协作入口：Channel 执行面与独立配置面分离；经 Connector 对接 OpenClaw 等 Runtime；管理控制台（如 dingtalk-robot）只作 API 客户端。V1 做核心+OpenClaw，不做完整管理台。
 tags:
   - github
   - agent-channel
@@ -22,14 +22,16 @@ status: ready
 
 | 部分 | 职责 |
 | --- | --- |
-| GitHub Channel | App / 仓库 Webhook、@Mention、Inbox/路由、回写、GitHub API/Git、调用方鉴权与 Policy |
+| GitHub Channel（执行面） | App / 仓库 Webhook、@Mention、Inbox/路由、回写、Capability、Policy |
+| Configuration / Management API | Connection、Repository、Agent Binding、策略等可管理资源 |
+| Management Console | 配置客户端（如 `OpenClaw-dingtalk-robot`）；**不**内嵌 Channel 核心 |
 | Agent Connector | 连接用户选定的 Runtime（V1：OpenClaw） |
 | External Agent Runtime | 推理、规划、Skills、执行语义 |
 
 **Channel 不实现 Agent Runtime。** OpenClaw 是第一个 Connector，不是核心硬依赖。工程名倾向 `github-agent-channel`。
 
 **模式 A（V1）**：连接用户已有 Agent。  
-**模式 B（非目标）**：托管 Agent Runtime（成本、隔离、供应商生命周期另案）。
+**模式 B（非目标）**：托管 Agent Runtime。
 
 ## 原则
 
@@ -39,7 +41,21 @@ status: ready
 4. Agent 执行与 GitHub 授权分离；外部无权限高危操作直接拒绝。  
 5. 新 Runtime 经 Connector 接入，不重写 Channel 核心。  
 6. **不为统一而过早造万能 Agent 协议**；先调研能力矩阵再冻结 Connector。  
-7. V1 核心交互：`@机器人` + 自然语言 → Channel → Connector → Agent →（经 Capability）回写 GitHub。
+7. **配置与执行分离**：配置不绑定特定前端；经稳定 Management API（或可演进为 API 的资源模型）管理；密钥永不暴露给前端。  
+8. V1 核心交互：`@机器人` + 自然语言 → Channel → Connector → Agent →（经 Capability）回写 GitHub。
+
+## 配置面与执行面
+
+**有必要现在定为原则，不必现在做完整管理台。**
+
+| 平面 | 职责 |
+| --- | --- |
+| Configuration Plane | Connection、仓库绑定、Agent Binding、执行策略等；供控制台 / 第三方管理 |
+| Execution Plane | Webhook、分发、Agent 调用、回写 |
+
+可管理资源（认知清单，V1 不要求全 CRUD）：GitHub Connection、Repository、Agent Binding、Agent 连接参数、Execution Policy。Skills 启用以 Runtime/Connector 侧为主。
+
+V1：同一资源模型可用文件或嵌入式存储；**避免**把连接与策略硬编码在启动代码里，以便日后挂上 HTTP Management API，并由 dingtalk-robot 等控制台接入。
 
 ## 分层
 
@@ -116,6 +132,7 @@ V1 只实现 **OpenClaw Connector**。Codex / Cursor / ACP 等先做**能力矩�
 ## 对抗结论（摘要）
 
 - Agent-agnostic Channel **比**「OpenClaw Plugin」更清晰，采纳。  
-- V1 **只**落地 OpenClaw Connector；防过早多 Runtime。  
-- 不做托管 Agent；不做万能协议。  
+- 配置/执行分离与 Management API **原则必要**；完整管理台与 Skills CRUD **V1 不做**。  
+- 不为 Channel 单做整套 Console；控制台只是客户端。  
+- V1 **只**落地 OpenClaw Connector；不做托管 Agent、不做万能协议。  
 - Skills 降为 OpenClaw 附件；安全仍在 Channel。
