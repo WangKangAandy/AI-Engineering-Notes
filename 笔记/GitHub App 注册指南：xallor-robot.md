@@ -67,23 +67,33 @@ status: ready
 | --- | --- | --- |
 | Active | **先不勾选**（与截图一致） | 未勾选时 GitHub 不会投递事件；等 Plugin 有公网 HTTPS 入口后再勾选 |
 | Webhook URL | 创建时可留空 | 就绪后填 Plugin 的 HTTPS 路径（如 Gateway `registerHttpRoute`）；本地调试可用 smee.io / ngrok 等隧道转发到本机 |
-| Secret | **本机生成随机串后粘贴进输入框** | 页面上**没有**「生成」按钮，只是普通文本框；自己造串 → 粘贴 → 离线保存。日后验签用 |
+| Secret | **自备一串高熵随机口令，粘贴进输入框** | 页面上**没有**「生成」按钮。它是你与 GitHub 约定的共享口令，用来验 HMAC；与在哪台机器生成无关 |
 
-> [!note] Secret 怎么自己生成
-> GitHub 创建页不会帮你点一下出串。在本机终端跑一条即可，把输出整段粘贴进 **Secret**，并另存到密码库 / 环境变量（勿提交 Git）：
+> [!note] Secret 是什么、为什么「随便造一串」
+> **不是**绑定某台机器、某次安装或某个仓库的硬件指纹。它只是一段双方都知道的口令：
+>
+> 1. 你填进 GitHub App 的 **Secret**  
+> 2. 同一串再放进接收端（OpenClaw Plugin / 环境变量）  
+> 3. GitHub 每次投递带签名；接收端用这串验签，证明请求来自 GitHub、内容未被改
+>
+> 因此：**在哪台电脑执行生成命令都行**（笔记本、跳板机、WSL 均可），输出拷走即可；命令本身不依赖特定环境。所谓「随便」是指**内容不必有业务含义**，不是可以随便用短密码或公开示例串——要用足够长、不可猜测的随机串。
+>
+> GitHub 创建页不会帮你点一下出串。任选一台可信机器跑：
 >
 > ```bash
 > openssl rand -hex 32
 > ```
 >
-> Windows PowerShell 也可用：
+> Windows PowerShell：
 >
 > ```powershell
 > -join ((1..64) | ForEach-Object { '{0:x}' -f (Get-Random -Max 16) })
 > ```
+>
+> 把输出整段粘贴进 **Secret**，并另存到密码库 / 接收端环境变量（勿提交 Git、勿贴进公开 Issue）。
 
-> [!tip] 为什么先关 Active、但仍填 Secret
-> Secret 与 URL 可分开准备：没有接收端时不要开 Active，避免投递失败堆积；Secret 尽早定好，避免后期改密导致旧投递验签失败。创建时也可先留空 Secret，等有接收端再一起填——但一旦开始收事件，Secret 就必须与验签端一致。
+> [!tip] 为什么先关 Active、但仍可填 Secret
+> Secret 与 URL 可分开准备：没有接收端时不要开 Active，避免投递失败堆积。创建时也可先留空 Secret，等有接收端再一起填——但一旦开始收事件，**GitHub 上的 Secret 与验签端必须是同一串**。
 
 接收端就绪后的改法：App 设置页 → 勾选 Active → 填入最终 Webhook URL（及 Secret，若创建时未填）→ Save。
 
