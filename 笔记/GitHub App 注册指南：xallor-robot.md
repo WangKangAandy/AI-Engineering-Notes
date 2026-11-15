@@ -46,40 +46,73 @@ status: ready
 
 第一期使用 **Installation（装到仓库）** 身份，不是用户 OAuth。若页面出现 **Request user authorization (OAuth) during installation**，不要勾选。
 
-## Webhook
+## Webhook / 权限 / 安装范围（本页后半段）
 
-| 项 | 建议 |
-| --- | --- |
-| Active | 接收端未就绪时可先关闭；或用临时隧道 URL（如 smee.io）调试 |
-| Webhook URL | 指向 OpenClaw Plugin 暴露的 HTTPS 路径（例如 Gateway 上 `registerHttpRoute` 的路径）；本地调试可用隧道转发到本机 |
-| Webhook secret | 自行生成长随机串并妥善保存；与私钥同等敏感 |
+向下滚动到与下图一致的区域后再填：
 
-创建 App 时若尚无公网 URL，可先填占位并关闭 Active，等 Plugin 就绪后再改。
+![Create GitHub App：Webhook、Permissions、安装范围](./_assets/github-app/create-github-app-webhook-perms.png)
 
-## 仓库权限（第一期）
+图中现状通常是：
 
-| Permission | 级别 |
-| --- | --- |
-| Metadata | Read-only |
-| Contents | Read-only |
-| Issues | Read & write |
-| Pull requests | Read & write |
-| Checks | Read-only（可选） |
+- **Active** 未勾选  
+- **Webhook URL / Secret** 为空  
+- **Permissions** 四个分组折叠未展开  
+- 安装范围已选 **Only on this account**（正确，保持）
 
-权限遵循最小够用；需要 Checkout / Push 代码时再另行扩大 Contents 等权限。
+按下面三节逐项配置，再点绿色 **Create GitHub App**。
 
-## 订阅事件（第一期）
+### Webhook
 
-建议先开：
+| 项 | 第一期建议 | 说明 |
+| --- | --- | --- |
+| Active | **先不勾选**（与截图一致） | 未勾选时 GitHub 不会投递事件；等 Plugin 有公网 HTTPS 入口后再勾选 |
+| Webhook URL | 创建时可留空 | 就绪后填 Plugin 的 HTTPS 路径（如 Gateway `registerHttpRoute`）；本地调试可用 smee.io / ngrok 等隧道转发到本机 |
+| Secret | **现在就生成并填入** | 长随机串；创建后与私钥同等保管；日后验签用。可先生成、再关掉 Active |
+
+> [!tip] 为什么先关 Active、但仍填 Secret
+> Secret 与 URL 可分开准备：没有接收端时不要开 Active，避免投递失败堆积；Secret 尽早定好，避免后期改密导致旧投递验签失败。
+
+接收端就绪后的改法：App 设置页 → 勾选 Active → 填入最终 Webhook URL → Save（Secret 若创建时已填且未泄露则不必改）。
+
+### 仓库权限（展开 Repository permissions）
+
+点开 **Repository permissions**，只改下列项；其余保持 **No access**。Organization / Account / Enterprise 三组第一期全部不配。
+
+| Permission | 级别 | 用途 |
+| --- | --- | --- |
+| Metadata | Read-only | 必选底座；装 App 后自动具备 |
+| Contents | Read-only | 读仓库文件 / 树；暂不写代码 |
+| Issues | Read & write | 读 Issue、评论、关单等 |
+| Pull requests | Read & write | 读 PR、评论、改状态等 |
+| Checks | Read-only（可选） | 若机器人要读 CI 结论再开 |
+
+> [!warning] 最小够用
+> 不要一次打开 Administration、Secrets、Workflows 等高危权限。需要 Checkout / Push 时再单独把 Contents 升到 Read & write，并记入变更原因。
+
+### 订阅事件（Subscribe to events）
+
+权限保存后，页面会出现 **Subscribe to events**（或创建后在 App 设置里改）。第一期只勾：
 
 - `Pull request`
 - `Issue comment`
 
-需要 Issue 自动化时再开 `Issues`。行内 Review 评论需要时再开 `Pull request review` / `Pull request review comment`。
+按需再开：
 
-## 安装范围
+| 事件 | 何时再开 |
+| --- | --- |
+| `Issues` | 要监听开/关 Issue、改标签等，而不只是评论 |
+| `Pull request review` / `Pull request review comment` | 要处理行内 Review 评论 |
 
-选择 **Only on this account**（仅 `xallor-ai`），避免被装到无关账号。
+Webhook 未 Active 时，勾选事件只是「就绪清单」：真正投递要等 Active + 有效 URL。
+
+### 安装范围（Where can this GitHub App be installed?）
+
+| 选项 | 第一期 |
+| --- | --- |
+| **Only on this account** | **选这个**（仅 `@xallor-ai`） |
+| Any account | 不要选；公开可装会扩大攻击面与支持面 |
+
+与截图一致即可，创建后一般也不改成 Any account。
 
 ## 创建后立刻保存的材料
 
@@ -109,8 +142,11 @@ GitHub App（本文）
 
 - [ ] 基本信息与示意一致（名称、主页、Redirect 占位）  
 - [ ] 未开启「安装时请求用户 OAuth」  
-- [ ] 权限与事件按第一期表格设置  
-- [ ] 仅限本组织安装  
-- [ ] App ID、私钥、Webhook secret 已离线保存  
-- [ ] 已安装到目标仓库  
-- [ ] Webhook Active 与 URL 与接收端就绪状态一致  
+- [ ] Webhook：创建时 Active 关闭；Secret 已生成并填写（或创建后立即补填）  
+- [ ] Repository permissions：Metadata / Contents / Issues / Pull requests（及可选 Checks）按上表  
+- [ ] Organization / Account / Enterprise 权限未乱开  
+- [ ] 事件：至少 `Pull request` + `Issue comment`  
+- [ ] 安装范围：Only on this account  
+- [ ] 创建后保存 App ID、私钥 `.pem`、Webhook secret  
+- [ ] Install App 到目标仓库，记下 Installation ID  
+- [ ] Plugin 就绪后再打开 Active 并写入真实 Webhook URL  
