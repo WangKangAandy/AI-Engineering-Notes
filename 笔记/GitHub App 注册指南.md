@@ -1,9 +1,9 @@
 ---
 title: GitHub App 注册指南
-summary: 为 GitHub Agent Channel 注册安装型 GitHub App 的逐步填写说明：基本信息、Webhook、权限与事件、私钥与安装。文中以 xallor-ai / xallor-robot 为示例截图与字段值，可按自己的组织与 App 名替换。
+summary: 说明 GitHub App 是什么、适合做什么，并逐步演示如何在组织下创建安装型 App：基本信息、Webhook、权限与事件、私钥与安装。截图以 xallor-robot 为例，字段可替换。
 tags:
   - github-app
-  - openclaw
+  - github
   - automation
 created: 2026-11-15
 status: ready
@@ -13,11 +13,39 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-为 [[GitHub Agent Channel 架构与阶段计划]] 的 **App Adapter** 注册安装型 GitHub App：页面怎么填、权限怎么选、创建后保存什么。
+## GitHub App 是什么
 
-下文截图与示例值来自组织 `xallor-ai`、App 名 `xallor-robot`，请换成你自己的 org / App 名称与主页。
+GitHub App 是 GitHub 提供的一种**一等集成身份**：以「应用」而不是某个个人账号去访问仓库。创建后装到组织或仓库上，用自己的权限集与 Webhook 收事件，再用私钥换短期 Installation Token 调 API。
 
-权限名称以 **Create GitHub App** 页 **Repository permissions** 展示名为准。
+和常见替代比：
+
+| 方式 | 特点 |
+| --- | --- |
+| Personal Access Token (PAT) | 绑在个人用户上，权限面往往偏大，轮换与审计麻烦 |
+| OAuth App | 偏「用户登录授权」；仓库自动化也能做，但安装型机器人场景更绕 |
+| **GitHub App** | 独立身份、按仓库安装、权限可细到资源类型、事件经 Webhook 推送；适合机器人与自动化 |
+
+本文默认做**安装型**用法：装到仓库后以 Installation 身份读写与收事件，**不**做「安装时请求用户 OAuth 登录」。
+
+## 能做什么、怎么用
+
+典型能力：
+
+1. **收事件**：PR、Issue、评论、Checks / Actions 等变更推到你配置的 Webhook URL。  
+2. **调 API**：读仓库、评 PR、开 Issue、推分支、触发 Workflow 等（取决于你勾的权限）。  
+3. **身份隔离**：权限是 App 的上限；Token 还可再收窄；卸装即收回访问。
+
+常见用法：CI 机器人、PR Review / 评论机器人、Issue 分流、把 GitHub 事件接到自建服务或 Agent。  
+流程可以记成：
+
+```text
+注册 App → 设权限与事件 → 生成私钥 → 安装到仓库
+  →（可选）打开 Webhook → 自建服务验签并调 API
+```
+
+下文按创建页从顶到底填写。截图与示例来自 `xallor-robot`（组织 `xallor-ai`），请换成你自己的名称与主页。权限名称以页面 **Repository permissions** 展示名为准。
+
+若你的场景是把 GitHub 接到 Agent 通道，可另见 [[GitHub Agent Channel 架构与阶段计划]]；**不是**读本文的前提。
 
 ## 入口
 
