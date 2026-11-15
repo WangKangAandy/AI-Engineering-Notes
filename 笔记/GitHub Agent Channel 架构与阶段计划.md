@@ -1,4 +1,4 @@
----
+﻿---
 title: GitHub Agent Channel 架构与阶段计划
 summary: Agent-agnostic 的 GitHub 协作入口；配置边界是 Configuration Manager（V1 用 YAML/JSON+Secret 引用），非独立 Configuration API 基建；经 Connector 接 OpenClaw；控制台不直读文件。
 tags:
@@ -14,7 +14,7 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-配套实操：[[GitHub App 注册指南：xallor-robot]]。旧称「OpenClaw GitHub Plugin」已收束为本定位；本文不写运行时代码。
+配套实操：[[GitHub App 注册指南]]。旧称「OpenClaw GitHub Plugin」已收束为本定位；本文不写运行时代码。
 
 ## 产品定位
 
