@@ -67,12 +67,25 @@ status: ready
 | --- | --- | --- |
 | Active | **先不勾选**（与截图一致） | 未勾选时 GitHub 不会投递事件；等 Plugin 有公网 HTTPS 入口后再勾选 |
 | Webhook URL | 创建时可留空 | 就绪后填 Plugin 的 HTTPS 路径（如 Gateway `registerHttpRoute`）；本地调试可用 smee.io / ngrok 等隧道转发到本机 |
-| Secret | **现在就生成并填入** | 长随机串；创建后与私钥同等保管；日后验签用。可先生成、再关掉 Active |
+| Secret | **本机生成随机串后粘贴进输入框** | 页面上**没有**「生成」按钮，只是普通文本框；自己造串 → 粘贴 → 离线保存。日后验签用 |
+
+> [!note] Secret 怎么自己生成
+> GitHub 创建页不会帮你点一下出串。在本机终端跑一条即可，把输出整段粘贴进 **Secret**，并另存到密码库 / 环境变量（勿提交 Git）：
+>
+> ```bash
+> openssl rand -hex 32
+> ```
+>
+> Windows PowerShell 也可用：
+>
+> ```powershell
+> -join ((1..64) | ForEach-Object { '{0:x}' -f (Get-Random -Max 16) })
+> ```
 
 > [!tip] 为什么先关 Active、但仍填 Secret
-> Secret 与 URL 可分开准备：没有接收端时不要开 Active，避免投递失败堆积；Secret 尽早定好，避免后期改密导致旧投递验签失败。
+> Secret 与 URL 可分开准备：没有接收端时不要开 Active，避免投递失败堆积；Secret 尽早定好，避免后期改密导致旧投递验签失败。创建时也可先留空 Secret，等有接收端再一起填——但一旦开始收事件，Secret 就必须与验签端一致。
 
-接收端就绪后的改法：App 设置页 → 勾选 Active → 填入最终 Webhook URL → Save（Secret 若创建时已填且未泄露则不必改）。
+接收端就绪后的改法：App 设置页 → 勾选 Active → 填入最终 Webhook URL（及 Secret，若创建时未填）→ Save。
 
 ### 仓库权限（展开 Repository permissions）
 
@@ -142,7 +155,8 @@ GitHub App（本文）
 
 - [ ] 基本信息与示意一致（名称、主页、Redirect 占位）  
 - [ ] 未开启「安装时请求用户 OAuth」  
-- [ ] Webhook：创建时 Active 关闭；Secret 已生成并填写（或创建后立即补填）  
+- [ ] Webhook：创建时 Active 关闭；Secret 已用本机命令生成并粘贴（页面无生成按钮），或创建后补填  
+
 - [ ] Repository permissions：Metadata / Contents / Issues / Pull requests（及可选 Checks）按上表  
 - [ ] Organization / Account / Enterprise 权限未乱开  
 - [ ] 事件：至少 `Pull request` + `Issue comment`  
