@@ -15,7 +15,7 @@ status: ready
 
 ## GitHub App 是什么
 
-GitHub App 是 GitHub 提供的一种**一等集成身份**：以「应用」而不是某个个人账号去访问仓库。创建后装到组织或仓库上，用自己的权限集与 Webhook 收事件。私钥**不是** API Token：用它签发短时 JWT（`iss` 填 App ID 或 **Client ID**，文档更推荐后者），再换大约一小时有效的 Installation Access Token。
+GitHub App 是 GitHub 提供的一种**一等集成身份**：以「应用」而不是某个个人账号去访问仓库。创建后装到组织或仓库上，用自己的权限集与 Webhook 收事件，再用安装凭证调 API。
 
 和常见替代比：
 
@@ -153,12 +153,12 @@ Contents 一旦可写，应在目标仓库给默认分支开**分支保护**（�
 
 保存（勿提交 Git、勿写进公开笔记）：
 
-1. **App ID**、**Client ID**（General；JWT 的 `iss` 更推荐 Client ID）
-2. **Private key**（`.pem`，见下；**不是** API Token，也不是 Client secret）
-3. **Webhook secret**（与创建时同一串；验 `X-Hub-Signature-256`）
+1. **App ID**、**Client ID**（General）
+2. **Private key**（`.pem`，见下）
+3. **Webhook secret**（与创建时同一串）
 4. **Installation ID**（安装后：安装页 URL、`GET /app/installations`，或 Webhook payload）
 
-Client secret 只用于**用户 OAuth**；纯安装型用法一般不需要。
+`.pem` 不是 API Token，也不是 Client secret。服务端用私钥签发短时 JWT（`iss` 填 App ID 或 Client ID，文档更推荐后者），再换成大约一小时有效的 Installation Access Token。Webhook secret 用来校验 `X-Hub-Signature-256`。Client secret 只用于**用户 OAuth**，纯安装型一般不需要。
 
 ### 生成 Private key
 
