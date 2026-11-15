@@ -370,7 +370,7 @@ openclaw --version
 openclaw setup --baseline
 ```
 
-在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）。OpenClaw 按 JSON5 解析，可用 `//` 行注释；标准 JSON / `#` 注释都不行。
+在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）：
 
 ```json5
 {
