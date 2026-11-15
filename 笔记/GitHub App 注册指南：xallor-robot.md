@@ -117,19 +117,33 @@ status: ready
 
 #### 第一期：Repository permissions 逐项
 
-| 页面上的权限名 | 下拉选 | 机器人因此能做什么 | 不能做什么（刻意不开） |
+目标能力：**允许写仓库（推分支、改文件、开/评 PR）**；**禁止私自合入默认分支（`main` / `master`）**——后者不靠把 Contents 降成只读，而靠分支保护 + 接收端策略（见下节）。
+
+| 页面上的权限名 | 下拉选 | 机器人因此能做什么 | 备注 |
 | --- | --- | --- | --- |
 | **Metadata** | `Read-only`（通常创建后强制具备） | 读仓库基础信息、列表已安装仓库 | 不含代码 / Issue / PR 正文 |
-| **Contents** | `Read-only` | 读文件、目录树、commit、分支信息；Agent 需要看仓库内容时用 | **不能** push、改文件、建 release；需要写代码时再升到 `Read & write` |
-| **Issues** | `Read & write` | 读/写 Issue；开关注释、关单、改标签/指派等；**PR 评论在 API 上常与 Issue 评论同源，写评论通常也要这项** | — |
-| **Pull requests** | `Read & write` | 读/写 PR；评论、改状态、合并相关能力（是否真合并取决于你写的逻辑） | — |
-| **Checks** | `Read-only`（可选；第一期可先 `No access`） | 读 CI Check 结论，便于「失败了再评论」 | 不写 Check Run；要机器人自己报检查结果再开 `Read & write` |
+| **Contents** | **`Read & write`** | 读文件；**push 分支、API 改文件/提交**；发 release 等写接口 | 要「能写操作」就必须开 Write；只读挡不住合主分支，也挡不住写 |
+| **Issues** | `Read & write` | 读/写 Issue；评论、关单、改标签等；**发 PR 评论常也依赖这项** | 只开 PR、不开 Issues 易 403 |
+| **Pull requests** | `Read & write` | 读/写 PR、评论、开 PR；API 上也具备「合并 PR」的权限位 | **合不进主分支**靠仓库分支保护，不是靠这里选 Read |
+| **Checks** | `Read-only`（可选；可先 `No access`） | 读 CI Check 结论 | 要机器人自己报检查结果再开 Write |
 
 说明：
 
-- 下拉只有三档时，选表中那一档即可；若某项没有 `Read-only`（只有 No access / Read & write），按表意图选最低够用档。  
-- **Issues 与 Pull requests 建议第一期都开 Write**：只开 PR、不开 Issues，常见踩坑是「听得到 PR 事件，但发评论 403」。  
-- Metadata 若界面已锁在 Read-only，无需也无法关掉。
+- 下拉只有三档时，选表中那一档即可。  
+- Metadata 若界面已锁在 Read-only，无需也无法关掉。  
+- **Workflows** 仍保持 No access：Contents Write 已够改普通文件；改 `.github/workflows` 需要另开 Workflows，风险更大，第一期不开。
+
+#### 「能写」但「不能私自合主分支」怎么拆
+
+| 机制 | 作用 |
+| --- | --- |
+| App：**Contents = Read & write** | 允许往**非保护分支**写提交、推 feature 分支 |
+| App：**Pull requests = Read & write** | 允许开 PR、评论；权限位上也能调「合并」API |
+| **仓库分支保护**（Settings → Branches） | 对 `main`/`master`：禁止直接 push；要求 PR；要求评审/CI；**不要**把 `xallor-robot` 放进 bypass 名单 |
+| **接收端策略**（Plugin / Agent 规则） | 代码层拒绝 `merge` 到默认分支、拒绝 `push` 到 `main`；双保险 |
+
+> [!important] Contents Write ≠ 自动能改主分支
+> GitHub App 的 Contents Write 只表示「有写仓库内容的 API 能力」。默认分支是否接得住这次 push / merge，由**分支保护规则**决定。没有保护时，Write 确实可能直接推到 `main`——所以装 App 的仓库务必给默认分支上保护。
 
 #### 第一期明确保持 No access 的（常见项）
 
@@ -137,15 +151,12 @@ status: ready
 
 | 权限名（常见英文） | 为什么先不开 |
 | --- | --- |
-| Administration | 改仓库设置、协作者等高危 |
+| Administration | 改仓库设置、协作者；还可能削弱保护相关配置 |
 | Actions | 读/写 workflow 运行；非第一期目标 |
 | Secrets / Dependabot secrets / Environments 等 | 密钥与部署环境 |
-| Workflows | 改 `.github/workflows`；与 Contents 写权限叠加风险大 |
+| Workflows | 改 `.github/workflows`；与 Contents Write 叠加风险大 |
 | Deployments / Packages / Pages | 发布与制品面 |
 | Members / Single file 等 | 非机器人主路径；需要再单开 |
-
-> [!warning] 最小够用
-> 权限一改大，已安装仓库的管理员通常要**重新批准**。先按上表上线；真要 Checkout + Push 时，再把 **Contents** 升到 `Read & write`，并在笔记或变更记录里写原因。
 
 #### 权限与能力对照（方便自检）
 
@@ -153,9 +164,11 @@ status: ready
 | --- | --- |
 | 收到 PR 开/改/关事件 | `Pull requests` Read + 订阅 `Pull request` |
 | 在 PR / Issue 下发评论、关 Issue | `Issues` **Write**（+ 视情况 `Pull requests` Write） |
-| Agent 读仓库里的 md / 代码 | `Contents` Read |
+| Agent 读仓库里的 md / 代码 | `Contents` Read（已含在 Write 里） |
+| 推 feature 分支 / API 改文件 | `Contents` **Write** |
+| 开 PR、更新 PR | `Pull requests` Write |
 | 读 Actions 是否红了 | `Checks` Read（或以后再开 Actions Read） |
-| 机器人直接改仓库文件并 push | `Contents` **Write**（本期不要） |
+| **阻止私自合入 / 直推主分支** | **不是**关掉 Contents Write；用分支保护 + 禁止 App bypass + 接收端拒合主分支 |
 
 ### 订阅事件（Subscribe to events）
 
@@ -217,9 +230,11 @@ GitHub App（本文）
 - [ ] Webhook：创建时 Active 关闭；Secret 已用本机命令生成并粘贴（页面无生成按钮），或创建后补填  
 
 - [ ] 只展开并修改 Repository permissions；Org / Account / Enterprise 未改  
-- [ ] Contents = Read-only；Issues = Read & write；Pull requests = Read & write；其余常见高危项 = No access  
+- [ ] Contents / Issues / Pull requests = Read & write；Administration、Workflows、Secrets 等 = No access  
 - [ ] Checks 仅在需要读 CI 时开 Read-only，否则 No access  
+- [ ] 目标仓库默认分支已开保护：禁直推、需 PR；`xallor-robot` 不在 bypass 名单  
 - [ ] 事件：勾选 `Pull request` + `Issue comment`；其余先不勾  
+
 
 - [ ] 安装范围：Only on this account  
 - [ ] 创建后保存 App ID、私钥 `.pem`、Webhook secret  
