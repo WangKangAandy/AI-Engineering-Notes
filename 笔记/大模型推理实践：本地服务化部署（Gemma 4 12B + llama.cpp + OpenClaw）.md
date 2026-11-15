@@ -16,7 +16,7 @@ status: evergreen
 
 本文讨论大模型的本地服务化部署：在 WSL2 Ubuntu 中把模型做成 OpenAI 兼容 API，再从 Windows 客户端接入。具体路线是 Gemma 4 12B + `llama.cpp`（`llama-server`）+ OpenClaw。
 
-实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存和 6GB Swap；OpenClaw CLI 固定为 2026.11.3（安装在 Windows）。模型使用 Google 官方 QAT Q4_0 GGUF，初始上下文为 16K。
+实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存和 6GB Swap；OpenClaw CLI 固定为 2026.11.3（安装在 Windows）。模型使用 Google 官方 QAT Q4_0 GGUF，运行上下文为 128K（`-c 131072`）。
 
 ## 1. 检查 Ubuntu、GPU 和内存
 
@@ -178,7 +178,7 @@ docker run -d \
   -m /models/gemma-4-12b-it-qat-q4_0.gguf \
   --mmproj /models/mmproj-gemma-4-12b-it-qat-q4_0.gguf \
   --alias gemma-4-12b \
-  -c 16384 \
+  -c 131072 \
   -ngl 99 \
   --flash-attn on \
   --jinja \
@@ -389,7 +389,7 @@ openclaw setup --baseline
             "reasoning": false,
             "input": ["text", "image"],
             "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
-            "contextWindow": 16384,
+            "contextWindow": 131072,
             "maxTokens": 2048
           }
         ]
@@ -411,18 +411,12 @@ openclaw setup --baseline
 ```powershell
 openclaw config validate
 openclaw models list
-openclaw agent exec `
-  --model gemma4-local/gemma-4-12b `
-  --local-model-lean `
-  --code-mode direct `
-  --thinking off `
-  "只回答一个数字：17 加 25 等于多少？" `
-  --json
+openclaw
 ```
 
-成功时返回 `42`：
+进入 TUI 后发送「你好」。底部状态栏应显示 `gemma-4-12b`，上下文约为 `tokens ?/131k`：
 
-![OpenClaw agent exec 返回 42](./_assets/llm-local-serving/openclaw-agent-exec.png)
+![OpenClaw TUI 接入本地 Gemma 4](./_assets/llm-local-serving/openclaw-tui.png)
 
 其他 OpenAI 兼容 Agent 同样使用上一节的 `base_url` / `api_key` / `model` 三元组即可，不必经过 OpenClaw。
 
