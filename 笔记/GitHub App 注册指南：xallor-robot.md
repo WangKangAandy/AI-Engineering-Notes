@@ -143,12 +143,24 @@ openssl rand -hex 32
 
 ## 创建后保存
 
-1. App ID  
-2. Private key（`.pem`，Generate a private key）  
-3. Webhook secret  
-4. 安装后的 Installation ID  
+1. **App ID**（App 设置页 / General 可见）  
+2. **Private key**（`.pem`，见下方生成步骤）  
+3. **Webhook secret**（与创建时填写的同一串）  
+4. 安装后的 **Installation ID**（安装页 URL 或 API / Webhook payload）
 
-只放本机密钥库 / 环境变量 / OpenClaw SecretRef。
+只放本机密钥库 / 环境变量 / OpenClaw SecretRef；勿提交 Git、勿贴进公开笔记正文。
+
+### 生成 Private key
+
+App 创建完成后进入该 App 设置：
+
+1. 左侧点 **Credentials**  
+2. 打开 **Key pairs** 子页（与 Client secrets 并列）  
+3. 点绿色 **New key**
+
+![Credentials → Key pairs → New key](./_assets/github-app/credentials-new-key.png)
+
+浏览器会下载一份 `.pem`。GitHub **只在此刻提供私钥**；公钥留在 App 上，用于校验你用私钥签的 JWT，进而换 Installation Access Token。私钥丢失只能再 **New key** 一对新密钥，旧 `.pem` 作废前可先撤销对应 key pair。
 
 ## 安装与主分支
 
@@ -178,5 +190,6 @@ Plugin 另文。官方参考：[Choosing permissions](https://docs.github.com/en
 - [ ] Organization / Account / Enterprise = No access  
 - [ ] 事件至少 Pull request + Issue comment  
 - [ ] Only on this account；已安装目标仓库；默认分支已保护且 App 不在 bypass  
-- [ ] App ID / `.pem` / Webhook secret / Installation ID 已离线保存  
+- [ ] Credentials → Key pairs → New key 已下载 `.pem`；App ID / Webhook secret / Installation ID 已离线保存  
+
 - [ ] Plugin 就绪后再开 Active 并填 Webhook URL  
