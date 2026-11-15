@@ -1,6 +1,6 @@
 ---
 title: GitHub App 注册指南：xallor-robot
-summary: 在 xallor-ai 创建安装型 App xallor-robot：基本信息、Webhook、按当前创建页名称配置的 Repository permissions 清单，以及创建后凭证与主分支保护要点；供自建 OpenClaw GitHub Plugin 使用。
+summary: 在 xallor-ai 创建安装型 App xallor-robot：基本信息、Webhook、按当前创建页名称配置的 Repository permissions 清单，以及创建后凭证与主分支保护要点；供 GitHub Agent Channel 的 App Adapter 使用。
 tags:
   - github-app
   - openclaw
@@ -132,7 +132,7 @@ openssl rand -hex 32
 
 ### 订阅事件
 
-权限设好后勾选（名称以页面为准）。与 [[OpenClaw GitHub Plugin 架构与阶段计划]] 的 `@机器人` 入口对齐，建议至少：
+权限设好后勾选（名称以页面为准）。与 [[GitHub Agent Channel 架构与阶段计划]] 中 `@机器人` 入口对齐，建议至少：
 
 - **Issue comment**（Issue / PR 普通评论主入口）
 - **Pull request review comment**（行内评论）
