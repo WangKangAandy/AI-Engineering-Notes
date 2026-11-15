@@ -13,7 +13,7 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-在组织 `xallor-ai` 注册安装型 App `xallor-robot`。架构：GitHub App 只做身份、权限上限与事件投递；验签、换 Token、调 API、唤醒 Agent 由自建 OpenClaw GitHub Plugin 完成。
+在组织 `xallor-ai` 注册安装型 App `xallor-robot`。架构：GitHub App 只做身份、权限上限与事件投递；验签、换 Token、调 API、唤醒 Agent 由自建 OpenClaw GitHub Plugin 完成。桥接层整体方案见 [[OpenClaw GitHub Plugin 架构与阶段计划]]。
 
 权限名称以**当前 Create GitHub App 页 Repository permissions 展示名为准**（勿与 REST 文档里的旧别名混用）。
 
@@ -130,12 +130,13 @@ openssl rand -hex 32
 
 ### 订阅事件
 
-权限设好后勾选（名称以页面为准）。建议至少：
+权限设好后勾选（名称以页面为准）。与 [[OpenClaw GitHub Plugin 架构与阶段计划]] 的 `@机器人` 入口对齐，建议至少：
 
-- **Pull request**
-- **Issue comment**
+- **Issue comment**（Issue / PR 普通评论主入口）
+- **Pull request review comment**（行内评论）
+- **Pull request**（上下文；非默认自动跑全量逻辑）
 
-按需再开：`Issues`、`Pull request review`、`Pull request review comment`、`Discussion` / `Discussion comment`、`Check run` / `Check suite`、`Workflow run` 等。Active 未开时勾选只作就绪清单。
+按需再开：`Issues`、`Pull request review`、`Check run` / `Check suite`、`Workflow run` 等。Active 未开时勾选只作就绪清单。无 `@App` 的评论默认不唤醒 Agent。
 
 ### 安装范围
 
