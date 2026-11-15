@@ -14,9 +14,9 @@ status: evergreen
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本文讨论大模型的本地服务化部署：在 WSL2 Ubuntu 中把模型做成 OpenAI 兼容 API，再接入 Agent 客户端。具体路线是 Gemma 4 12B + `llama.cpp`（`llama-server`）+ OpenClaw。
+本文讨论大模型的本地服务化部署：在 WSL2 Ubuntu 中把模型做成 OpenAI 兼容 API，再从 Windows 客户端接入。具体路线是 Gemma 4 12B + `llama.cpp`（`llama-server`）+ OpenClaw。
 
-实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存和 6GB Swap；OpenClaw CLI 固定为 2026.11.3。模型使用 Google 官方 QAT Q4_0 GGUF，初始上下文为 16K。
+实测环境是 Ubuntu 22.04、RTX 4060 Ti 16GB、约 23GB WSL 内存和 6GB Swap；OpenClaw CLI 固定为 2026.11.3（安装在 Windows）。模型使用 Google 官方 QAT Q4_0 GGUF，初始上下文为 16K。
 
 ## 1. 检查 Ubuntu、GPU 和内存
 
@@ -165,7 +165,7 @@ ghcr.io/ggml-org/llama.cpp@sha256:17934f68b6efc68671800735f25e209b489f47b610cfbb
 
 ## 6. 启动 llama-server
 
-端口发布到 `0.0.0.0:8080`，便于同一台 Windows 主机访问；容器内仍用 `--api-key` 做访问控制。
+端口发布到 `0.0.0.0:8080`，便于同一台 Windows 主机访问；`--api-key` 与 `--alias` 决定客户端要用的 Key 和模型名。
 
 ```bash
 docker run -d \
@@ -177,6 +177,7 @@ docker run -d \
   ghcr.io/ggml-org/llama.cpp:server-cuda-b12282 \
   -m /models/gemma-4-12b-it-qat-q4_0.gguf \
   --mmproj /models/mmproj-gemma-4-12b-it-qat-q4_0.gguf \
+  --alias gemma-4-12b \
   -c 16384 \
   -ngl 99 \
   --flash-attn on \
@@ -185,6 +186,18 @@ docker run -d \
   --host 0.0.0.0 \
   --port 8080
 ```
+
+服务起来后，对任何 OpenAI 兼容客户端只需要三件事：
+
+```text
+base_url = http://<host>:8080/v1
+api_key  = local-model
+model    = gemma-4-12b
+```
+
+- WSL 内：`<host>` 用 `127.0.0.1`
+- Windows：`<host>` 用 WSL IP（`wsl -d Ubuntu-22.04 -- hostname -I` 的第一个地址；重启 WSL 后可能变化）
+- `api_key` 对应 `--api-key`；`model` 对应 `--alias`
 
 查看启动日志：
 
@@ -212,7 +225,7 @@ curl -fsS http://127.0.0.1:8080/v1/models \
   -H 'Authorization: Bearer local-model'
 ```
 
-健康接口应返回 `{"status":"ok"}`。
+健康接口应返回 `{"status":"ok"}`。`/v1/models` 中的模型 id 应为 `gemma-4-12b`。
 
 ### 文本请求
 
@@ -221,7 +234,7 @@ curl -fsS http://127.0.0.1:8080/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer local-model' \
   -d '{
-    "model": "gemma-4-12b-it-qat-q4_0.gguf",
+    "model": "gemma-4-12b",
     "messages": [
       {"role": "user", "content": "只回答一个数字：17 加 25 等于多少？"}
     ],
@@ -239,7 +252,7 @@ curl -fsS http://127.0.0.1:8080/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer local-model' \
   -d '{
-    "model": "gemma-4-12b-it-qat-q4_0.gguf",
+    "model": "gemma-4-12b",
     "messages": [{
       "role": "user",
       "content": "调用 echo_code，参数 code 必须是 GEMMA4_TOOL_OK，不要直接回答。"
@@ -277,7 +290,7 @@ import urllib.error
 import urllib.request
 
 BASE = "http://127.0.0.1:8080/v1/chat/completions"
-MODEL = "gemma-4-12b-it-qat-q4_0.gguf"
+MODEL = "gemma-4-12b"
 
 def data_url(path):
     p = pathlib.Path(path)
@@ -340,117 +353,66 @@ ask("video", [
 | 音频 | 通过 |
 | 视频 | 通过 |
 
-OpenClaw Provider 的输入模态声明为本次已验证的文本和图片。
+## 8. 在 Windows 用 OpenClaw 接入
 
-## 8. 在 WSL Ubuntu 中接入 OpenClaw
-
-OpenClaw 与 llama-server 运行在同一个 WSL Ubuntu 中，直接使用回环地址调用 API。
-
-```bash
-curl -fsSL https://openclaw.ai/install-cli.sh \
-  | bash -s -- --version 2026.11.3 --runtime-only
-echo 'export PATH="$HOME/.openclaw/bin:$PATH"' >> ~/.bashrc
-export PATH="$HOME/.openclaw/bin:$PATH"
-hash -r
-openclaw --version
-openclaw setup --baseline
-```
-
-`openclaw --version` 应显示 `2026.11.3`。若不是，先执行 `which openclaw`，确认指向 `~/.openclaw/bin/openclaw`。
-
-用官方 onboard 接入自定义 OpenAI 兼容端点：
-
-```bash
-openclaw onboard \
-  --non-interactive \
-  --accept-risk \
-  --mode local \
-  --flow quickstart \
-  --auth-choice custom-api-key \
-  --custom-provider-id gemma4-local \
-  --custom-base-url http://127.0.0.1:8080/v1 \
-  --custom-api-key local-model \
-  --custom-model-id gemma-4-12b-it-qat-q4_0.gguf \
-  --custom-compatibility openai \
-  --custom-image-input \
-  --skip-channels \
-  --skip-skills \
-  --skip-search \
-  --skip-hooks \
-  --skip-ui \
-  --no-install-daemon \
-  --skip-daemon \
-  --skip-health
-```
-
-```bash
-openclaw config validate
-openclaw models list
-```
-
-`models list` 应能看到 `gemma4-local/gemma-4-12b-it-qat-q4_0.gguf`。显式选择该模型完成一次 Agent 调用：
-
-```bash
-openclaw agent exec \
-  --model gemma4-local/gemma-4-12b-it-qat-q4_0.gguf \
-  --local-model-lean \
-  --code-mode direct \
-  --thinking off \
-  "只回答一个数字：17 加 25 等于多少？" \
-  --json
-```
-
-成功时返回 `42`：
-
-![OpenClaw agent exec 返回 42](./_assets/llm-local-serving/openclaw-agent-exec.png)
-
-## 9. 从 Windows 接入 WSL 中的服务
-
-WSL 内的 `llama-server` 发布在 `8080` 后，Windows 侧把它当作本机 OpenAI 兼容端点使用。先取 WSL IP：
+推理仍在 WSL；OpenClaw 只作为 Windows 客户端。先确认 Windows 能打到服务：
 
 ```powershell
 wsl -d Ubuntu-22.04 -- hostname -I
-```
-
-用返回的第一个地址替换下面的 `WSL_IP`（重启 WSL 后可能会变）：
-
-```powershell
 curl.exe -fsS --noproxy "*" http://WSL_IP:8080/health
 ```
 
-应返回 `{"status":"ok"}`。若本机 `http://127.0.0.1:8080` 也可达，可直接用回环地址。
-
-在 Windows 安装同版本 OpenClaw，并把 Provider 指到该地址：
+安装 OpenClaw，并完成一次最小目录初始化：
 
 ```powershell
 npm install -g openclaw@2026.11.3
 openclaw --version
 openclaw setup --baseline
-openclaw onboard `
-  --non-interactive `
-  --accept-risk `
-  --mode local `
-  --flow quickstart `
-  --auth-choice custom-api-key `
-  --custom-provider-id gemma4-local `
-  --custom-base-url http://WSL_IP:8080/v1 `
-  --custom-api-key local-model `
-  --custom-model-id gemma-4-12b-it-qat-q4_0.gguf `
-  --custom-compatibility openai `
-  --custom-image-input `
-  --skip-channels `
-  --skip-skills `
-  --skip-search `
-  --skip-hooks `
-  --skip-ui `
-  --no-install-daemon `
-  --skip-daemon `
-  --skip-health
 ```
 
+在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）：
+
+```json
+{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "gemma4-local": {
+        "baseUrl": "http://WSL_IP:8080/v1",
+        "apiKey": "local-model",
+        "api": "openai-completions",
+        "timeoutSeconds": 300,
+        "models": [
+          {
+            "id": "gemma-4-12b",
+            "name": "Gemma 4 12B",
+            "reasoning": false,
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 16384,
+            "maxTokens": 2048
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "gemma4-local/gemma-4-12b"
+      }
+    }
+  }
+}
+```
+
+若文件里已有其他字段，只合并 `models` 与 `agents.defaults.model`，不要整文件覆盖。
+
 ```powershell
+openclaw config validate
+openclaw models list
 openclaw agent exec `
-  --model gemma4-local/gemma-4-12b-it-qat-q4_0.gguf `
+  --model gemma4-local/gemma-4-12b `
   --local-model-lean `
   --code-mode direct `
   --thinking off `
@@ -458,9 +420,13 @@ openclaw agent exec `
   --json
 ```
 
-Windows 侧只负责客户端；模型推理仍在 WSL GPU 容器中完成。
+成功时返回 `42`：
 
-## 10. 常用维护命令
+![OpenClaw agent exec 返回 42](./_assets/llm-local-serving/openclaw-agent-exec.png)
+
+其他 OpenAI 兼容 Agent 同样使用上一节的 `base_url` / `api_key` / `model` 三元组即可，不必经过 OpenClaw。
+
+## 9. 常用维护命令
 
 ```bash
 docker ps --filter name=gemma4-llamacpp
@@ -480,5 +446,5 @@ nvidia-smi
 - [ModelScope 模型仓库](https://modelscope.cn/models/google/gemma-4-12B-it-qat-q4_0-gguf)
 - [llama.cpp Docker 文档](https://github.com/ggml-org/llama.cpp/blob/master/docs/docker.md)
 - [llama.cpp 多模态文档](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md)
-- [OpenClaw llama.cpp Provider](https://docs.openclaw.ai/plugins/llama-cpp)
+- [OpenClaw 自定义 Provider](https://docs.openclaw.ai/concepts/model-providers/custom-providers)
 - [WSL 高级配置](https://learn.microsoft.com/windows/wsl/wsl-config)
