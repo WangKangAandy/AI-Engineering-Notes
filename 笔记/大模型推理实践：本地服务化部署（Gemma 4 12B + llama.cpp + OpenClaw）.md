@@ -176,24 +176,16 @@ docker run -d \
   -v "$HOME/services/gemma4-llamacpp/models:/models:ro" \
   ghcr.io/ggml-org/llama.cpp:server-cuda-b12282 \
   -m /models/gemma-4-12b-it-qat-q4_0.gguf \
-  --mmproj /models/mmproj-gemma-4-12b-it-qat-q4_0.gguf \
-  --alias gemma-4-12b \
-  -c 131072 \
-  -ngl 99 \
+  --mmproj /models/mmproj-gemma-4-12b-it-qat-q4_0.gguf \  # 多模态投影；无则图/音/视频不可用
+  --alias gemma-4-12b \  # 对外模型名，客户端 model 填这个
+  -c 131072 \  # 约 128K；OpenClaw contextWindow 须对齐
+  -ngl 99 \  # 尽量把层放到 GPU
   --flash-attn on \
   --jinja \
-  --api-key local-model \
+  --api-key local-model \  # Bearer；客户端 api_key 填这个
   --host 0.0.0.0 \
   --port 8080
 ```
-
-关键参数：
-
-- `--mmproj`：多模态投影；没有它则图片/音频/视频请求不可用
-- `--alias gemma-4-12b`：对外模型名，客户端 `model` 填这个
-- `-c 131072`：服务端上下文（约 128K）；OpenClaw 的 `contextWindow` 须与此一致
-- `--api-key local-model`：Bearer Key；客户端 `api_key` 填这个
-- `-ngl 99`：尽量把层放到 GPU；`--flash-attn on` / `--jinja` 按当前镜像与聊天模板需要开启
 
 服务起来后，对任何 OpenAI 兼容客户端只需要三件事：
 
@@ -378,27 +370,27 @@ openclaw --version
 openclaw setup --baseline
 ```
 
-在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）。该文件是严格 JSON，不能写 `//` 注释；字段含义见配置块下方：
+在 `%USERPROFILE%\.openclaw\openclaw.json` 写入 `models.providers`（把 `WSL_IP` 换成上一步的地址）。OpenClaw 按 JSON5 解析，可用 `//` 行注释；标准 JSON / `#` 注释都不行。
 
-```json
+```json5
 {
   "models": {
-    "mode": "merge",
+    "mode": "merge", // 与已有配置合并，避免覆盖掉其他 provider
     "providers": {
       "gemma4-local": {
-        "baseUrl": "http://WSL_IP:8080/v1",
-        "apiKey": "local-model",
-        "api": "openai-completions",
-        "timeoutSeconds": 300,
+        "baseUrl": "http://WSL_IP:8080/v1", // Windows → WSL llama-server；须带 /v1
+        "apiKey": "local-model", // 对应服务端 --api-key
+        "api": "openai-completions", // Chat Completions，与本镜像一致
+        "timeoutSeconds": 300, // 本地首包/长上下文可能较慢
         "models": [
           {
-            "id": "gemma-4-12b",
+            "id": "gemma-4-12b", // 对应服务端 --alias；完整名为 gemma4-local/gemma-4-12b
             "name": "Gemma 4 12B",
             "reasoning": false,
-            "input": ["text", "image", "audio", "video"],
+            "input": ["text", "image", "audio", "video"], // 须与 --mmproj 及上文多模态实测一致
             "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
-            "contextWindow": 131072,
-            "maxTokens": 2048
+            "contextWindow": 131072, // 须与服务端 -c 131072 对齐
+            "maxTokens": 2048 // 单次回复上限，不是上下文总长
           }
         ]
       }
@@ -407,25 +399,12 @@ openclaw setup --baseline
   "agents": {
     "defaults": {
       "model": {
-        "primary": "gemma4-local/gemma-4-12b"
+        "primary": "gemma4-local/gemma-4-12b" // 默认选用上面的本地模型
       }
     }
   }
 }
 ```
-
-字段说明：
-
-- `models.mode: merge`：与已有配置合并，避免整文件覆盖丢掉其他 provider
-- `baseUrl`：Windows 访问 WSL 中 llama-server 的 OpenAI 兼容入口（须带 `/v1`）
-- `apiKey`：对应服务端 `--api-key`
-- `api: openai-completions`：走 Chat Completions 协议，与本镜像一致
-- `timeoutSeconds`：本地首包/长上下文可能较慢，适当加大避免客户端过早超时
-- `id`：对应服务端 `--alias`；OpenClaw 里完整模型名为 `gemma4-local/gemma-4-12b`
-- `input`：声明模型可接受的模态；须与 `--mmproj` 及上文多模态实测一致（含 audio/video）
-- `contextWindow`：须与服务端 `-c 131072` 对齐，否则 TUI/会话计量会偏
-- `maxTokens`：单次回复生成上限（不是上下文总长）
-- `agents.defaults.model.primary`：默认选用上面的本地模型
 
 若文件里已有其他字段，只合并 `models` 与 `agents.defaults.model`，不要整文件覆盖。
 
