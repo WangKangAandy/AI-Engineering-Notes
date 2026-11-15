@@ -22,16 +22,68 @@ status: ready
 
 | 部分 | 职责 |
 | --- | --- |
-| GitHub Channel（执行面） | App / 仓库 Webhook、@Mention、Inbox/路由、回写、Capability、Policy；只消费 RuntimeConfig |
+| GitHub Channel（执行面） | 承接 GitHub App / Webhook 接入身份、授权上下文与受控操作；负责 @Mention、Inbox/路由、回写、Capability、Policy；只消费 RuntimeConfig |
 | Configuration Manager | 加载/校验/更新配置；持久化真源可先为 YAML/JSON；Secret 走引用 |
 | Management Console | 如 `OpenClaw-dingtalk-robot`；经后端调 Manager，**不**直读文件、**不**内嵌 Channel 核心 |
 | Agent Connector | 连接用户选定的 Runtime（V1：OpenClaw） |
 | External Agent Runtime | 推理、规划、Skills、执行语义 |
 
-**Channel 不实现 Agent Runtime。** OpenClaw 是第一个 Connector，不是核心硬依赖。工程名倾向 `github-agent-channel`。
+**Channel 不实现 Agent Runtime。** OpenClaw 是第一个 Connector，不是核心硬依赖。Channel 不是 GitHub 的身份或权限管理替代品，而是把 GitHub 的 Installation 授权、调用者权限和本地操作策略组合成任务范围，并在每次受控操作前核验。工程名倾向 `github-agent-channel`。
 
 **模式 A（V1）**：连接用户已有 Agent。  
 **模式 B（非目标）**：托管 Agent Runtime。
+
+## 长期架构图
+
+下图表达长期模块边界；V1 可以在一个进程内按模块实现，不要求每个方框立刻拆成独立服务。
+
+```mermaid
+flowchart TB
+    GH["GitHub<br/>App / Webhook / Installation"]
+    subgraph CM["管理面"]
+        UI["Management Console / Backend"]
+        MGR["Configuration Manager<br/>load · validate · update · public view"]
+        STORE["V1 YAML/JSON + Secret references"]
+        UI --> MGR
+        MGR -.-> STORE
+    end
+    subgraph CH["GitHub Agent Channel"]
+        AD["Integration Adapter<br/>V1 App Webhook"]
+        IN["Inbox + delivery dedupe"]
+        AUTH["Actor Authz + Routing"]
+        TASK["Task Coordinator + Binding + State"]
+        CAP["Capability Gateway"]
+        POL["Operation Policy"]
+        OPS["GitHub Operations"]
+        CRED["Credential Provider"]
+        AD --> IN --> AUTH --> TASK
+        TASK --> CAP --> POL --> OPS
+        OPS -.-> CRED
+    end
+    subgraph RT["外部 Agent Runtime"]
+        CON["Connector<br/>V1 OpenClaw"]
+        AG["Runtime<br/>planning · Skills · workspace"]
+        FUTURE["Future Connectors"]
+        CON <--> AG
+    end
+    SECRET["Secret Manager / environment"]
+    GH -->|"signed delivery"| AD
+    MGR -.->|"validated RuntimeConfig snapshot"| AD
+    MGR -.-> AUTH
+    MGR -.-> TASK
+    MGR -.-> POL
+    MGR -.-> CON
+    CRED -.-> SECRET
+    TASK -->|"task + trusted context"| CON
+    CON -->|"status / result"| TASK
+    CON -->|"operation request"| CAP
+    OPS -->|"installation-scoped API / Git"| GH
+    TASK -.-> FUTURE
+    classDef future fill:#f1f5f9,stroke:#94a3b8,stroke-dasharray:5 5,color:#475569;
+    class FUTURE future;
+```
+
+其中，**GitHub 仍是权限事实的权威来源**；Channel 负责验签、解析 Installation、核验调用者和任务范围，并在操作前执行更严格的本地 Policy。Runtime 不应拿到通用 GitHub 写仓凭据；若用户另行配置 PAT 或 SSH 写权限，Runtime 仍可能绕过 Channel，V1 不能宣称对此拥有端到端控制。
 
 ## 原则
 
@@ -121,6 +173,23 @@ V1 只实现 **OpenClaw Connector**。Codex / Cursor / ACP 等先做**能力矩�
 - **Channel 拥有** GitHub 侧任务型能力与 Policy（精选 Tools，非一 API 一 Tool）。  
 - Agent 如何调用这些能力由 Connector 适配；V1 经 OpenClaw 注册 Tools。  
 - OpenClaw 侧可附带 Skills / `AGENTS.md` 模板（pr-review、pr-development、issue-triage、actions）；**不属于**所有 Runtime 共通核心。
+
+## 社区实现调研：复用基础设施，不照搬产品边界
+
+我对几个代表性实现做了源码级只读调研。调研目录在仓库外的临时目录；未运行项目、未安装依赖、未把第三方代码复制进本仓库。GitHub 直连受限时，部分仓库改用固定提交的 API/raw 源码核对，文章中的链接固定到对应 SHA。
+
+| 项目 | 固定版本与取得方式 | 可借鉴 | 不能直接照搬 |
+| --- | --- | --- | --- |
+| [`probot/probot`](https://github.com/probot/probot/tree/7682a9ae49fca9ae8b1f7df06f4a201815be1e69) | `7682a9ae`；已 shallow clone；ISC | GitHub App/Webhook 装配、Octokit 上下文、Webhook middleware、throttling/retry 插件 | 默认没有持久 Inbox、delivery 去重、Task/Binding 状态和调用者业务鉴权；不与 Connector/Policy 等价 |
+| [`octokit/app.js`](https://github.com/octokit/app.js/tree/523a32f0e9a4c8a8c6e09e24fa92d16ed95eb26b) | `523a32f0`；已 shallow clone；MIT | Installation-scoped client、JWT/Installation Token 缓存与按仓库/权限收窄 | 默认核心不包含完整 retry/throttling；缓存命名空间需隔离 App/Host；SDK 不验证评论者是否有权启动任务 |
+| [`OpenHands/automation`](https://github.com/OpenHands/automation/tree/2ebf36191ccc3aefe5c5d84496b9036281d0ba15) | `2ebf3619`；API/raw 复核；MIT | 事件验签、provider event ID 去重入口、组织级 webhook secret、automation run 状态 | 组织管理权限不等于 GitHub 调用者仓库权限；依赖 OpenHands Server/Automation 运行模型，不是 BYO OpenClaw Connector |
+| [`sweepai/sweep`](https://github.com/sweepai/sweep/tree/a8b8b67bda4f89faac9314d34e7c7d5a64f76046) | `a8b8b67b`；clone 未形成有效 HEAD，API/raw 复核；EE License | Mention gate、Installation Token 刷新重试、PR/Issue 进度评论与同主题串行队列 | 内存线程状态、PyGithub 强耦合，缺少可靠持久恢复和调用者仓库写权限核验；许可也不适合作为直接复用代码的依据 |
+| [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action/tree/9fa68854da5fadef4ed3dce240325a0dfe251880) | `9fa68854`；已完整 clone；MIT | Mention 触发解析、actor 权限 gate、评论回写、限定重试和 SDK run 关联 | 本质是 GitHub Actions runner 内的 Agent 执行；将 token 放入 `GITHUB_TOKEN/GH_TOKEN`，不适合直接作为 Channel 的权限 Broker |
+| [`github/gh-aw`](https://github.com/github/gh-aw/tree/5ac122295e5e839aa15a727ecf4762f3e680cc24) | `5ac12229`；clone 未完成，官方源码/文档复核；MIT | Actions admission、角色校验、safe outputs 与受信任写入 Job 分离 | 是按次运行的 Actions 编排，不是常驻 Channel/Runtime；safe outputs 可借鉴为 Operation Intent + Trusted Executor 模式 |
+
+可直接形成 V1 选型：GitHub 接入采用轻量 `@octokit/app` + `@octokit/webhooks`，按需加入 retry/throttling；不同时叠加 Probot。原因是 Channel 自己已有 Inbox、Task、Binding、Policy 和 Connector 边界，Probot 的完整应用约定不是第二道安全边界。Webhook 必须执行“验签 → 持久 Inbox/去重 → 快速 2xx → 异步处理”，不能把 SDK 的超时应答当成可靠入库。
+
+社区实现共同暴露了一个关键边界：**Webhook 验签、Installation Token 和 Mention 前缀都不能单独证明调用者有权让 Agent 写仓。** Channel 仍需从可信任务上下文核验 actor、repository、installation、Policy 和操作目标。另一个可复用模式来自 `gh-aw`：Agent 只提出受限的操作意图，由另一个受权限控制的执行面校验并落地；这与本文的 Capability Gateway + Policy + Operations 分层一致。
 
 ## 里程碑
 
