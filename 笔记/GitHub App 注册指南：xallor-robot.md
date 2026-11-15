@@ -13,7 +13,9 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-在组织 `xallor-ai` 注册安装型 App `xallor-robot`。架构：GitHub App 只做身份、权限上限与事件投递；验签、换 Token、调 API、唤醒 Agent 由自建 OpenClaw GitHub Plugin 完成。桥接层整体方案见 [[OpenClaw GitHub Plugin 架构与阶段计划]]。
+在组织 `xallor-ai` 注册安装型 App `xallor-robot`。
+
+**定位**：GitHub App 是 OpenClaw GitHub Plugin 的一种 **Integration Adapter**（推荐正式路径），负责身份、权限上限与事件投递；不是 Plugin 的唯一前置。无 App、仅仓库级 Webhook（± PAT）的路径见整体方案。Plugin 只做通道与能力桥接；决策在既有 Agent。整体架构与阶段：[[OpenClaw GitHub Plugin 架构与阶段计划]]。
 
 权限名称以**当前 Create GitHub App 页 Repository permissions 展示名为准**（勿与 REST 文档里的旧别名混用）。
 
@@ -21,10 +23,10 @@ status: ready
 
 | 层 | 在哪 | 做什么 |
 | --- | --- | --- |
-| GitHub App | Developer settings | 工牌、权限上限、Webhook |
-| OpenClaw Plugin | 自建接收端 | 验签、签发更小范围的 Installation Token、调 API、跑 Agent |
+| GitHub App（本文） | Developer settings | 工牌、权限上限、App Webhook |
+| OpenClaw Plugin | 自建接收端 | 多 Adapter 接入、验签、Credential、Tools/Policy、投递 Agent |
 
-页面上 Create 只完成上一层。App 权限是能力上限；具体请求仍可用 Installation Token 再收窄仓库与权限。
+页面上 Create 只完成 App Adapter 配置。App 权限是能力上限；具体请求仍可用 Installation Token 再收窄。
 
 ## 入口
 
