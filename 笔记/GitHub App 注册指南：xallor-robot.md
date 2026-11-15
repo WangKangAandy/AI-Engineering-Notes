@@ -189,7 +189,8 @@ Plugin 另文。官方参考：[Choosing permissions](https://docs.github.com/en
 - [ ] Workflows = Write  
 - [ ] Administration、Agent\*、Secrets、Dependabot secrets、Webhooks、Codespaces\*、Artifact metadata、Attestations、Code quality = No access  
 - [ ] Organization / Account / Enterprise = No access  
-- [ ] 事件至少 Pull request + Issue comment  
+- [ ] 事件至少 Issue comment + Pull request review comment（及按需 Pull request）  
+
 - [ ] Only on this account；已安装目标仓库；默认分支已保护且 App 不在 bypass  
 - [ ] Credentials → Key pairs → New key 已下载 `.pem`；App ID / Webhook secret / Installation ID 已离线保存  
 
