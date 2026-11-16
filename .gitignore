@@ -34,3 +34,9 @@ Desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Generated teaching-code artifacts (keep source examples)
+**/__pycache__/
+**/.venv/
+笔记/_assets/**/*.pt
+笔记/_assets/**/*.pth
