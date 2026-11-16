@@ -12,9 +12,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-目标：看懂 GitHub 仓库的主要入口，能完成从提出需求、修改代码、自动检查到发布的流程，并能使用仓库的 Agents 页面委派任务。
+GitHub 上的一次改动，通常从需求讨论开始，经过分支修改、PR 评审和自动检查，最后进入发布或部署。本系列沿着这条过程，讲解各个页面、配置文件和执行记录的作用。
 
-这套笔记围绕一个真实的练习仓库展开。前半部分使用网页即可开始；CI 示例用很小的 Python 程序，不要求先学习 Web 框架。示例改动都在目标仓库的实验分支中完成，本文所在的笔记库只保存教程。
+这套笔记围绕一个真实的练习仓库展开。前半部分使用网页即可开始；CI 示例用很小的 Python 程序，不要求先学习 Web 框架。实操时在下面约定的功能分支中添加示例文件，再通过 PR 合入目标分支。
 
 资料核对日期：2026-11-16。Agents、套餐和组织策略变化较快，实际可用入口以登录后的账户及文中官方链接为准。
 
@@ -24,7 +24,7 @@ status: learning
 
 正文按组织仓库中具有相应权限的成员路径讲解：提交文件需要写权限，合并要满足仓库规则，调整 ruleset、Pages、Secrets 或 App 安装需要相应管理权限。没有这些权限时，采用第 02 篇的 fork 路径：在自己的 fork 中完成实验、合并到该 fork 的 `master` 并验证；只有准备贡献的改动才另建指向组织 `master` 的正式 PR。fork 的测试结果不代表组织环境已经验证。
 
-| 章节 | 分支或入口 | 验收结果 |
+| 章节 | 分支或入口 | 实际操作 |
 |---|---|---|
 | 02 | `lab/02-issue-pr` | 新建实操记录，完成 Issue 与 PR |
 | 03 | `lab/03-actions` | workflow 合入 master，手动运行并查看日志 |
@@ -71,9 +71,9 @@ flowchart TD
 
 Agents 的产品含义是 Agent 会话管理入口；官方说明可见 [Agent management](https://docs.github.com/en/copilot/concepts/agent-capabilities/choosing-and-delegating-agent-work/agent-management)。
 
-## 3. 按成果学习
+## 3. 阅读顺序
 
-| 章节 | 文档 | 做完后应拿到的结果 |
+| 章节 | 文档 | 本篇内容 |
 |---|---|---|
 | 02 | [[GitHub 协作与自动化：02 Issue、分支与 Pull Request]] | 一个合并的 PR，以及关联的 Issue |
 | 03 | [[GitHub 协作与自动化：03 Actions 与 Workflow]] | 一次手动执行成功的 workflow，能找到 step 日志 |
@@ -108,18 +108,10 @@ Agents 的产品含义是 Agent 会话管理入口；官方说明可见 [Agent m
 
 Actions 层次参见 [Understanding GitHub Actions](https://docs.github.com/en/actions/get-started/understand-github-actions)。
 
-## 5. 完成标准
+## 5. 如何读懂一次自动化的结果
 
-- [ ] 能指出一个 PR 的来源分支和目标分支。
-- [ ] 能说明为什么某次提交触发或没有触发 workflow。
-- [ ] 能从红色检查进入失败 step，读到具体错误。
-- [ ] 能区分“测试通过”“允许合并”“已部署”。
-- [ ] 能说明发布的网站对应哪个提交。
-- [ ] 能从 Agent session 找到改动，核查测试，再决定是否合并。
-- [ ] 能区分 Agents 页面、Actions 页面和 `gh-aw` 项目。
-- [ ] 能说明 GitHub App 的安装、仓库授权与第三方功能开关分别控制什么。
-- [ ] 能区分自建 GitHub App 与现成服务 App 的接入方式。
+看一个 PR 时，先区分“改了什么”和“改动经过了哪些检查”。来源分支保存修改，目标分支决定它准备合入哪里；Checks 展示测试结果，合并规则决定当前结果是否允许合并。CI 通过只代表配置的检查通过，网站是否更新还要看后续部署。
 
-## 6. 本套材料的验证范围
+排查一次失败，可以从 PR 的红色检查进入对应 run，再打开失败 job 的具体 step。把日志和提交对应起来，才能判断错误来自哪次修改。部署成功后，同样可以沿着站点 URL、部署记录和 commit 找回关联 PR。
 
-教程中的 Python 示例可在本地验证；GitHub 的远端触发、账户权限、Pages 发布和 Agent 会话需要在练习仓库实际执行。阅读或复制 YAML 不等于已完成云端验证。每篇的“验收”用于记录你实际看到的结果。
+Agent session 则解释一次委派做了什么。会话完成后，仍需要查看实际 diff、测试日志和 PR 检查。GitHub App 的安装只解决访问授权，具体审查或自动化何时运行，取决于相应功能的配置。分清这些记录的作用，就能顺着一次改动理解完整流程。

@@ -1,6 +1,6 @@
 ---
 title: GitHub 协作与自动化：06 Agents 与任务委派
-summary: 理解仓库 Agents 页面中的 session，学习描述任务、跟踪修改，并通过 PR 和 CI 验收结果。
+summary: 理解仓库 Agents 页面中的 session，学习描述任务、跟踪修改，并通过 PR 和 CI 检查交付结果。
 tags:
   - github
   - agents
@@ -75,7 +75,7 @@ flowchart LR
 结果说明：列出修改文件、执行命令、测试结果；没有执行的检查明确说明。
 ```
 
-这个任务范围小，验收明确：可以同时观察 Agent 的代码修改、工具执行和 PR 交付。要求“创建 PR”是有意写明的；当前从 prompt 发起的会话不必自动创建 PR。
+这个任务可以从三处观察结果：实现是否拒绝非字符串输入，测试是否覆盖新增情况，以及是否创建了 PR。提示中写明“创建 PR”，是因为从 prompt 发起的会话不必自动创建 PR。
 
 另一种入口是先新建包含同样内容的 Issue，再通过 Assignees 指派 Copilot。官方将 Issue 指派描述为创建 PR 的入口；不同 Agent App 的行为以自己的文档为准。[启动任务的两种入口](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
 
@@ -111,7 +111,7 @@ GitHub 自定义 Agent 的仓库配置常见于 `.github/agents/*.agent.md`，�
 
 [[GitHub 协作与自动化：08 GitHub App 注册与权限配置]] 讲解如何注册自己的 GitHub App、配置权限并安装到仓库；[[GitHub 协作与自动化：09 Cursor GitHub Agent 接入]] 则讲安装现成的 Cursor App。App 提供集成身份和授权；是否具有 Agent 能力、是否出现在 Sessions 中，取决于具体实现。
 
-## 8. 排错与验收
+## 8. 常见问题与结果检查
 
 | 现象 | 先检查 |
 |---|---|
@@ -122,6 +122,6 @@ GitHub 自定义 Agent 的仓库配置常见于 `.github/agents/*.agent.md`，�
 | PR 没有 CI 结果 | workflow 事件和分支条件，是否等待授权运行 |
 | 提示额度不足 | Agent 使用量、执行资源及账户预算，不只看 GitHub 登录状态 |
 
-验收：保留一次 session 和对应 PR 的链接，能说清任务要求、实际修改、验证结果和是否合并。未启动真实会话时，不把阅读完成记成实操完成。
+一次任务可以产生会话记录、代码修改、测试输出和 PR。Session 显示完成但没有 PR 时，先核对任务是否要求创建 PR；PR 已创建但检查未通过时，继续修复并等待新提交的检查结果，不能仅凭会话状态决定合并。
 
 下一篇：[[GitHub 协作与自动化：07 gh-aw 与智能自动化]]。

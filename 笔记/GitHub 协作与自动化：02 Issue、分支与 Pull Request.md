@@ -152,8 +152,8 @@ gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head YOUR_LOG
 | PR 不能合并 | 页面是否要求检查、评审、解决讨论或更新分支 |
 | Issue 没关闭 | 编号和关联仓库是否正确；是否合入目标基线分支 |
 
-## 7. 验收
+## 7. 合并后发生了什么
 
-找出 Issue、PR、合并后的提交，说明三者关系。能回答：“我的分支上又提交了一次修改，是否需要重新创建 PR？”答案是：同一个未关闭 PR 通常会随来源分支的新提交更新。
+PR 合并后，切回 master 可以看到新增的实操记录；Issue 是否自动关闭，取决于关闭关键词是否正确关联该 Issue，以及 PR 是否合入默认分支。PR 尚未合并时，继续向同一来源分支推送提交，会更新现有 PR，通常不需要另建一个。
 
 下一篇：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。

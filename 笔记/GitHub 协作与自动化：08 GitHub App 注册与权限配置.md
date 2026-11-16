@@ -62,7 +62,7 @@ GitHub App 是独立于个人账号的集成身份：在用户或组织账号下
 
 ![Create GitHub App 基本信息填写示意](./_assets/github-app/create-github-app-basic.png)
 
-截图里 Redirect URI 填了组织主页，是未清理状态。本文不做用户 OAuth，应 **Delete / 留空**，不要用主页占位。
+本例不做用户 OAuth，Redirect URI 应 **Delete / 留空**；截图中的组织主页不能作为此字段的填写示例。
 
 | 字段 | 建议 | 示例 |
 | --- | --- | --- |

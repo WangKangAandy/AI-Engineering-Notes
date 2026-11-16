@@ -78,7 +78,7 @@ jobs:
         run: ls -la
 ```
 
-这段是 `steps` 下的插入片段，不是独立 workflow。`actions/checkout@v7` 中前半部分是 action 仓库，`@v7` 是版本引用。上游 README 已核对该引用；练习采用 GitHub 托管 runner。组织生产流程可按自身要求固定到审核过的完整 commit SHA。[checkout 官方仓库](https://github.com/actions/checkout)
+这段是 `steps` 下的插入片段，不是独立 workflow。`actions/checkout@v7` 中前半部分是 action 仓库，`@v7` 是版本引用。本例采用 GitHub 托管 runner；该版本的用法和环境要求见上游 README。组织生产流程可按自身要求固定到审核过的完整 commit SHA。[checkout 官方仓库](https://github.com/actions/checkout)
 
 ## 5. 把手动触发改为事件触发
 
@@ -130,9 +130,9 @@ jobs:
 
 后续 CI 示例中的 `jobs.test-and-build` 定义 job ID `test-and-build`，其 `name: Test and build` 是显示名称。`needs` 引用 ID，Actions 页面和必需检查设置中通常看到显示名称。配置合并规则时，选择实际运行产生的检查项，而不是凭文件名猜测。
 
-自测：部署 job 写了 `needs: build`，是不是就能直接读取 build job 的 `site/`？答案是否定的。后续 Pages 示例会先上传 artifact，再由部署步骤获取该产物。
+部署 job 即使写了 `needs: build`，也不能直接读取另一个 job 的 `site/`。后续 Pages 示例先上传 artifact，再由部署步骤获取产物；依赖顺序和文件传递需要分别配置。
 
-## 7. 先认识，暂不堆进练习的功能
+## 7. 流程变复杂后会用到的功能
 
 | 功能 | 解决什么问题 |
 |---|---|
@@ -145,7 +145,7 @@ jobs:
 
 缓存丢失应只影响速度；artifact 是明确要保留或传递的结果。[Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts) · [Caching](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching)
 
-## 8. 排错与验收
+## 8. 常见问题与结果检查
 
 | 现象 | 排查顺序 |
 |---|---|
@@ -155,6 +155,6 @@ jobs:
 | 步骤红了 | 展开第一个失败步骤，读具体错误，不只看最后的退出码 |
 | 新提交没触发 | 事件类型、目标分支、路径过滤、是否等待外部贡献者运行批准 |
 
-验收：能自行修改打印内容，运行新版本，并找到对应提交的输出。
+修改打印内容并提交后，新运行的日志应显示修改后的文字。若仍是旧输出，先检查 run 对应的分支和提交；重新执行旧 run 并不会自动改为运行最新提交。
 
 下一篇：[[GitHub 协作与自动化：04 CI 与合并检查]]。

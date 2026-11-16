@@ -143,8 +143,8 @@ jobs:
 
 练习后停止发布时，先禁用 Deploy Pages workflow，另行取消正在运行的部署；在 Settings → Pages 取消发布站点。删除实验分支或 Release 不会下线已有页面。
 
-## 8. 验收
+## 8. 从网站追溯到代码
 
-能沿着“网页 URL → 部署 run → commit → PR”追溯一次变更；能指出 artifact、tag、Release 分别是什么。
+网站内容来自某次部署使用的 artifact。打开部署记录，可以找到对应的 workflow run 和提交，再从提交定位到 PR。Tag 为选定提交命名，Release 为版本提供说明和附件；两者与部署记录关联，但不会代替实际发布动作。
 
 下一篇：[[GitHub 协作与自动化：06 Agents 与任务委派]]。

@@ -121,7 +121,7 @@ Bugbot 和 Cloud Agents 会产生相应使用量。启用自动触发前，在 C
 - 本篇讲安装并使用 Cursor 提供的现成 App，通常不需要自己生成私钥或实现 Webhook 接收服务。
 - 第 06 篇讲 GitHub Agents 页面中的 session；Cursor 的 Cloud Agents、Bugbot 和 Automations 是 Cursor 产品入口，不要因为都含有 Agent 就假定它们共享同一个 Sessions 列表。
 
-验收时分别确认：GitHub App 是否已安装到目标仓库、Cursor 后台是否能选择仓库、PR 事件是否触发预期功能、评论或 PR 是否确实产生。没有实际触发时，只记录配置完成，不记录为运行成功。
+GitHub App 安装成功后，Cursor 后台应能选择获授权的仓库。提交或更新 PR 后，再到对应功能的运行记录查看触发状态和结果：仓库可选表示连接已建立，实际出现的审查、检查或新 PR 才能说明任务执行到了哪一步。
 
 返回：[[GitHub 协作与自动化：01 学习路线]]。
 
