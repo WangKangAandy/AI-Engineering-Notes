@@ -14,7 +14,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。前置阅读 [[GitHub 协作与自动化：08 GitHub App 注册与权限配置]]，先区分“注册自己的 App”和“安装并使用现成服务的 App”。本篇以 Cursor 为例，讲解第三方 App 接入后的 Agent、审查和自动化。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇可在目标仓库的 `lab/09-cursor` 分支记录配置说明；Cursor App 的安装和自动化触发会作用于实际授权的仓库。前置阅读 [[GitHub 协作与自动化：08 GitHub App 注册与权限配置]]，先区分“注册自己的 App”和“安装并使用现成服务的 App”。本篇以 Cursor 为例，讲解第三方 App 接入后的 Agent、审查和自动化。
 
 Cursor 通过官方 GitHub App 访问仓库，提供 PR 审查、Issue 调查和自动化任务。
 

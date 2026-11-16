@@ -12,7 +12,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。前置：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+
+> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/04-ci`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
 
 本篇完成一个关键练习：故意提交错误，看到 PR 检查失败，再通过新提交修复，并理解如何要求检查通过后才能合并。
 
@@ -31,7 +33,7 @@ CI 把项目已有的检查命令接入每次变更。检查内容由项目自�
 
 ## 2. 准备三个文件
 
-在练习仓库根目录添加以下文件，并通过一个初始化 PR 合并到 main。
+在练习仓库根目录添加以下文件，并通过一个初始化 PR 合并到 `docs/github-agent-channel-architecture`。
 
 `app.py`：
 
@@ -99,7 +101,7 @@ python build.py
 
 Windows 只有 `py` 启动器时，把本地命令中的 `python` 换成 `py`；workflow 内仍用 `python`。没有本地 Python 也可以把文件提交后交给 Actions 执行。
 
-预期：发现并通过 3 个测试，产生 `site/index.html`。`site/` 和 `__pycache__/` 是生成内容，可以加入练习仓库的 `.gitignore`。
+预期：发现并通过 3 个测试，产生 `site/index.html`。这些 Python 文件和生成目录只用于本次实验；若不想把它们作为仓库长期内容，可以在验收后通过一个清理 PR 删除，并保留 CI 运行链接。
 
 ## 3. 接入 CI
 
@@ -110,9 +112,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [docs/github-agent-channel-architecture]
   pull_request:
-    branches: [main]
+    branches: [docs/github-agent-channel-architecture]
   workflow_dispatch:
 
 permissions:
@@ -141,9 +143,9 @@ jobs:
 
 ## 4. 制造失败，先保留红灯
 
-1. 从最新 main 创建 `exercise/break-greeting`，并在 README 增加一句“本仓库通过 CI 检查 greeting 函数并构建练习页面”。保留这项说明性改动，避免修复故意制造的错误后，整个 PR 与 main 完全相同而没有可合并内容。
+1. 从最新 `docs/github-agent-channel-architecture` 创建 `exercise/break-greeting`，并在 `笔记/GitHub Agent Channel 架构与阶段计划.md` 末尾增加一句“本仓库通过 CI 检查 greeting 函数并构建练习页面”。保留这项说明性改动，避免修复故意制造的错误后，整个 PR 与 main 完全相同而没有可合并内容。
 2. 仅把 `app.py` 的返回值改为 `return f"Hi, {cleaned}!"`，不修改测试。
-3. 提交并创建面向 main 的 PR。
+3. 提交并创建面向 `docs/github-agent-channel-architecture` 的 PR。
 4. 打开 PR 的检查区域，进入 **Test and build**，展开 **Run tests**。
 5. 应看到期望 `Hello` 与实际 `Hi` 不一致；本例前两个测试失败，后续构建步骤默认跳过。
 6. 先保持这个 PR 打开且检查失败，继续下一节配置规则。此时不要修复或合并。
@@ -155,7 +157,7 @@ jobs:
 有检查结果和“必须通过”是两件事。在有管理权限且支持 ruleset 的练习仓库中：
 
 1. 打开 Settings → Rules → Rulesets，创建面向默认分支的 branch ruleset。
-2. 将执行状态设为 Active，目标选择默认分支或 main。
+2. 将执行状态设为 Active，目标选择默认分支或 `docs/github-agent-channel-architecture`。
 3. 启用要求通过 PR 合并的规则。
 4. 启用要求状态检查通过，选择先前真实运行出现过的 **Test and build** 检查。
 5. 保存后回到仍然失败的练习 PR，确认当前提交的 **Test and build** 未通过，并观察普通合并被阻止。记录当前提交和阻止原因，不使用历史失败 run 代替这一步。

@@ -13,7 +13,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。前置：[[GitHub 协作与自动化：04 CI 与合并检查]] 中的三个 Python 文件已经进入 main。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+
+> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/05-pages`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：[[GitHub 协作与自动化：04 CI 与合并检查]] 中的三个 Python 文件已经进入 `docs/github-agent-channel-architecture`。
 
 目标：把 `build.py` 产生的页面部署到 GitHub Pages，并区分构建产物、版本发布和部署。
 
@@ -44,7 +46,7 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [main]
+    branches: [docs/github-agent-channel-architecture]
   workflow_dispatch:
 
 permissions:
@@ -56,7 +58,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/docs/github-agent-channel-architecture'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -95,12 +97,12 @@ jobs:
 
 这个示例故意在部署流程内再次测试：独立的 `ci.yml` 与 `pages.yml` 不会因为先后出现在 Actions 列表就形成依赖。这里确保测试、构建和部署关联同一次运行的提交。
 
-手动运行时请选择 main；`build.if` 防止误选其他分支直接部署。以后改默认分支名时，需要同时修改 `branches` 与这个条件。
+手动运行时请选择 `docs/github-agent-channel-architecture`；`build.if` 防止误选其他分支直接部署。以后改默认分支名时，需要同时修改 `branches` 与这个条件。
 
 ## 4. 观察发布全过程
 
 1. 合并 PR，进入 Actions → Deploy Pages。
-2. 确认运行对应合并后的 main 提交。
+2. 确认运行对应合并后的 `docs/github-agent-channel-architecture` 提交。
 3. 在 build 日志中查看测试数量、构建文件和 artifact 上传结果。
 4. 在 deploy 任务中查看成功结果，打开生成的 URL。
 5. 页面应显示 `Hello, GitHub!`。首次发布可能需要稍等再访问。
@@ -117,7 +119,7 @@ jobs:
 
 标签不存在时，页面可以在发布时创建标签。Release 自动提供的源码压缩包不等于编译好的程序；需要提供构建包时要显式上传相应附件。[管理 Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
-本教程的部署触发条件是 main 的 push，因此新增 Release 本身不会再次触发该部署流程。
+本教程的部署触发条件是 `docs/github-agent-channel-architecture` 的 push，因此新增 Release 本身不会再次触发该部署流程。
 
 ## 6. 持续交付、持续部署与回滚
 

@@ -12,7 +12,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇目标：用一次小改动走完 Issue → 分支 → PR → 合并。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇目标：在目标仓库走完 Issue → 分支 → PR → 合并。
+
+> 本篇实验分支：`lab/02-issue-pr`，PR 目标：`docs/github-agent-channel-architecture`。先阅读第 01 篇的“实操对象与分支约定”。
 
 ## 1. 六个操作各自改变什么
 
@@ -31,39 +33,41 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 
 ## 2. 准备练习仓库
 
-在 GitHub 新建 `github-workflow-lab`，初始化 README，确认默认分支名。本教程使用 `main`，你的默认分支若不同，后续 YAML 的分支过滤也要对应修改。
+不要新建练习仓库。打开目标仓库的 [基线分支](https://github.com/WangKangAandy/AI-Engineering-Notes/tree/docs/github-agent-channel-architecture)，从该分支创建 `lab/02-issue-pr`。本系列把 `docs/github-agent-channel-architecture` 当作练习基线，后续 workflow 的分支过滤也使用这个名称。
 
 如果要完成 Pages 免费练习，可使用只包含示例代码的公开仓库；私有仓库的 Pages 可用性依账户套餐而定。教程后续发布的是练习页面。[Pages 可用范围](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
 ## 3. 全程网页练习
 
-1. 在 Issues 新建“给 README 增加学习目标”，正文写：增加一段说明，列出 PR、CI、Pages 三个学习目标。
+1. 在 Issues 新建“给现有的 `笔记/GitHub Agent Channel 架构与阶段计划.md` 增加一段学习目标”，正文写：在该笔记末尾增加一段说明，列出 PR、CI、Pages 三个学习目标。
 2. 记下 Issue 编号。下面用 `#1` 举例，实际使用自己的编号。
-3. 回到 Code，通过分支选择器从 `main` 创建 `docs/learning-goals`。
+3. 回到 Code，通过分支选择器从 `docs/github-agent-channel-architecture` 创建 `lab/02-issue-pr`。
 4. 在该分支编辑 README，增加目标说明并提交。网页保存操作会直接形成远程提交，不需要另做本地 push。
-5. 进入 Pull requests → New pull request。检查 `base: main`，`compare: docs/learning-goals`。
+5. 进入 Pull requests → New pull request。检查 `base: docs/github-agent-channel-architecture`，`compare: lab/02-issue-pr`。
 6. 查看差异，确认只包含预期改动，创建 PR。
 7. PR 正文说明改了什么、怎样检查，并写 `Closes #1`。关联关闭通常在 PR 合并到默认分支后发生。
 8. 在 Files changed 阅读改动，在 Conversation 查看讨论和状态。此时还没配置 CI，没有自动测试结果是正常的。
-9. 使用页面允许的合并方式完成合并，再回到 main 验证文件内容。
+9. 使用页面允许的合并方式完成合并，再回到 `docs/github-agent-channel-architecture` 验证文件内容。
 
 可选删除已合并分支；这不会删除已进入主分支的内容。Issue 关联语法参见 [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)。
 
 ## 4. 本地 Git 对应做法
 
-以下命令在练习仓库目录运行。假设已经 clone，工作区没有待处理改动；`git add README.md` 前先在编辑器完成修改。
+以下命令在本地运行。先从目标分支 clone，并把个人 fork 设为 `fork`，把组织仓库设为只读的 `upstream`；工作区没有待处理改动。`git add README.md` 前先在编辑器完成修改。
 
 ```powershell
-git switch main
-git pull --ff-only
-git switch -c docs/learning-goals
+git clone --branch docs/github-agent-channel-architecture https://github.com/WangKangAandy/AI-Engineering-Notes.git AI-Engineering-Notes
+cd AI-Engineering-Notes
+git remote rename origin fork
+git remote add upstream https://github.com/xallor-ai/AI-Engineering-Notes.git
+git switch -c lab/02-issue-pr
 git status
 git add README.md
 git commit -m "docs: add learning goals"
-git push -u origin docs/learning-goals
+git push -u fork lab/02-issue-pr
 ```
 
-随后在网页创建 PR。合并后切回本地 main 并执行 `git pull --ff-only`，让本地跟上远程。
+随后在网页创建 PR。合并后切回本地 `docs/github-agent-channel-architecture` 并执行 `git pull --ff-only`，让本地跟上远程。
 
 GitHub CLI 的命令以 `gh` 开头，用于操作 PR、Issue、Actions 等 GitHub 对象；`git` 管理版本历史。初期不安装 CLI 也能完成网页练习。
 
@@ -81,11 +85,11 @@ GitHub CLI 的命令以 `gh` 开头，用于操作 PR、Issue、Actions 等 GitH
 
 | 现象 | 先检查 |
 |---|---|
-| PR 没有差异 | 是否选反 base / compare；改动是否已进入 main |
+| PR 没有差异 | 是否选反 base / compare；改动是否已进入目标基线分支 |
 | 无法直接编辑原仓库 | 是否有写权限；没有时走 fork + PR |
 | 出现 merge conflict | 同一位置是否被其他提交改过；解决冲突后重新检查 |
 | PR 不能合并 | 页面是否要求检查、评审、解决讨论或更新分支 |
-| Issue 没关闭 | 编号和关联仓库是否正确；是否合入默认分支 |
+| Issue 没关闭 | 编号和关联仓库是否正确；是否合入目标基线分支 |
 
 ## 7. 验收
 

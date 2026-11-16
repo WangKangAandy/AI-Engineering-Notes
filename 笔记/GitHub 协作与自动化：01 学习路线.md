@@ -14,9 +14,28 @@ status: learning
 
 目标：看懂 GitHub 仓库的主要入口，能完成从提出需求、修改代码、自动检查到发布的流程，并能使用仓库的 Agents 页面委派任务。
 
-这套笔记围绕一个练习仓库 `github-workflow-lab` 展开。前半部分使用网页即可开始；CI 示例用很小的 Python 程序，不要求先学习 Web 框架。所有示例文件都应放在练习仓库，本文所在的笔记库只保存教程。
+这套笔记围绕一个真实的练习仓库展开。前半部分使用网页即可开始；CI 示例用很小的 Python 程序，不要求先学习 Web 框架。示例改动都在目标仓库的实验分支中完成，本文所在的笔记库只保存教程。
 
 资料核对日期：2026-11-16。Agents、套餐和组织策略变化较快，实际可用入口以登录后的账户及文中官方链接为准。
+
+## 实操对象与分支约定
+
+本系列的实际练习对象是 [WangKangAandy/AI-Engineering-Notes 的 `docs/github-agent-channel-architecture` 分支](https://github.com/WangKangAandy/AI-Engineering-Notes/tree/docs/github-agent-channel-architecture)。当前这条链接属于 `WangKangAandy` 的个人 fork；[xallor-ai/AI-Engineering-Notes 组织仓库](https://github.com/xallor-ai/AI-Engineering-Notes) 当前默认分支为 `master`，组织仓库中没有同名练习分支。本文后续命令以链接中的 fork 分支为准；如果你要把结果贡献回组织仓库，再从 fork 分支创建指向组织仓库 `master` 的 PR。
+
+这条分支当前基线提交为 `bfcae9d8a010e34279fc044fb6a8b37332c56dae`，内容以 GitHub Agent Channel 架构研究笔记为主，仓库中还没有本系列示例的 workflow。每章都从这个基线或上一步合并后的基线创建实验分支，不直接在基线分支上改动：
+
+| 章节 | 实验分支 | 主要操作 |
+|---|---|---|
+| 02 | `lab/02-issue-pr` | Issue、文档改动和 PR |
+| 03 | `lab/03-actions` | 添加并运行第一个 workflow |
+| 04 | `lab/04-ci` | 添加 CI，制造失败并修复 |
+| 05 | `lab/05-pages` | 构建产物、Pages 和 Release |
+| 06 | `lab/06-agent` | 在 Agents 页面委派任务并检查 PR |
+| 07 | `lab/07-gh-aw` | 导入并手动运行 Agentic Workflow |
+| 08 | `lab/08-github-app` | 注册和安装自己的 GitHub App |
+| 09 | `lab/09-cursor` | 接入现成 Cursor GitHub App |
+
+第 02～07 篇的示例会在该仓库产生真实提交、PR、Actions 运行或报告。第 05、07～09 篇可能创建 Pages 部署、报告 Issue、App 安装或第三方自动化，执行前先确认目标仓库、权限和费用；不需要长期保留的实验可以在验收后关闭 PR、禁用 workflow 或删除实验分支。
 
 ## 1. 先认识一次改动经过哪些地方
 

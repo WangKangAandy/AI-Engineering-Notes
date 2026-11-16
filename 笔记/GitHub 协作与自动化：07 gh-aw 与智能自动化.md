@@ -13,7 +13,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。前置：能读懂 [[GitHub 协作与自动化：03 Actions 与 Workflow]]，理解 [[GitHub 协作与自动化：06 Agents 与任务委派]]。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+
+> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/07-gh-aw`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：能读懂 [[GitHub 协作与自动化：03 Actions 与 Workflow]]，理解 [[GitHub 协作与自动化：06 Agents 与任务委派]]。
 
 本篇是进阶选学。资料核对于 2026-11-16，配置和认证方式应随工具版本复核。
 
@@ -64,16 +66,16 @@ gh auth status
 
 如果尚未登录，按官方 quickstart 执行 `gh auth login --scopes repo,workflow` 并完成交互授权。已有登录但向导提示权限不足时，核对登录账号、仓库授权、组织策略及所用凭据权限；“已登录”不代表具备更新 workflow 的权限。[认证前提](https://github.github.com/gh-aw/setup/quick-start/)
 
-在准备存放练习仓库的目录执行以下命令。把 `OWNER` 替换为自己的 GitHub 用户名或仓库所属组织：
+在准备存放练习仓库的目录执行以下命令。本篇使用已核对过的 fork 和分支，不再替换占位符：
 
 ```bash
-gh repo clone OWNER/github-workflow-lab
-cd github-workflow-lab
+git clone --branch docs/github-agent-channel-architecture https://github.com/WangKangAandy/AI-Engineering-Notes.git AI-Engineering-Notes
+cd AI-Engineering-Notes
 git remote -v
 git status
 ```
 
-已有可用 checkout 时直接进入它，不需要再次 clone；确认远程地址是自己的练习仓库，工作区的既有修改已妥善处理。随后安装扩展：[克隆命令说明](https://cli.github.com/manual/gh_repo_clone)
+已有可用 checkout 时直接进入它，不需要再次 clone；确认远程地址是 `WangKangAandy/AI-Engineering-Notes`，并且当前分支是 `docs/github-agent-channel-architecture`，工作区的既有修改已妥善处理。随后安装扩展：[克隆命令说明](https://cli.github.com/manual/gh_repo_clone)
 
 ```bash
 gh extension install github/gh-aw

@@ -13,7 +13,7 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇讲解自建 GitHub App 的注册、权限、事件和安装配置；如只想使用现成服务，通常安装服务提供的 App 即可，不必重新注册。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇可在目标仓库的 `lab/08-github-app` 分支记录配置说明；注册和安装动作作用于你选择的账号与仓库，不会由 Markdown 自动完成。本篇讲解自建 GitHub App 的注册、权限、事件和安装配置；如只想使用现成服务，通常安装服务提供的 App 即可，不必重新注册。
 
 完成注册与安装后，还需由自己的程序或服务接收事件、获取安装令牌并执行操作；创建 App 本身不会自动实现 PR 审查或 AI Agent。
 

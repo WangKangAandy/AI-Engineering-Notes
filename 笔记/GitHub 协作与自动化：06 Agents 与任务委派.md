@@ -12,7 +12,9 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇专门解释仓库顶部与 Actions 并列的 **Agents** 页面，以及其中的 Sessions。产品信息核对于 2026-11-16。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+
+> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/06-agent`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。本篇专门解释仓库顶部与 Actions 并列的 **Agents** 页面，以及其中的 Sessions。产品信息核对于 2026-11-16。
 
 ## 1. 先读懂 Sessions 页面
 
@@ -30,7 +32,7 @@ status: learning
 
 从这个空列表只能判断“没有匹配当前筛选的会话”，不能判断仓库完全没用过 Agent，也不能判断你的账户是否有启动权限。先清除筛选、切换状态，再检查账户和仓库权限。
 
-`github/gh-aw` 是这个例子中的仓库名。Agents 是 GitHub 的产品入口，不是该仓库额外实现的页面。不要直接在这个上游仓库做写入练习；用自己的 `github-workflow-lab`。
+`github/gh-aw` 是这个例子中的仓库名。Agents 是 GitHub 的产品入口，不是该仓库额外实现的页面。不要直接在这个上游仓库做写入练习；用第 01 篇定义的目标仓库。
 
 ## 2. Session、PR、Actions run 如何对应
 
@@ -56,12 +58,12 @@ flowchart LR
 
 ## 4. 第一个任务：给现有函数加输入检查
 
-先完成 [[GitHub 协作与自动化：04 CI 与合并检查]]。在自己练习仓库的 Agents 页面或 GitHub Copilot 会话入口选择该仓库，使用可用的 Agent 和执行环境，明确以 main 为基础发起任务。
+先完成 [[GitHub 协作与自动化：04 CI 与合并检查]]。在自己练习仓库的 Agents 页面或 GitHub Copilot 会话入口选择该仓库，使用可用的 Agent 和执行环境，明确以 `docs/github-agent-channel-architecture` 为基础发起任务。
 
 复制以下任务描述：
 
 ```text
-请修改 app.py 中的 greeting，并创建一个面向 main 的 Pull Request。
+请修改 app.py 中的 greeting，并创建一个面向 `docs/github-agent-channel-architecture` 的 Pull Request。
 
 需求：
 1. name 不是字符串时，抛出 TypeError，消息为 name must be a string。
@@ -92,7 +94,7 @@ flowchart LR
 3. 查看是否覆盖 None、整数和原有三种情况。
 4. 查看当前提交的 **Test and build** CI 结果；若页面要求批准 workflow 运行，阅读改动后按仓库流程处理。
 5. 需要修改时在支持的交互入口提出具体要求，等待更新后再次核查。
-6. 只有满足原有检查及评审要求后再合并。后续 Pages 部署按已有 main push 配置发生。
+6. 只有满足原有检查及评审要求后再合并。后续 Pages 部署按已有 `docs/github-agent-channel-architecture` push 配置发生。
 
 “Agent 自测”提供一次执行记录；“PR CI”提供仓库约定的统一检查；“评审”判断需求与改动是否匹配。三者各有用途。
 
