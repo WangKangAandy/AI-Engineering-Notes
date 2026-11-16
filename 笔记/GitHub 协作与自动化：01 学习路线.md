@@ -20,22 +20,22 @@ status: learning
 
 ## 实操对象与分支约定
 
-本系列的正式博客对象是 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)。公开文章、示例链接和正式 PR 目标统一指向这个组织仓库；当前组织默认分支为 `master`。你提供的 `docs/github-agent-channel-architecture` 是当前用于测试的分支名称，目前位于测试 fork，尚未出现在组织仓库；测试时可以使用已有的该分支 checkout，或先把同名分支同步到组织仓库，再按本文操作。
+实操对象为 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，默认分支为 `master`。每章从最新 `master` 建立功能分支，PR 的目标、CI 分支过滤、必需检查规则和部署分支都统一使用 `master`。分支只是代码版本，Actions、Pages、App 安装与第三方用量属于仓库或账号资源。
 
-当前测试分支基线提交为 `bfcae9d8a010e34279fc044fb6a8b37332c56dae`，内容以 GitHub Agent Channel 架构研究笔记为主，仓库中还没有本系列示例的 workflow。每章都从这个基线或组织仓库 `master` 的最新状态创建实验分支，不直接在基线分支上改动；如果使用 fork 测试，完成后再向组织仓库 `master` 提交 PR：
+正文按组织仓库中具有相应权限的成员路径讲解：提交文件需要写权限，合并要满足仓库规则，调整 ruleset、Pages、Secrets 或 App 安装需要相应管理权限。没有这些权限时，采用第 02 篇的 fork 路径：在自己的 fork 中完成实验、合并到该 fork 的 `master` 并验证；只有准备贡献的改动才另建指向组织 `master` 的正式 PR。fork 的测试结果不代表组织环境已经验证。
 
-| 章节 | 实验分支 | 主要操作 |
+| 章节 | 分支或入口 | 验收结果 |
 |---|---|---|
-| 02 | `lab/02-issue-pr` | Issue、文档改动和 PR |
-| 03 | `lab/03-actions` | 添加并运行第一个 workflow |
-| 04 | `lab/04-ci` | 添加 CI，制造失败并修复 |
-| 05 | `lab/05-pages` | 构建产物、Pages 和 Release |
-| 06 | `lab/06-agent` | 在 Agents 页面委派任务并检查 PR |
-| 07 | `lab/07-gh-aw` | 导入并手动运行 Agentic Workflow |
-| 08 | `lab/08-github-app` | 注册和安装自己的 GitHub App |
-| 09 | `lab/09-cursor` | 接入现成 Cursor GitHub App |
+| 02 | `lab/02-issue-pr` | 新建实操记录，完成 Issue 与 PR |
+| 03 | `lab/03-actions` | workflow 合入 master，手动运行并查看日志 |
+| 04 | `lab/04-ci`；随后 `lab/04-break-ci` | 初始化检查，再观察失败、阻止合并、修复通过 |
+| 05 | `lab/05-pages` | 从 master 构建并部署页面 |
+| 06 | Agents 选择 master，Agent 创建工作分支 | 审阅 Agent 产生的 PR 与 CI |
+| 07 | gh-aw 向导创建 PR 的分支 | 生成配置经 PR 合入 master 后手动运行 |
+| 08 | GitHub App 设置页 | 注册、设置权限、安装到指定仓库 |
+| 09 | Cursor 集成和 Automations 页面 | 连接目标仓库，完成一次审查或任务 |
 
-第 02～07 篇的示例会在该仓库产生真实提交、PR、Actions 运行或报告。第 05、07～09 篇可能创建 Pages 部署、报告 Issue、App 安装或第三方自动化，执行前先确认目标仓库、权限和费用；不需要长期保留的实验可以在验收后关闭 PR、禁用 workflow 或删除实验分支。
+第 02～07 篇有前后依赖，关闭未合并的前置 PR 不会把所需文件带入下一篇。Pages 部署、报告 Issue、App 安装和第三方自动化按各篇说明启用与停用；不会因为删除实验分支就自动停止。
 
 ## 1. 先认识一次改动经过哪些地方
 
@@ -46,7 +46,7 @@ flowchart TD
     C --> D[Actions 执行 CI 检查]
     D --> E{检查和评审满足要求}
     E -->|需要修改| B
-    E -->|满足| F[合并到 main]
+    E -->|满足| F[合并到 master]
     F --> G[构建产物]
     G --> H[发布版本或部署网站]
     H --> I[反馈与后续 Issue]

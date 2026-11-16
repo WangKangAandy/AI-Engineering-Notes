@@ -15,7 +15,7 @@ status: learning
 
 学习路线：[[GitHub 协作与自动化：01 学习路线]]。
 
-> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/07-gh-aw`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：能读懂 [[GitHub 协作与自动化：03 Actions 与 Workflow]]，理解 [[GitHub 协作与自动化：06 Agents 与任务委派]]。
+> 本篇在当前操作仓库的最新 `master` 上启动向导，由向导创建配置 PR；PR base 必须是同一仓库的 master。fork 实验在自己的 fork 中完成，不将定时报告直接提交到组织默认分支。
 
 本篇是进阶选学。资料核对于 2026-11-16，配置和认证方式应随工具版本复核。
 
@@ -66,33 +66,43 @@ gh auth status
 
 如果尚未登录，按官方 quickstart 执行 `gh auth login --scopes repo,workflow` 并完成交互授权。已有登录但向导提示权限不足时，核对登录账号、仓库授权、组织策略及所用凭据权限；“已登录”不代表具备更新 workflow 的权限。[认证前提](https://github.github.com/gh-aw/setup/quick-start/)
 
-在准备存放练习仓库的目录执行以下命令。本篇使用已核对过的 fork 和分支，不再替换占位符：
+如果还没有本地 checkout，有组织仓库权限的成员可以执行：
 
 ```bash
-git clone https://github.com/xallor-ai/AI-Engineering-Notes.git AI-Engineering-Notes
-# 如果组织仓库已经同步测试分支，再执行：
-# git switch docs/github-agent-channel-architecture
+git clone https://github.com/xallor-ai/AI-Engineering-Notes.git
 cd AI-Engineering-Notes
+git switch master
+git pull --ff-only
 git remote -v
 git status
 ```
 
-已有可用 checkout 时直接进入它，不需要再次 clone；确认远程地址是 `xallor-ai/AI-Engineering-Notes`，并根据第 01 篇选择 `master` 或已同步的 `docs/github-agent-channel-architecture`，工作区的既有修改已妥善处理。随后安装扩展：[克隆命令说明](https://cli.github.com/manual/gh_repo_clone)
+已有 checkout 时直接进入它，确认 origin、当前分支和干净的工作区。使用 fork 的读者沿用第 02 篇的 fork checkout；不要又 clone 组织仓库。先确认当前操作仓库已完成前置配置，再安装扩展：
 
 ```bash
 gh extension install github/gh-aw
 gh aw --help
-```
-
-然后使用官方示例向导：
-
-```bash
 gh aw add-wizard githubnext/agentics/repo-status
 ```
 
-向导负责检查条件、选择引擎、配置认证、添加 Markdown 和生成文件，并可提交到仓库或通过 PR 引入，以及可选立即运行。它包含远端写入步骤；确认目标是自己的练习仓库，阅读向导摘要后选择适合的提交方式。看到日程配置时明确这会定期触发，练习后需要停用。
+向导会选择引擎、配置认证、添加 Markdown 源文件及 .lock.yml，并可推送或创建 PR。按以下顺序完成本练习：
 
-该样例会总结仓库活动、新建报告 Issue，并按第 3 节所述配置关闭匹配的旧报告。若要调整自动关闭或定时行为，跳过向导的立即运行选项，通过 PR 检查并修改配置、重新编译后再合并启用。向导操作、文件类型和预期输出依据 [官方样例流程](https://github.github.com/gh-aw/setup/quick-start/)。
+1. 确认向导识别的是当前操作仓库；没有组织写权限时应为自己的 fork。
+2. 选择通过 PR 引入配置，不选择直接写默认分支；接受向导创建的工作分支，无需预设 `lab/07-gh-aw`。确认 PR 的 base 为该仓库 `master`。
+3. 向导创建 PR 后，在评审与合并确认环节暂停：先不确认合并，也不启用自动合并。原样例包含定时触发，仅在后面跳过手动运行不能阻止定时任务生效。
+4. 另开终端进入同一 checkout，执行 `git fetch origin`，再 `git switch 分支名`（换成该 PR 的实际来源分支）。在本地生成的 `repo-status.md` 中，将整个 `on` 配置改为仅 `workflow_dispatch`，并将 `safe-outputs.create-issue.close-older-issues` 设为 `false`，保留其他必需设置。
+5. 执行 `gh aw compile`，检查生成的 .lock.yml 也只有手动触发；将修改后的 .md 和 .lock.yml 提交并推送到该 PR。检查 PR 最新差异和检查结果后，才合并到同一仓库的 `master`。
+6. 回到暂停的向导继续完成后续认证和状态步骤；若出现立即运行选项，选择跳过。最后进入 Actions，选择对应报告流程、Run workflow、master，手动触发。向导具体提示随版本变化，必须保持“修改并编译 → 检查 PR → 合并 → 运行”的顺序。[向导生命周期说明](https://github.github.com/gh-aw/setup/cli/#add-wizard)
+
+
+`on` 的替换片段位于 Markdown 文件的 YAML frontmatter 中，不是独立 workflow：
+
+```yaml
+on:
+  workflow_dispatch:
+```
+
+向导也可能添加辅助文件，提交前逐项检查。认证和 Secrets 属于仓库配置，不会因为 PR 尚未合并就自动撤销。[官方样例流程](https://github.github.com/gh-aw/setup/quick-start/)
 
 ## 5. 认证与权限分别解决什么
 

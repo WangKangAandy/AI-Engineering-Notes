@@ -13,7 +13,7 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇可在目标仓库的 `lab/08-github-app` 分支记录配置说明；注册和安装动作作用于你选择的账号与仓库，不会由 Markdown 自动完成。本篇讲解自建 GitHub App 的注册、权限、事件和安装配置；如只想使用现成服务，通常安装服务提供的 App 即可，不必重新注册。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。注册和安装动作作用于你选择的账号与仓库，不会由 Markdown 自动完成。本篇讲解自建 GitHub App 的注册、权限、事件和安装配置；如只想使用现成服务，通常安装服务提供的 App 即可，不必重新注册。
 
 完成注册与安装后，还需由自己的程序或服务接收事件、获取安装令牌并执行操作；创建 App 本身不会自动实现 PR 审查或 AI Agent。
 
@@ -51,7 +51,7 @@ GitHub App 是独立于个人账号的集成身份：在用户或组织账号下
 
 ## 入口
 
-- **组织**（须对该组织有创建 App 的权限，一般为 owner）：Settings → Developer settings → GitHub Apps → **New GitHub App**
+- **组织**（须对该组织有创建 App 的权限，组织 owner 或被授予管理全部 GitHub Apps 权限的成员）：Settings → Developer settings → GitHub Apps → **New GitHub App**
 
   `https://github.com/organizations/<你的组织>/settings/apps/new`
 - **个人账号**：`https://github.com/settings/apps/new`
@@ -172,5 +172,7 @@ App 设置 → **Credentials** → **Key pairs** → **New key**
 参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Authenticating as a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
 
 如果要使用现成的第三方 Agent 服务，下一篇是 [[GitHub 协作与自动化：09 Cursor GitHub Agent 接入]]。
+
+结束自建 App 实验时，可在 GitHub Installed GitHub Apps 中移除测试仓库授权、暂停或卸载该 App；若还有自己的接收服务，另行停止不再需要的服务。现成服务的停用示例见 [[GitHub 协作与自动化：09 Cursor GitHub Agent 接入#7. 停止练习]]。
 
 返回：[[GitHub 协作与自动化：01 学习路线]]。

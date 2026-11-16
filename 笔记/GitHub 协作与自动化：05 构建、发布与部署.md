@@ -15,7 +15,7 @@ status: learning
 
 学习路线：[[GitHub 协作与自动化：01 学习路线]]。
 
-> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/05-pages`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：[[GitHub 协作与自动化：04 CI 与合并检查]] 中的三个 Python 文件已经进入 `docs/github-agent-channel-architecture`。
+> 本篇实验基线：`master`；实验分支：`lab/05-pages`。先按第 02 篇的方法从最新 master 创建该分支；完成本篇所需的 PR 合并后再进入依赖它的下一篇。前置：[[GitHub 协作与自动化：04 CI 与合并检查]] 中的三个 Python 文件已经进入 `master`。
 
 目标：把 `build.py` 产生的页面部署到 GitHub Pages，并区分构建产物、版本发布和部署。
 
@@ -25,7 +25,7 @@ status: learning
 |---|---|---|
 | 构建目录 | 命令执行后生成的本地文件 | runner 工作目录中的 `site/index.html` |
 | Artifact | 把输出保存下来或传给后续任务 | Pages 部署包 |
-| Tag | 给 Git 历史中的某个点起名字 | `v0.1.0` |
+| Tag | 给 Git 历史中的某个点起名字 | `lab-v0.1.0` |
 | Release | 围绕版本组织说明和可下载附件 | “首次发布练习页面” |
 | Deployment | 将产物部署到目标环境 | Pages 上能访问的网站 |
 
@@ -37,6 +37,8 @@ runner 上存在文件不代表已经上传为 artifact。创建 Release 也不�
 
 本练习会发布静态 HTML。Pages 不负责运行 Python 后端：Python 在构建时生成 HTML，访问者获取的是生成后的页面。[Pages 自定义工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
+在 Settings → Environments → github-pages 中确认允许 `master` 部署；有必需审核时由指定人员批准。Pages 是仓库级站点，已有正式站点时不要用练习页面覆盖它，改在自己的 fork 验证。
+
 ## 3. 配置从检查到部署的流水线
 
 通过 PR 新增 `.github/workflows/pages.yml`：
@@ -46,7 +48,7 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [docs/github-agent-channel-architecture]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -58,7 +60,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/docs/github-agent-channel-architecture'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -97,12 +99,12 @@ jobs:
 
 这个示例故意在部署流程内再次测试：独立的 `ci.yml` 与 `pages.yml` 不会因为先后出现在 Actions 列表就形成依赖。这里确保测试、构建和部署关联同一次运行的提交。
 
-手动运行时请选择 `docs/github-agent-channel-architecture`；`build.if` 防止误选其他分支直接部署。以后改默认分支名时，需要同时修改 `branches` 与这个条件。
+手动运行时请选择 `master`；`build.if` 防止误选其他分支直接部署。以后改默认分支名时，需要同时修改 `branches` 与这个条件。
 
 ## 4. 观察发布全过程
 
 1. 合并 PR，进入 Actions → Deploy Pages。
-2. 确认运行对应合并后的 `docs/github-agent-channel-architecture` 提交。
+2. 确认运行对应合并后的 `master` 提交。
 3. 在 build 日志中查看测试数量、构建文件和 artifact 上传结果。
 4. 在 deploy 任务中查看成功结果，打开生成的 URL。
 5. 页面应显示 `Hello, GitHub!`。首次发布可能需要稍等再访问。
@@ -113,13 +115,13 @@ jobs:
 
 在仓库 Releases 入口选择创建新版本：
 
-1. 新建标签 `v0.1.0`，选择刚才确认部署成功的提交。
-2. 标题写 `v0.1.0 - Workflow Lab`。
+1. 新建标签 `lab-v0.1.0`，选择刚才确认部署成功的提交。
+2. 标题写 `lab-v0.1.0 - Workflow Lab`。
 3. 正文说明功能、关联 PR 和验证结果，然后发布。
 
 标签不存在时，页面可以在发布时创建标签。Release 自动提供的源码压缩包不等于编译好的程序；需要提供构建包时要显式上传相应附件。[管理 Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
 
-本教程的部署触发条件是 `docs/github-agent-channel-architecture` 的 push，因此新增 Release 本身不会再次触发该部署流程。
+本教程的部署触发条件是 `master` 的 push，因此新增 Release 本身不会再次触发该部署流程。
 
 ## 6. 持续交付、持续部署与回滚
 
@@ -138,6 +140,8 @@ jobs:
 | 权限错误 | deploy 权限、仓库或组织限制、环境允许的分支 |
 | 等待批准 | github-pages 环境是否配置 reviewer 或部署保护规则 |
 | workflow 绿了但页面内容旧 | 打开的站点 URL、部署提交、浏览器缓存、发布传播时间 |
+
+练习后停止发布时，先禁用 Deploy Pages workflow，另行取消正在运行的部署；在 Settings → Pages 取消发布站点。删除实验分支或 Release 不会下线已有页面。
 
 ## 8. 验收
 

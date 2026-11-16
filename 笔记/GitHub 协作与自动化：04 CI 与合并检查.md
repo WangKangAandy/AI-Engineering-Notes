@@ -14,7 +14,7 @@ status: learning
 
 学习路线：[[GitHub 协作与自动化：01 学习路线]]。
 
-> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/04-ci`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
+> 本篇实验基线：`master`；实验分支：`lab/04-ci`。先按第 02 篇的方法从最新 master 创建该分支；完成本篇所需的 PR 合并后再进入依赖它的下一篇。前置：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
 
 本篇完成一个关键练习：故意提交错误，看到 PR 检查失败，再通过新提交修复，并理解如何要求检查通过后才能合并。
 
@@ -33,7 +33,7 @@ CI 把项目已有的检查命令接入每次变更。检查内容由项目自�
 
 ## 2. 准备三个文件
 
-在练习仓库根目录添加以下文件，并通过一个初始化 PR 合并到 `docs/github-agent-channel-architecture`。
+在 `lab/04-ci` 分支准备以下三个文件和第 3 节的 ci.yml，放入同一个初始化 PR。确认初始化检查通过后再合并到 `master`，然后开始第 4 节。
 
 `app.py`：
 
@@ -101,7 +101,7 @@ python build.py
 
 Windows 只有 `py` 启动器时，把本地命令中的 `python` 换成 `py`；workflow 内仍用 `python`。没有本地 Python 也可以把文件提交后交给 Actions 执行。
 
-预期：发现并通过 3 个测试，产生 `site/index.html`。这些 Python 文件和生成目录只用于本次实验；若不想把它们作为仓库长期内容，可以在验收后通过一个清理 PR 删除，并保留 CI 运行链接。
+预期：发现并通过 3 个测试，产生 `site/index.html`。把生成的 `site/` 和 `__pycache__/` 加入 .gitignore，不提交构建输出。第 05、06 篇依赖这些 Python 文件，完成后续练习后再清理；清理时同时移除依赖它们的 workflow 和必需检查规则，避免之后每个 PR 都失败。
 
 ## 3. 接入 CI
 
@@ -112,9 +112,9 @@ name: CI
 
 on:
   push:
-    branches: [docs/github-agent-channel-architecture]
+    branches: [master]
   pull_request:
-    branches: [docs/github-agent-channel-architecture]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -143,9 +143,9 @@ jobs:
 
 ## 4. 制造失败，先保留红灯
 
-1. 从最新 `docs/github-agent-channel-architecture` 创建 `exercise/break-greeting`，并在 `笔记/GitHub Agent Channel 架构与阶段计划.md` 末尾增加一句“本仓库通过 CI 检查 greeting 函数并构建练习页面”。保留这项说明性改动，避免修复故意制造的错误后，整个 PR 与 main 完全相同而没有可合并内容。
+1. 从最新 `master` 创建 `lab/04-break-ci`，并在 `笔记/GitHub 工作流实操记录.md` 末尾增加一句“本仓库通过 CI 检查 greeting 函数并构建练习页面”。保留这项说明性改动，避免修复故意制造的错误后，整个 PR 与 master 完全相同而没有可合并内容。
 2. 仅把 `app.py` 的返回值改为 `return f"Hi, {cleaned}!"`，不修改测试。
-3. 提交并创建面向 `docs/github-agent-channel-architecture` 的 PR。
+3. 提交并创建面向 `master` 的 PR。
 4. 打开 PR 的检查区域，进入 **Test and build**，展开 **Run tests**。
 5. 应看到期望 `Hello` 与实际 `Hi` 不一致；本例前两个测试失败，后续构建步骤默认跳过。
 6. 先保持这个 PR 打开且检查失败，继续下一节配置规则。此时不要修复或合并。
@@ -157,11 +157,11 @@ jobs:
 有检查结果和“必须通过”是两件事。在有管理权限且支持 ruleset 的练习仓库中：
 
 1. 打开 Settings → Rules → Rulesets，创建面向默认分支的 branch ruleset。
-2. 将执行状态设为 Active，目标选择默认分支或 `docs/github-agent-channel-architecture`。
+2. 将执行状态设为 Active，目标明确匹配 `master`，与本练习 PR base 和 ci.yml 的 branches 一致。
 3. 启用要求通过 PR 合并的规则。
 4. 启用要求状态检查通过，选择先前真实运行出现过的 **Test and build** 检查。
 5. 保存后回到仍然失败的练习 PR，确认当前提交的 **Test and build** 未通过，并观察普通合并被阻止。记录当前提交和阻止原因，不使用历史失败 run 代替这一步。
-6. 在同一个来源分支把返回值改回 `Hello`，保留 README 的说明，提交并 push。
+6. 在同一个来源分支把返回值改回 `Hello`，保留实操记录中的说明，提交并 push。
 7. 等待新提交的检查通过，确认该必需检查不再阻止合并。若没有其他未满足的规则，此时可以正常合并这个 PR。
 
 个人练习仓库不必要求另一人批准，否则只有自己时可能无法满足评审条件。管理者若有 bypass 权限，界面可能仍提供绕过入口；要区分“规则生效”和“某账号有例外权限”。套餐或组织策略不支持该设置时，可以先理解检查结果，但不能声称已经配置强制门禁。[Ruleset 规则说明](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)

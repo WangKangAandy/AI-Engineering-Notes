@@ -14,7 +14,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇可在目标仓库的 `lab/09-cursor` 分支记录配置说明；Cursor App 的安装和自动化触发会作用于实际授权的仓库。前置阅读 [[GitHub 协作与自动化：08 GitHub App 注册与权限配置]]，先区分“注册自己的 App”和“安装并使用现成服务的 App”。本篇以 Cursor 为例，讲解第三方 App 接入后的 Agent、审查和自动化。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。Cursor App 的安装和自动化触发会作用于实际授权的仓库。前置阅读 [[GitHub 协作与自动化：08 GitHub App 注册与权限配置]]，先区分“注册自己的 App”和“安装并使用现成服务的 App”。本篇以 Cursor 为例，讲解第三方 App 接入后的 Agent、审查和自动化。
 
 Cursor 通过官方 GitHub App 访问仓库，提供 PR 审查、Issue 调查和自动化任务。
 
@@ -26,7 +26,7 @@ Cursor 通过官方 GitHub App 访问仓库，提供 PR 审查、Issue 调查和
 
 ## 1. 连接仓库
 
-准备具有目标仓库授权权限的 GitHub 账号，以及可使用所需功能的 Cursor 账号。组织仓库可能需要管理员批准安装。
+准备具有目标仓库授权权限的 GitHub 账号，以及可使用所需功能的 Cursor 账号。组织集成按 Cursor 文档要求由具备 Cursor 管理权限和 GitHub 组织管理权限的人员配置；普通仓库写权限不等于可管理组织集成。
 
 1. 打开 [Cursor Integrations](https://cursor.com/dashboard/integrations)，在 GitHub 下点击 **Connect**；已连接时选择 **Manage Connections**。
 2. 登录 GitHub，完成账号关联。
@@ -124,3 +124,7 @@ Bugbot 和 Cloud Agents 会产生相应使用量。启用自动触发前，在 C
 验收时分别确认：GitHub App 是否已安装到目标仓库、Cursor 后台是否能选择仓库、PR 事件是否触发预期功能、评论或 PR 是否确实产生。没有实际触发时，只记录配置完成，不记录为运行成功。
 
 返回：[[GitHub 协作与自动化：01 学习路线]]。
+
+## 7. 停止练习
+
+在 Cursor Automations 中停用本次自定义任务，并关闭目标仓库的 Bugbot 自动审查或改为仅手动。检查并单独停止仍在运行的 Cloud Agent 任务；关闭 PR 不等于停止所有自动化。若不再需要仓库连接，在 GitHub Installed GitHub Apps 中移除该仓库的授权，或暂停/卸载 Cursor App。先确认没有其他团队任务依赖这次安装。用户身份授权可在 Authorized GitHub Apps 单独撤销。[GitHub App 管理](https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps)

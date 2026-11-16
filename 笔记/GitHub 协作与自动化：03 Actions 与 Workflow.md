@@ -14,7 +14,7 @@ status: learning
 
 学习路线：[[GitHub 协作与自动化：01 学习路线]]。
 
-> 本篇实验基线：`docs/github-agent-channel-architecture`；实验分支：`lab/03-actions`。本篇的新增文件和提交都在该实验分支完成，再按文中的 PR 步骤合并或关闭。前置：能编辑练习仓库并通过 PR 合并。本篇先运行一句话，建立“配置 → 触发 → 执行 → 日志”的对应关系。
+> 本篇实验基线：`master`；实验分支：`lab/03-actions`。先按第 02 篇的方法从最新 master 创建该分支；完成本篇所需的 PR 合并后再进入依赖它的下一篇。前置：能编辑练习仓库并通过 PR 合并。本篇先运行一句话，建立“配置 → 触发 → 执行 → 日志”的对应关系。
 
 ## 1. 从页面对应到对象
 
@@ -60,7 +60,7 @@ jobs:
 ## 3. 运行并查看日志
 
 1. 打开仓库 Actions 页，在左侧找到 **Hello Actions**。
-2. 点击 **Run workflow**，选择 `docs/github-agent-channel-architecture`，再运行。
+2. 点击 **Run workflow**，选择 `master`，再运行。
 3. 打开新增的运行记录，找到 `hello` job。
 4. 展开 **Print a message**，找到输出文字。
 5. 记录这次运行的触发方式、分支、提交及结果。
@@ -88,12 +88,12 @@ jobs:
 on:
   workflow_dispatch:
   push:
-    branches: [docs/github-agent-channel-architecture]
+    branches: [master]
   pull_request:
-    branches: [docs/github-agent-channel-architecture]
+    branches: [master]
 ```
 
-现在有三种入口：手动运行、推送到 `docs/github-agent-channel-architecture`、指向该分支的 PR 发生受支持的变动。`pull_request.branches` 筛选的是 PR 的目标分支；更新 PR 来源分支通常会引起一次新检查。
+现在有三种入口：手动运行、推送到 `master`、指向该分支的 PR 发生受支持的变动。`pull_request.branches` 筛选的是 PR 的目标分支；更新 PR 来源分支通常会引起一次新检查。
 
 在 PR 阶段和合并后各运行一次很常见：前者检查待合并变更，后者检查主分支的新状态。触发行为以 [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) 为准。
 
