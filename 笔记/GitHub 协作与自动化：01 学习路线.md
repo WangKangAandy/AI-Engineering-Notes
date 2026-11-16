@@ -20,9 +20,9 @@ status: learning
 
 ## 实操对象与分支约定
 
-本系列的实际练习对象是 [WangKangAandy/AI-Engineering-Notes 的 `docs/github-agent-channel-architecture` 分支](https://github.com/WangKangAandy/AI-Engineering-Notes/tree/docs/github-agent-channel-architecture)。当前这条链接属于 `WangKangAandy` 的个人 fork；[xallor-ai/AI-Engineering-Notes 组织仓库](https://github.com/xallor-ai/AI-Engineering-Notes) 当前默认分支为 `master`，组织仓库中没有同名练习分支。本文后续命令以链接中的 fork 分支为准；如果你要把结果贡献回组织仓库，再从 fork 分支创建指向组织仓库 `master` 的 PR。
+本系列的正式博客对象是 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)。公开文章、示例链接和正式 PR 目标统一指向这个组织仓库；当前组织默认分支为 `master`。你提供的 `docs/github-agent-channel-architecture` 是当前用于测试的分支名称，目前位于测试 fork，尚未出现在组织仓库；测试时可以使用已有的该分支 checkout，或先把同名分支同步到组织仓库，再按本文操作。
 
-这条分支当前基线提交为 `bfcae9d8a010e34279fc044fb6a8b37332c56dae`，内容以 GitHub Agent Channel 架构研究笔记为主，仓库中还没有本系列示例的 workflow。每章都从这个基线或上一步合并后的基线创建实验分支，不直接在基线分支上改动：
+当前测试分支基线提交为 `bfcae9d8a010e34279fc044fb6a8b37332c56dae`，内容以 GitHub Agent Channel 架构研究笔记为主，仓库中还没有本系列示例的 workflow。每章都从这个基线或组织仓库 `master` 的最新状态创建实验分支，不直接在基线分支上改动；如果使用 fork 测试，完成后再向组织仓库 `master` 提交 PR：
 
 | 章节 | 实验分支 | 主要操作 |
 |---|---|---|

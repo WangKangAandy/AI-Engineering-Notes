@@ -14,7 +14,7 @@ status: learning
 
 学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇目标：在目标仓库走完 Issue → 分支 → PR → 合并。
 
-> 本篇实验分支：`lab/02-issue-pr`，PR 目标：`docs/github-agent-channel-architecture`。先阅读第 01 篇的“实操对象与分支约定”。
+> 本篇实验分支：`lab/02-issue-pr`，PR 目标：`docs/github-agent-channel-architecture`。本篇具体命令固定使用这个测试基线；如果该分支尚未同步到组织仓库，先在已有测试 checkout 中完成，或先同步分支后再操作。先阅读第 01 篇的“实操对象与分支约定”。
 
 ## 1. 六个操作各自改变什么
 
@@ -33,7 +33,7 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 
 ## 2. 准备练习仓库
 
-不要新建练习仓库。打开目标仓库的 [基线分支](https://github.com/WangKangAandy/AI-Engineering-Notes/tree/docs/github-agent-channel-architecture)，从该分支创建 `lab/02-issue-pr`。本系列把 `docs/github-agent-channel-architecture` 当作练习基线，后续 workflow 的分支过滤也使用这个名称。
+不要新建练习仓库。打开 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，确认目标仓库已经有 `docs/github-agent-channel-architecture`；从该分支创建 `lab/02-issue-pr`。如果组织仓库尚未同步该分支，先在已有测试 checkout 中完成本篇，或先同步分支后再从网页操作。
 
 如果要完成 Pages 免费练习，可使用只包含示例代码的公开仓库；私有仓库的 Pages 可用性依账户套餐而定。教程后续发布的是练习页面。[Pages 可用范围](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
@@ -42,7 +42,7 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 1. 在 Issues 新建“给现有的 `笔记/GitHub Agent Channel 架构与阶段计划.md` 增加一段学习目标”，正文写：在该笔记末尾增加一段说明，列出 PR、CI、Pages 三个学习目标。
 2. 记下 Issue 编号。下面用 `#1` 举例，实际使用自己的编号。
 3. 回到 Code，通过分支选择器从 `docs/github-agent-channel-architecture` 创建 `lab/02-issue-pr`。
-4. 在该分支编辑 README，增加目标说明并提交。网页保存操作会直接形成远程提交，不需要另做本地 push。
+4. 在该分支编辑 `笔记/GitHub Agent Channel 架构与阶段计划.md`，增加目标说明并提交。网页保存操作会直接形成远程提交，不需要另做本地 push。
 5. 进入 Pull requests → New pull request。检查 `base: docs/github-agent-channel-architecture`，`compare: lab/02-issue-pr`。
 6. 查看差异，确认只包含预期改动，创建 PR。
 7. PR 正文说明改了什么、怎样检查，并写 `Closes #1`。关联关闭通常在 PR 合并到默认分支后发生。
@@ -53,18 +53,17 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 
 ## 4. 本地 Git 对应做法
 
-以下命令在本地运行。先从目标分支 clone，并把个人 fork 设为 `fork`，把组织仓库设为只读的 `upstream`；工作区没有待处理改动。`git add README.md` 前先在编辑器完成修改。
+以下命令从组织仓库 clone；如果你是在测试 fork 上操作，把远程地址和 push 目标替换为自己的 fork。工作区没有待处理改动。`git add "笔记/GitHub Agent Channel 架构与阶段计划.md"` 前先在编辑器完成修改。
 
 ```powershell
-git clone --branch docs/github-agent-channel-architecture https://github.com/WangKangAandy/AI-Engineering-Notes.git AI-Engineering-Notes
+git clone https://github.com/xallor-ai/AI-Engineering-Notes.git AI-Engineering-Notes
 cd AI-Engineering-Notes
-git remote rename origin fork
-git remote add upstream https://github.com/xallor-ai/AI-Engineering-Notes.git
+git switch master
 git switch -c lab/02-issue-pr
 git status
-git add README.md
+git add "笔记/GitHub Agent Channel 架构与阶段计划.md"
 git commit -m "docs: add learning goals"
-git push -u fork lab/02-issue-pr
+git push -u origin lab/02-issue-pr
 ```
 
 随后在网页创建 PR。合并后切回本地 `docs/github-agent-channel-architecture` 并执行 `git pull --ff-only`，让本地跟上远程。

@@ -69,13 +69,15 @@ gh auth status
 在准备存放练习仓库的目录执行以下命令。本篇使用已核对过的 fork 和分支，不再替换占位符：
 
 ```bash
-git clone --branch docs/github-agent-channel-architecture https://github.com/WangKangAandy/AI-Engineering-Notes.git AI-Engineering-Notes
+git clone https://github.com/xallor-ai/AI-Engineering-Notes.git AI-Engineering-Notes
+# 如果组织仓库已经同步测试分支，再执行：
+# git switch docs/github-agent-channel-architecture
 cd AI-Engineering-Notes
 git remote -v
 git status
 ```
 
-已有可用 checkout 时直接进入它，不需要再次 clone；确认远程地址是 `WangKangAandy/AI-Engineering-Notes`，并且当前分支是 `docs/github-agent-channel-architecture`，工作区的既有修改已妥善处理。随后安装扩展：[克隆命令说明](https://cli.github.com/manual/gh_repo_clone)
+已有可用 checkout 时直接进入它，不需要再次 clone；确认远程地址是 `xallor-ai/AI-Engineering-Notes`，并根据第 01 篇选择 `master` 或已同步的 `docs/github-agent-channel-architecture`，工作区的既有修改已妥善处理。随后安装扩展：[克隆命令说明](https://cli.github.com/manual/gh_repo_clone)
 
 ```bash
 gh extension install github/gh-aw
