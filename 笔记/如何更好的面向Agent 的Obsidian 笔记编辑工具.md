@@ -1,5 +1,6 @@
 ---
 title: 如何更好的面向Agent 的Obsidian 笔记编辑工具
+summary: 区分本库写作技能、Obsidian 格式技能与可选 MCP 操作入口，说明项目配置和使用边界。
 tags:
   - agent
   - obsidian
@@ -11,14 +12,17 @@ status: evergreen
 
 # 如何更好的面向Agent 的Obsidian 笔记编辑工具
 
-本库只用两样东西：**一个 Skill、一个 MCP**。
+> 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
+
+本库把内容写作、Obsidian 格式和文件操作分开：写作技能帮助组织解释，工具技能处理语法，可用的 MCP 连接提供 vault 操作入口。本地文件工具也能完成编辑。
 
 | 组件 | 仓库 | 作用 |
 |------|------|------|
-| **Skill** | [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) | 教 Agent 正确写 Obsidian 语法（wikilink、callout、properties、Bases、Canvas 等） |
+| **写作 Skill** | 本库 `.agents/skills/technical-note-writing/` | 研究、解释、改稿与内容评审 |
+| **格式与操作 Skills** | [obsidianmd/obsidian-skills](https://github.com/obsidianmd/obsidian-skills) | 教 Agent 正确写 Obsidian 语法（wikilink、callout、properties、Bases、Canvas 等） |
 | **MCP** | [coddingtonbear/obsidian-local-rest-api](https://github.com/coddingtonbear/obsidian-local-rest-api) | 让 Agent 通过工具读写/搜索本 vault（Obsidian 需保持打开） |
 
-Vault：`C:\Users\andy.wang\Desktop\Agent-Notes`
+Vault 是当前打开的仓库目录。使用隔离 worktree 时，先确认 Obsidian 打开的也是目标 checkout；本地命令的工作目录与 MCP 实际连接的 vault 不一定相同。
 
 ---
 
@@ -30,23 +34,13 @@ Vault：`C:\Users\andy.wang\Desktop\Agent-Notes`
 - 正确处理 `[[wikilink]]`、embed、callout、YAML properties
 - 需要时还能处理 Bases / JSON Canvas / Obsidian CLI
 
-### 本机已配置
+### 项目中如何使用
 
-已装到 Cursor 个人 Skills 目录：
+本库的技能位于项目 `.agents/skills/`，由 Git 管理；Cursor 和 Codex 可从同一位置发现，不需要分别复制一份。
 
-`C:\Users\andy.wang\.cursor\skills\`
+内容任务使用 `technical-note-writing`。涉及特定格式或工具时，再按需加载 `obsidian-markdown`、`obsidian-bases`、`json-canvas`、`obsidian-cli` 或 `defuddle`。语法技能中的项目清单只是格式示例，不作为博客的默认结构。
 
-含：`obsidian-markdown`、`obsidian-bases`、`json-canvas`、`obsidian-cli`、`defuddle`
-
-### 自己重装（可选）
-
-```bash
-npx skills add https://github.com/kepano/obsidian-skills
-```
-
-或手动把仓库里 `skills/*` 拷到 `%USERPROFILE%\.cursor\skills\`。
-
-装完后 **重启 Cursor / 新开 Agent 对话** 后生效。
+在客户端技能列表中确认相应名称可见；列表未刷新时重新打开工作区。换机与 MCP 配置见仓库 `.cursor/SETUP.md`，上游更新应核对实际文件后单独进行，不在普通写作中重装插件。
 
 ---
 
@@ -55,19 +49,21 @@ npx skills add https://github.com/kepano/obsidian-skills
 ### 有啥用
 
 - Agent 可 list / read / search / create / append / patch 本 vault 笔记
-- 走 Obsidian 进程内的 Local REST API + 内置 MCP，比「当文件夹瞎改」更安全、更贴 Obsidian
+- 通过已配置的服务读写当前 vault；工具调用仍需检查目标文件与修改范围，不能保证内容或格式自动正确
 
-### Obsidian 侧（本库已预装插件）
+### Obsidian 侧
 
 1. 用 Obsidian **打开本库** `Agent-Notes`（须保持运行）
 2. 设置 → **社区插件** → 关闭安全模式（若提示）
-3. 确认已启用：**Local REST API with MCP**
-4. 设置 → 该插件 → 打开 **Enable non-encrypted (HTTP) server**（本库 `data.json` 已设为开启）
-5. 在插件设置里查看 **API Key**（密钥只留本机：插件 `data.json` 与 `~/.cursor/mcp.json`，**不要写进笔记或提交 Git**）
+3. 确认安装并启用了本库配置所需的 Local REST API 服务及 MCP 接口；配置文件存在不代表本机服务已运行
+4. 设置 → 该插件 → 打开 **Enable non-encrypted (HTTP) server**（按本机插件实际设置确认，运行数据不随 Git 分发）
+5. 在插件设置里查看 **API Key**（密钥只留本机：插件运行配置或环境变量，**不要写进笔记或提交 Git**）
 
 HTTP MCP 地址：`http://127.0.0.1:27123/mcp/`
 
-### Cursor 侧（已写入 `~/.cursor/mcp.json`）
+### Cursor 侧
+
+本库 `.cursor/mcp.json` 已声明连接，认证来自 `OBSIDIAN_REST_API_KEY`。下方仅展示配置结构，不是完整配置文件；其他客户端需使用各自的配置格式。
 
 ```json
 "obsidian": {
@@ -90,8 +86,8 @@ HTTP MCP 地址：`http://127.0.0.1:27123/mcp/`
 
 ## 3. 怎么一起用
 
-1. Obsidian 打开本 vault  
-2. Cursor Agent 编辑笔记时：  
-   - **Skill** 约束写法  
-   - **MCP** 执行读写  
+1. Obsidian 打开本 vault
+2. Cursor Agent 编辑笔记时：
+   - **写作 Skill** 指导内容，**Obsidian Skills** 处理特定语法
+   - 已核对 vault 的 **MCP** 或本地文件工具执行读写
 3. 不要关着 Obsidian 还指望这个 MCP 工作（它跑在 Obsidian 进程里）

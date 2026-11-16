@@ -1,20 +1,23 @@
 ---
-description: 本库 Obsidian Skills 与 MCP（Agent 操作面）
-alwaysApply: true
+description: 操作 Obsidian vault、技能资源或 MCP 配置时使用
+globs: ["笔记/**", ".agents/**", ".obsidian/**", ".cursor/mcp.json"]
+alwaysApply: false
 ---
 
-# Skill + MCP
+# 操作入口
 
-Skills 约束写法，MCP 执行读写。说明笔记：[[如何更好的面向Agent 的Obsidian 笔记编辑工具]]。换机见 `.cursor/SETUP.md`。
+项目技能统一位于 `.agents/skills/`，Cursor 和 Codex 使用同一份文件。按任务加载：
 
-## Skills（`.cursor/skills/`）
+| 任务 | Skill |
+| --- | --- |
+| 博客、教程、概念笔记的新写、改稿、内容评审 | technical-note-writing |
+| 双链、嵌入、callout、properties 等 Obsidian 语法 | obsidian-markdown |
+| Bases / Canvas 文件 | obsidian-bases / json-canvas |
+| 操作已打开的 Obsidian | obsidian-cli |
+| 提取网页正文 | defuddle |
 
-`obsidian-markdown` · `obsidian-bases` · `json-canvas` · `obsidian-cli` · `defuddle`  
-上游：https://github.com/kepano/obsidian-skills
+Obsidian 工具技能来自 https://github.com/obsidianmd/obsidian-skills；它们负责格式与操作，语法示例不是本库文章模板。
 
-## MCP（`.cursor/mcp.json` → `obsidian`）
+`.cursor/mcp.json` 的 `obsidian` 连接需要 Obsidian 打开当前 vault，HTTP 地址为 `http://127.0.0.1:27123/mcp/`，密钥来自 `OBSIDIAN_REST_API_KEY`。隔离 worktree 不一定是当前打开的 vault，使用 MCP 前核对实际目标，避免改到另一 checkout。
 
-- 需 Obsidian 打开本 vault；HTTP：`http://127.0.0.1:27123/mcp/`
-- 密钥：`OBSIDIAN_REST_API_KEY`（勿写入 Git / 笔记）
-
-常用：`vault_list` / `vault_read` / `vault_patch` / `vault_get_document_map` / `search_simple`；改文优先 patch。删改路径前先确认。
+MCP 可用时可用 `vault_list`、`vault_read`、`vault_patch`、`vault_get_document_map`、`search_simple`；不可用时用本地文件工具。不得为普通写作擅自改插件或安装依赖。环境说明见 `.cursor/SETUP.md`。
