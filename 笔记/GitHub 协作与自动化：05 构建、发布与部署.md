@@ -83,6 +83,9 @@ jobs:
   build:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -117,6 +120,8 @@ jobs:
 ```
 
 `build` 负责检查当前提交、生成页面并上传包；`deploy` 通过 `needs` 等待构建成功。`pages: write` 用于 Pages 发布，`id-token: write` 允许获取部署身份令牌。环境记录关联 `github-pages`，输出 URL 显示在部署结果中。相关 action 版本与权限依据 [Pages 官方示例](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
+
+build 的 `contents: read` 用于获取代码，`pages: read` 显式允许 configure-pages 读取站点配置；发布写权限只给 deploy。公开资源的读取允许不具备 Pages read 权限，本例仍将依赖声明清楚。增加这项权限不代表整个流程已适配私有仓库，Pages 与环境审批的可用条件仍须分别核对。[读取 Pages 配置的权限](https://docs.github.com/en/rest/pages/pages#get-a-github-pages-site)
 
 这个示例故意在部署流程内再次测试：独立的 `ci.yml` 与 `pages.yml` 不会因为先后出现在 Actions 列表就形成依赖。这里确保测试、构建和部署关联同一次运行的提交。
 

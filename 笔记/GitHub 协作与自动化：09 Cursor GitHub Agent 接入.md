@@ -59,7 +59,7 @@ cursor review
 避免重复评论和纯个人风格偏好。
 ```
 
-Bugbot 使用专用的 `BUGBOT.md` 规则，不读取 `.cursor/rules/*.mdc` 作为审查规则。审查频率等选项也可通过 `.cursor/config/bugbot.yaml` 管理；该 YAML 从 PR 的目标分支读取。`oncePerPr` 表示每个 PR 自动审查一次；仅手动运行应使用后台对应设置。[Bugbot 文档](https://cursor.com/docs/bugbot)
+Bugbot 使用专用的 `BUGBOT.md` 规则，不读取 `.cursor/rules/*.mdc` 作为审查规则。审查频率等选项也可通过 `.cursor/config/bugbot.yaml` 管理；该 YAML 从 PR 的目标分支读取。字段 `triggers.frequency` 可取 `everyPush` 或 `oncePerPr`，分别表示对符合自动审查条件的 PR 每次更新都审查，或每个 PR 只自动审查一次。`oncePerPr` 是字段取值，不是独立字段，也不是手动模式；仅手动触发在 Bugbot 后台单独设置。[Bugbot 配置文档](https://cursor.com/docs/bugbot#repository-config-file)
 
 ## 3. 在 Issue 或 PR 中调用 Agent
 
@@ -94,6 +94,8 @@ Bugbot 使用专用的 `BUGBOT.md` 规则，不读取 `.cursor/rules/*.mdc` 作�
 CI 通过后再按仓库规则合并。若保留 Pages 审批，它会因 master 更新而再次等待上线批准；本次只新增测试，可以在判断后取消不需要的部署。停止代码任务使用 Cursor 任务详情中的停止操作，随后检查是否已有提交/PR；关闭 Issue 不等于停止云端任务。[GitHub 集成](https://cursor.com/docs/integrations/github)
 
 ## 4. 配置自定义自动化
+
+Bugbot 是 Cursor 管理的专用审查功能；本节的自定义 automation 由你配置触发器、任务提示和工具。它们都能从 Automations 页面进入，分别位于 From Cursor 和自定义任务入口。[官方入口说明](https://cursor.com/docs/cloud-agent/automations#getting-started)
 
 本节单独配置“新 PR 打开时，用中文检查变更并发表一条摘要”，不使用 Issue 事件，也不与 Bugbot 同时自动审查。先保持 Bugbot 为仅手动模式，并使用前面能运行测试的实验仓库环境。
 
