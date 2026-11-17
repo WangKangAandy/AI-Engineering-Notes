@@ -58,7 +58,15 @@ flowchart LR
 
 ## 4. 第一个任务：给现有函数加输入检查
 
-先完成 [[GitHub 协作与自动化：04 CI 与合并检查]]。在自己练习仓库的 Agents 页面或 GitHub Copilot 会话入口选择该仓库，使用可用的 Agent 和执行环境，明确以 `master` 为基础发起任务。
+先完成 [[GitHub 协作与自动化：04 CI 与合并检查]]，确认 master 已有三个 Python 文件和 ci.yml；没有完成第 05 篇也能做本次 Agent 练习。本篇选用 **GitHub Copilot + Cloud** 主线，不使用第三方 Agent 或 Actions 执行环境。
+
+1. 打开当前操作仓库的 Agents 页；也可从 [Copilot 会话页](https://github.com/copilot) 进入。确认仓库选择器是组织实验仓库或自己的 fork。
+2. 在任务输入框的 Agent 选择器选择 Copilot；模型可保留该账户的默认可用模型。
+3. 打开 **Environment**，选择 **Cloud**，即 GitHub 托管沙箱。这里的 Environment 选择机器与工具，不是第 05 篇 Settings → Environments 的发布审批。
+4. 在 base branch 选择器选择 master，粘贴下方任务描述并发送。无需先创建 lab 分支，Agent 会建立自己的工作分支。
+5. 任务应出现在会话列表。打开该 session，观察状态和工具日志；首先确认它找到 app.py/test_app.py，而不是在另一个仓库从零创建程序。
+
+若没有 Copilot 或 Cloud 选项，先在账号 Copilot 设置核对资格、使用量及组织策略；不能靠改 workflow 文件“开启”账户能力。不要随意改选 Actions 后仍假定配置完全一样。Actions 是另一条执行环境路径，需按对应环境要求准备，本篇不并行展开。[官方任务启动步骤](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
 
 复制以下任务描述：
 
@@ -81,20 +89,22 @@ flowchart LR
 
 ## 5. 过程中怎么看、怎么纠偏
 
-进入 session，查看进度、操作日志和修改。如果 Agent 改了无关文件，在可用的会话输入框中补充约束，例如“保留当前函数签名，只补输入类型检查”。
+进入 session，查看进度、操作日志和修改。日志应能找到测试命令、发现的测试与退出结果；如果环境找不到 Python，先让 Agent 报告可用解释器和具体错误，再按错误准备环境，不能把“计划运行”当作已测试。如果 Agent 改了无关文件，在可用的会话输入框中补充约束，例如“保留当前函数签名，只补输入类型检查”。
 
 对 Issue 指派的任务，后续新增的 Issue 评论不应假定会自动进入既有任务；使用会话的 steering 入口或关联 PR 的受支持交互方式补充要求。
 
 完成时核对：它是否真的执行了测试命令、是否报告失败、是否给出了修改或 PR。Completed 表示会话完成，不意味着功能已验收或代码已合并。[会话管理说明](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)
 
+不再需要执行时，在 session 日志页选择 **Stop session**。停止后检查它是否已推送提交或创建 PR；停止会话不会撤销这些已有改动。需要放弃修改时再关闭对应 PR，不要误关其他任务的 PR。[会话管理](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)
+
 ## 6. 从完成会话到可合并 PR
 
-1. 打开关联 PR；若还没有，按会话入口创建或要求 Agent 创建。
+1. 从 session 的 PR 链接打开 Pull Request；没有 PR 时，使用会话中的创建 PR 操作，或发送“请把当前变更创建为面向 master 的 PR，不要合并”。检查仓库、base master 和来源分支。
 2. 在 Files changed 中确认只修改 `app.py`、`test_app.py`。
 3. 查看是否覆盖 None、整数和原有三种情况。
-4. 查看当前提交的 **Test and build** CI 结果；若页面要求批准 workflow 运行，阅读改动后按仓库流程处理。
+4. 在 PR 的 Checks 中查看当前提交的 **Test and build**。如果合并区域显示 **Approve and run workflows**，先阅读文件差异，再由有权限的用户点击批准运行，等待 CI。这里批准的是运行代码，不是批准合并，也不是 Pages 的部署审批；不要把这三个按钮混用。
 5. 需要修改时在支持的交互入口提出具体要求，等待更新后再次核查。
-6. 只有满足原有检查及评审要求后再合并。后续 Pages 部署按已有 `master` push 配置发生。
+6. 只有满足原有检查及评审要求后再合并。若保留第 05 篇的 Pages 配置，master push 会触发构建，部署仍需在 run 中人工批准；没有配置 Pages 就不会部署。
 
 “Agent 自测”提供一次执行记录；“PR CI”提供仓库约定的统一检查；“评审”判断需求与改动是否匹配。三者各有用途。
 

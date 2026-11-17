@@ -36,11 +36,13 @@ Cursor 通过官方 GitHub App 访问仓库，提供 PR 审查、Issue 调查和
 
 首次 Connect 只关联 GitHub 身份，仍需完成 App 的仓库授权。后续增加仓库时，修改 App 的访问范围即可。[GitHub 集成文档](https://cursor.com/docs/integrations/github)
 
+启用之前，在 Cursor 后台查看当前账号/团队的套餐、使用量与预算限制。本篇会产生审查或 Cloud Agent 用量，App 安装成功不表示包含无限运行额度。以下所有操作选当前实验仓库，fork 的结果不计为组织仓库验证。
+
 ## 2. 开启 PR 审查
 
 打开 [Automations](https://cursor.com/automations)，进入 **From Cursor → Bugbot**，启用目标仓库并选择自动审查或仅手动触发。连接仓库后 Bugbot 可能已经启用，先检查当前设置。只需要审查时，将 **Autofix** 设为关闭。
 
-在一个有实际变更的 PR 中，由用户发表评论：
+先从最新 master 创建 `lab/09-review`，在第 02 篇的实操记录中补一句本次想检查的问题，提交并创建面向 master 的普通 PR，暂不合并。Bugbot 本次选择仅手动触发，并关闭 Autofix。在这个有实际变更的 PR 中，由用户发表评论：
 
 ```text
 cursor review
@@ -61,47 +63,64 @@ Bugbot 使用专用的 `BUGBOT.md` 规则，不读取 `.cursor/rules/*.mdc` 作�
 
 ## 3. 在 Issue 或 PR 中调用 Agent
 
-连接仓库并启用 Cloud Agents 后，在评论中通过 `@cursor` 指派任务。
+### 先让云端环境能够运行本仓库的检查
 
-分析问题：
+复用第 04 篇已合入 master 的三个 Python 文件；不依赖第 06 篇是否已修改 greeting。本次选择 Cursor 托管的 Cloud Agents，不选择自托管机器。
+
+1. 打开 [Cloud Agents](https://cursor.com/agents)，进入新环境的引导式配置入口，选择当前实验仓库，仅选这一个仓库。
+2. 选择让 Agent 帮助配置环境的方式。在设置说明中填写下方要求，观察共享终端中的安装与检查过程。
+3. 本例只用 Python 标准库，没有 API、数据库或私有包，不添加 Secrets。需要真实服务凭据的项目以后在 Cursor 的 Secrets 设置中配置，它不会自动读取 GitHub Actions Secrets。
+4. 等待环境验证和 Build 成功，在环境配置页确认当前 active Build。找不到 Python 或检查失败时先修复环境并重新 Build，不开始后面的代码任务。
 
 ```text
-@cursor 请结合仓库代码分析这个问题，说明原因和解决方案。
+为当前仓库准备 Python 3.12 环境。仓库根目录已有 app.py、test_app.py 和 build.py，只使用标准库，不需要安装 pip 依赖或添加密钥。
+在仓库根目录执行 python --version、python -m unittest discover -v、python build.py。
+若 python 命令不可用，先准备解释器；不要通过修改测试来使环境验证通过。
+说明实际使用的版本、测试数量及构建结果。仅设置执行环境，不修改或合并仓库代码。
 ```
 
-执行修复：
+此时测试数量取决于是否已完成第 06 篇，至少应包含原有三个测试，不能把“运行了零个测试”当成功。build.py 应生成 site/index.html。Cursor 的保存环境及 Build 会供后续任务使用；若项目已有个人或团队环境，先确认选中的正是刚配置的环境，避免配置了一个却运行另一个。[官方环境配置](https://cursor.com/docs/cloud-agent/setup)
+
+### 用一个 Issue 发起任务
+
+在当前仓库新建 Issue“补充 greeting 的中文名字测试”，正文写清：在 test_app.py 新增 `greeting("世界") == "Hello, 世界!"` 的测试，不改变实现或 workflow。由已关联且有权限的用户在 Issue 中评论：
 
 ```text
-@cursor 请修复这个问题，补充必要测试，并提交 PR。说明修改内容和测试结果。
+@cursor 请处理本 Issue：以 master 为基础，新建工作分支，只在 test_app.py 增加中文名字“世界”的测试；已有相同测试时说明，无需重复添加。运行 python -m unittest discover -v 和 python build.py，创建面向 master 的 PR，不要合并。返回实际命令、测试数量和结果。
 ```
 
-Agent 在云端环境中工作。需要执行构建或测试时，先在 [Cloud Agents](https://cursor.com/agents) 中配置项目依赖、初始化命令和必要的 Secrets，确保测试命令可运行。[Cloud Agents 文档](https://cursor.com/docs/cloud-agent)
+点击机器人回复中的任务链接，进入 Cursor 查看日志和 diff；从任务结果打开 PR，确认只包含预期测试，再检查 GitHub 的 CI。机器人没有回复时，先核对评论账号关联、App 仓库访问范围、Cloud Agents 资格和用量，不用连续发相同命令。若任务没有使用预期环境，在 Cursor 的任务/环境设置中核对当前仓库绑定并重新发起一次明确任务。
+
+CI 通过后再按仓库规则合并。若保留 Pages 审批，它会因 master 更新而再次等待上线批准；本次只新增测试，可以在判断后取消不需要的部署。停止代码任务使用 Cursor 任务详情中的停止操作，随后检查是否已有提交/PR；关闭 Issue 不等于停止云端任务。[GitHub 集成](https://cursor.com/docs/integrations/github)
 
 ## 4. 配置自定义自动化
 
-在 [Automations](https://cursor.com/automations) 创建任务，设置触发条件、仓库、指令和工具，保存并激活。
+本节单独配置“新 PR 打开时，用中文检查变更并发表一条摘要”，不使用 Issue 事件，也不与 Bugbot 同时自动审查。先保持 Bugbot 为仅手动模式，并使用前面能运行测试的实验仓库环境。
 
-例如，创建一条自定义 PR 审查任务：
+1. 打开 [Automations](https://cursor.com/automations)，创建自己的自定义 automation，不进入 From Cursor → Bugbot。
+2. 名称填写“实验仓库 PR 中文审查”，配置如下表；保存前再次核对仓库和执行身份。团队若显示 Run as，本例使用自己的身份，不切换团队服务账号。
+3. 填入下方指令，保存并激活。记录该 automation 的页面链接，以便查看运行与停用。
+4. 激活之后，从最新 master 创建 `lab/09-automation`，修改实操记录中的一段说明并提交，创建**非 Draft** PR。已经打开的旧 PR 不会因为新建 automation 自动补触发。
+5. 回到此 automation 的运行列表，打开关联这个 PR 的运行，检查触发事件、仓库、执行日志和最终状态，再到 PR Conversation 查找摘要评论。
 
-| 设置 | 示例 |
-|---|---|
-| 触发条件 | Pull request opened、Pull request pushed |
-| 仓库 | 需要审查的仓库 |
-| 工具 | Comment on pull request；无需自动审批时关闭审批能力 |
-| 指令 | 见下方示例 |
+| 字段 | 本例值 |
+| --- | --- |
+| Trigger | Pull request opened，仅选择此事件 |
+| Repository | 当前实验仓库；fork 用户选自己的 fork |
+| Tools | Comment on pull request；不启用审批工具 |
+| Prompt | 下方指令，约束只审查和评论 |
+| 执行环境 | 当前仓库已验证可用的环境；有选择器时核对，不跨仓库复用凭据 |
 
 ```text
-审查本次 PR 的变更，并阅读必要的上下文。
-检查正确性、边界条件和测试覆盖，用中文说明有依据的问题。
-每条意见包含文件位置、影响和修改建议；避免重复已有评论。
-仅发表审查意见，不修改代码或创建 PR。
+审查触发本任务的 PR，读取 diff 和必要上下文。
+用中文在该 PR 的时间线发表一条摘要评论：说明检查范围、发现的问题，以及没有执行的验证；没有实质问题时也明确说明，而不是不输出。
+问题须说明位置、影响和依据。不要重复已有评论；如果已有本次运行的摘要，不再添加第二条。
+只读代码并评论，不修改代码、不创建 PR、不批准、不合并。
 ```
 
-配置后新建或更新一个 PR，在运行记录中确认任务被触发、完成并发表预期结果。自定义审查与 Bugbot 按需要选用，避免两个任务重复检查同一批问题。
+本例使用 opened 事件，所以只推送新提交不会再次触发；这是预期行为。若确需每次 PR 更新都检查，再添加 Pull request pushed，并考虑重复评论和额外用量。没有运行记录先查是否激活、仓库是否正确、PR 是否为草稿以及事件是否匹配；有运行但无评论时，查任务失败原因、评论工具是否启用及 App 是否有 PR 写权限。一次绿色运行不能代替检查实际评论内容。
 
-Issue 可使用 **Issue label changed** 或 **Issue comment** 事件触发任务，例如添加 `agent-review` 标签后分析问题。创建任务时还需配置可向 Issue 发布结果的工具或集成；PR 评论工具用于 PR。使用评论事件时，应过滤机器人自身的回复，避免重复触发。
-
-当前 Cursor Automations 支持 GitHub 的 PR 打开、更新、合并、评论、标签变化、CI 完成、Issue 评论、PR 评审评论和评审提交等触发器，也支持由 push、定时或 webhook 触发。GitHub 普通 Issue 的“创建”不应按一个已验证的内置触发器来配置；需要监听该事件时，可用 GitHub Actions 的 `issues.opened` 调用 Automation webhook，或使用 Cursor CLI。配置前以 [Automations 触发器文档](https://cursor.com/docs/cloud-agent/automations) 为准。
+评论事件、Issue 事件和 webhook 属于后续扩展，输出到 Issue 时需要适合 Issue 的工具，不能沿用 PR 评论工具。此处不把未完成配置的扩展列为已会使用的能力。[官方创建步骤与触发器](https://cursor.com/docs/cloud-agent/automations)
 
 ## 5. 常见问题
 
@@ -126,5 +145,7 @@ GitHub App 安装成功后，Cursor 后台应能选择获授权的仓库。提�
 返回：[[GitHub 协作与自动化：01 学习路线]]。
 
 ## 7. 停止练习
+
+先处理 `lab/09-review` 和 `lab/09-automation` 的实验 PR：有保留价值的改动经检查后合并，其余关闭；这不会删除已发表的评论。
 
 在 Cursor Automations 中停用本次自定义任务，并关闭目标仓库的 Bugbot 自动审查或改为仅手动。检查并单独停止仍在运行的 Cloud Agent 任务；关闭 PR 不等于停止所有自动化。若不再需要仓库连接，在 GitHub Installed GitHub Apps 中移除该仓库的授权，或暂停/卸载 Cursor App。先确认没有其他团队任务依赖这次安装。用户身份授权可在 Authorized GitHub Apps 单独撤销。[GitHub App 管理](https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps)

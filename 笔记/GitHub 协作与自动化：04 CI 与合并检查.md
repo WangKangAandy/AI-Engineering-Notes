@@ -158,8 +158,8 @@ jobs:
 
 1. 打开 Settings → Rules → Rulesets，创建面向默认分支的 branch ruleset。
 2. 将执行状态设为 Active，目标明确匹配 `master`，与本练习 PR base 和 ci.yml 的 branches 一致。
-3. 启用要求通过 PR 合并的规则。
-4. 启用要求状态检查通过，选择先前真实运行出现过的 **Test and build** 检查。
+3. 启用 **Require a pull request before merging**。个人练习将所需审批人数设为 0，保留“经过 PR”这项要求；不要误配成必须由另一位审阅者批准。
+4. 独立启用 **Require status checks to pass**，添加先前真实运行出现过的 **Test and build** 检查；不要用 workflow 文件名 ci.yml 替代检查名称。保存前确认目标仍是 master、状态为 Active，且没有给自己的实验账号加入 bypass。
 5. 保存后回到仍然失败的练习 PR，确认当前提交的 **Test and build** 未通过，并观察普通合并被阻止。记录当前提交和阻止原因，不使用历史失败 run 代替这一步。
 6. 在同一个来源分支把返回值改回 `Hello`，保留实操记录中的说明，提交并 push。
 7. 等待新提交的检查通过，确认该必需检查不再阻止合并。若没有其他未满足的规则，此时可以正常合并这个 PR。

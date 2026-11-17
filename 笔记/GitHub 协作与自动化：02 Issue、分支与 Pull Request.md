@@ -35,6 +35,8 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 
 打开 [组织仓库](https://github.com/xallor-ai/AI-Engineering-Notes)，确认分支选择器为 `master`。本篇新增 `笔记/GitHub 工作流实操记录.md`，不依赖仓库已有 README 或其他分支的文件。如果同名记录已经存在，更新其中的学习目标即可。
 
+网页与本地路径二选一，完成后继续第 03 篇；不要在同一仓库把两条路径重复做一遍。
+
 ## 3. 全程网页练习
 
 1. 在当前操作仓库的 Issues 新建“添加 GitHub 工作流学习记录”，正文写：新增一篇记录，列出 PR、CI、Pages 三个学习目标。
@@ -84,14 +86,19 @@ git pull --ff-only
 git switch -c lab/02-issue-pr
 ```
 
-现在在编辑器中创建上述记录文件并保存，再继续：
+先在当前操作仓库的 Issues 按第 3 节新建工作项并记下编号。现在在编辑器中创建上述记录文件并保存，再继续；将下面的 `123` 换成刚创建的 Issue 编号：
 
 ```powershell
+$issueNumber = 123
 git add "笔记/GitHub 工作流实操记录.md"
 git commit -m "docs: add workflow learning record"
 git push -u origin lab/02-issue-pr
-gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head lab/02-issue-pr --title "docs: add workflow learning record" --body "添加 PR、CI 和 Pages 学习目标。"
+gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head lab/02-issue-pr --title "docs: add workflow learning record" --body "Closes #$issueNumber
+
+添加 PR、CI 和 Pages 学习目标。"
 ```
+
+创建成功后打开 gh 返回的 PR URL，按第 3 节第 8～9 步检查并合并。确认当前仓库 master 已有实操记录、关联 Issue 已关闭，再更新本地 master 并进入下一篇。
 
 如果已有 checkout，直接进入它并确认 origin 指向当前操作仓库，不重复 clone。每章开始前确认工作区干净，再 `git switch master`、`git pull --ff-only`，最后 `git switch -c` 创建该章分支。PR 合并后回到 master 拉取新内容，再开始下一章。
 
@@ -108,11 +115,16 @@ git pull --ff-only
 git switch -c lab/02-issue-pr
 ```
 
-origin 现在指向自己的 fork。按上方模板编辑、提交并推送该分支；在自己的 fork 创建实验 PR：
+origin 现在指向自己的 fork。先在 fork 的 Issues 新建工作项，记录该 fork 的编号。按上方模板编辑，使用上方的 git add、commit、push 命令提交并推送；不要执行其中指向组织仓库的 gh pr create。改用下面命令，123 替换为 fork 内的实际 Issue 编号：
 
 ```powershell
-gh pr create --repo YOUR_LOGIN/AI-Engineering-Notes --base master --head lab/02-issue-pr --title "docs: add workflow learning record" --body "个人 fork 中的工作流练习。"
+$issueNumber = 123
+gh pr create --repo YOUR_LOGIN/AI-Engineering-Notes --base master --head lab/02-issue-pr --title "docs: add workflow learning record" --body "Closes #$issueNumber
+
+个人 fork 中的工作流练习。"
 ```
+
+打开上述命令返回的 fork PR URL，按第 3 节第 8～9 步检查并合并；确认记录进入 fork master 且该 fork 的 Issue 关闭，再拉取本地 master。
 
 后续实验的 Issue、PR、Actions、Pages、Secrets 和 App 都选择这个 fork；确认 fork 默认分支仍为 master，按需启用 Actions。第 03～07 篇合并和运行的是 fork 的 master，不能记成组织仓库上线。
 
@@ -150,7 +162,7 @@ gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head YOUR_LOG
 | 无法直接编辑原仓库 | 是否有写权限；没有时走 fork + PR |
 | 出现 merge conflict | 同一位置是否被其他提交改过；解决冲突后重新检查 |
 | PR 不能合并 | 页面是否要求检查、评审、解决讨论或更新分支 |
-| Issue 没关闭 | 编号和关联仓库是否正确；是否合入目标基线分支 |
+| Issue 没关闭 | 编号和关联仓库是否正确；是否合入默认分支 |
 
 ## 7. 合并后发生了什么
 

@@ -17,7 +17,7 @@ status: learning
 
 > 本篇在当前操作仓库的最新 `master` 上启动向导，由向导创建配置 PR；PR base 必须是同一仓库的 master。fork 实验在自己的 fork 中完成，不将定时报告直接提交到组织默认分支。
 
-本篇是进阶选学。资料核对于 2026-11-16，配置和认证方式应随工具版本复核。
+本篇是进阶选学。资料核对于 2026-11-17，配置和认证方式应随工具版本复核。
 
 ## 1. gh-aw 项目在做什么
 
@@ -54,6 +54,17 @@ Agentic Workflow 仍然依赖事件、runner、权限和日志这些基础。它
 
 准备：仓库写权限、启用 Actions、GitHub CLI，以及所选 AI 引擎的有效认证。官方 quickstart 当前面向 Linux、macOS 或 **Windows + WSL**；Windows 用户本篇命令在 WSL 中运行，并在 WSL 内确认 `gh` 登录和仓库路径，不能假定继承 PowerShell 的认证状态。[官方 Quickstart](https://github.github.com/gh-aw/setup/quick-start/)
 
+### 本例采用 Copilot 的个人令牌认证
+
+本例选择 Copilot 引擎，并使用名为 `COPILOT_GITHUB_TOKEN` 的 repository secret。先确认账号能使用所需 Copilot 能力且有预算；本地 gh 登录用来操作仓库，模型推理认证另行配置。
+
+1. 在 GitHub 个人 Settings → Developer settings → Personal access tokens → Fine-grained tokens 创建令牌，填写用途和合理过期时间。
+2. 在 Account permissions 中找到 **Copilot Requests**，设为 **Read**；按当前官方 Copilot 认证要求创建。不要为这个模型凭据额外授予仓库 Contents/Administration 写权限。
+3. 复制令牌后，在**当前操作仓库** Settings → Secrets and variables → Actions → Secrets → New repository secret 中填 Name `COPILOT_GITHUB_TOKEN`，Secret 填令牌，保存。不要放在第 05 篇的 github-pages 环境里，否则不引用该环境的报告 job 读不到它。
+4. 保存后只能查看名称和更新时间，不能再次读取明文。名称存在只说明已保存，首次运行的认证步骤与模型响应才证明可用。令牌过期或认证失败时更新此 Secret，不把令牌贴到 Issue 或日志。
+
+若创建页面没有该 Account permission 或组织禁止这种凭据，停止这条认证路径并核对资格/政策；有组织集中计费的团队可改用官方的 copilot-requests 路径，但它与此 PAT 方案不同，不能只换 Secret 名称。本文不要求同时配置两种认证。[官方认证路径](https://github.github.com/gh-aw/setup/quick-start/#configuring-authentication)
+
 ## 4. 安装与导入样例
 
 如果前面一直在网页练习，现在需要在 WSL 中准备本地仓库。先按 [GitHub CLI 安装说明](https://github.com/cli/cli#installation) 安装适合 WSL 发行版的 `gh`，并确认已安装 Git，然后检查：
@@ -82,18 +93,33 @@ git status
 ```bash
 gh extension install github/gh-aw
 gh aw --help
+gh repo set-default
 gh aw add-wizard githubnext/agentics/repo-status
 ```
 
-向导会选择引擎、配置认证、添加 Markdown 源文件及 .lock.yml，并可推送或创建 PR。按以下顺序完成本练习：
+`gh repo set-default` 用于选择 CLI 默认仓库。fork 同时连接上游时，明确选自己的 fork，避免 gh 命令默认作用于组织仓库。
 
-1. 确认向导识别的是当前操作仓库；没有组织写权限时应为自己的 fork。
+向导会添加 Markdown 源文件及 .lock.yml，并可推送或创建 PR。按以下顺序完成本练习：
+
+1. 确认向导识别的是当前操作仓库；没有组织写权限时应为自己的 fork。引擎选择 Copilot，认证选择 COPILOT_GITHUB_TOKEN 路径并复用刚配置的 Secret；不选择组织计费。
 2. 选择通过 PR 引入配置，不选择直接写默认分支；接受向导创建的工作分支，无需预设 `lab/07-gh-aw`。确认 PR 的 base 为该仓库 `master`。
 3. 向导创建 PR 后，在评审与合并确认环节暂停：先不确认合并，也不启用自动合并。原样例包含定时触发，仅在后面跳过手动运行不能阻止定时任务生效。
-4. 另开终端进入同一 checkout，执行 `git fetch origin`，再 `git switch 分支名`（换成该 PR 的实际来源分支）。在本地生成的 `repo-status.md` 中，将整个 `on` 配置改为仅 `workflow_dispatch`，并将 `safe-outputs.create-issue.close-older-issues` 设为 `false`，保留其他必需设置。
+4. 另开终端进入同一 checkout，执行 `git fetch origin`，再 `git switch 分支名`（换成该 PR 的实际来源分支）。在 `.github/workflows/repo-status.md` 中，将整个 `on` 配置改为仅 `workflow_dispatch`，并将 `safe-outputs.create-issue.close-older-issues` 设为 `false`，保留其他必需设置。
 5. 执行 `gh aw compile`，检查生成的 .lock.yml 也只有手动触发；将修改后的 .md 和 .lock.yml 提交并推送到该 PR。检查 PR 最新差异和检查结果后，才合并到同一仓库的 `master`。
-6. 回到暂停的向导继续完成后续认证和状态步骤；若出现立即运行选项，选择跳过。最后进入 Actions，选择对应报告流程、Run workflow、master，手动触发。向导具体提示随版本变化，必须保持“修改并编译 → 检查 PR → 合并 → 运行”的顺序。[向导生命周期说明](https://github.github.com/gh-aw/setup/cli/#add-wizard)
+6. 回到暂停的向导继续完成后续认证和状态步骤，确认使用前述 Copilot Secret；若出现立即运行选项，选择跳过。最后进入 Actions，选择对应报告流程、Run workflow、master，手动触发。向导具体提示随版本变化，必须保持“修改并编译 → 检查 PR → 合并 → 运行”的顺序。[向导生命周期说明](https://github.github.com/gh-aw/setup/cli/#add-wizard)
 
+
+源文件是 `.github/workflows/repo-status.md`，编译结果为 `.github/workflows/repo-status.lock.yml`。保存源文件后，在当前 PR 分支的仓库根目录执行：
+
+```bash
+gh aw compile
+git diff -- .github/workflows/repo-status.md .github/workflows/repo-status.lock.yml
+git add .github/workflows/repo-status.md .github/workflows/repo-status.lock.yml
+git commit -m "chore: make repo status report manual"
+git push
+```
+
+若向导另有辅助文件，分别确认用途和差异；不要把整个工作区无差别加入提交。`git push` 的 upstream 应是向导 PR 的来源分支，先用 `git status -sb` 核对。若当前来源分支尚未设置 upstream，确认 origin 是本次 PR 所在仓库后用 `git push -u origin HEAD` 建立跟踪，不向 master 直推。
 
 `on` 的替换片段位于 Markdown 文件的 YAML frontmatter 中，不是独立 workflow：
 
@@ -103,6 +129,19 @@ on:
 ```
 
 向导也可能添加辅助文件，提交前逐项检查。认证和 Secrets 属于仓库配置，不会因为 PR 尚未合并就自动撤销。[官方样例流程](https://github.github.com/gh-aw/setup/quick-start/)
+
+### 读懂导入的源文件
+
+| 源文件部分 | 本例检查什么 |
+| --- | --- |
+| on | 仅保留 workflow_dispatch，没有 schedule |
+| engine | 向导所选 Copilot；以当前生成文件的引擎表示为准 |
+| permissions | 读取仓库活动所需的 GitHub 权限，不等于模型账号资格 |
+| tools | Agent 可调用的工具范围，不能由任务正文随意增加权限 |
+| safe-outputs.create-issue | 允许把报告写成 Issue；close-older-issues 为 false |
+| frontmatter 后的 Markdown | 给 Agent 的任务要求，例如总结范围、语言、引用链接 |
+
+源文件中的读取权限与最终写 Issue 不应只看一行判断；gh-aw 会编译出受控输出处理步骤。检查生成的 workflow 和运行日志，确认写入的是本仓库的报告 Issue。正文中文要求可以改，编译产物不作为手写任务的维护入口。
 
 ## 5. 认证与权限分别解决什么
 
@@ -125,7 +164,9 @@ gh aw status
 gh run watch
 ```
 
-完成后查看 Issues 中的报告，抽查其引用的 PR、Issue 或提交是否存在，是否正确反映仓库活动。run 成功说明流程完成，并不能替代对报告内容的核查。
+打开该 run，先区分失败发生在配置/认证、Agent 执行还是输出阶段：401/403 先检查 Secret 名称、过期时间、Copilot 权限与政策；模型步骤成功但没有报告时，看受控输出处理步骤是否成功以及是否允许 create-issue。不要只重复运行整个流程。
+
+完成后查看 Issues 中新出现的报告，抽查其引用的 PR、Issue 或提交是否存在，是否正确反映仓库活动。run 成功说明流程完成，并不能替代对报告内容的核查。
 
 可以在样例 Markdown 的任务正文中补充自己的要求，例如：只总结最近的 PR；使用中文；每条结论附相关链接；没有活动就直接说明。
 
@@ -144,7 +185,7 @@ git diff
 
 **禁用 workflow 不会取消已经存在的 run。** 要立即停止当前执行，还需打开那次运行并选择取消。禁用期间也不能重新运行已有 run 或其中的 job，需要先重新启用。[禁用与启用说明](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows)
 
-仅关闭已生成的报告 Issue，不会停止下一次定时运行。
+本例已经移除定时事件，后续只有手动触发。若以后恢复 schedule，仅关闭报告 Issue 不会停止后续运行。实验彻底结束且没有其他流程使用此令牌时，可删除仓库 Secret，并在个人令牌设置中撤销对应 PAT。
 
 ## 8. 在哪里查看各阶段的结果
 

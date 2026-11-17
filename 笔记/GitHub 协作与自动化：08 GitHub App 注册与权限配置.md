@@ -32,6 +32,21 @@ GitHub App 是独立于个人账号的集成身份：在用户或组织账号下
 
 本文默认做**安装型**用法：装到仓库后以 Installation 身份读写与收事件，**不**做「安装时请求用户 OAuth 登录」。
 
+## 本篇采用的最小场景
+
+假设你准备给自建服务一个机器人身份：读取 PR，并在 PR 时间线发表评论。当前先完成身份与仓库授权，不启动接收服务。配置如下：
+
+| 项目 | 本例选择 |
+| --- | --- |
+| 注册归属 | 有权限的组织；个人练习可注册在自己账号并安装到自己的 fork |
+| Repository permissions | Pull requests：Read and write；Metadata：Read；其他保持 No access |
+| Webhook Active | 关闭，本例暂不需要接收事件 |
+| Subscribe to events | 暂不订阅；主动调用 API 与接收 Webhook 是两件事 |
+| 安装范围 | Only on this account，并只授权实验仓库 |
+| 用户 OAuth | 不开启；服务未来使用安装身份 |
+
+下面的字段表解释其他场景的选择，按本表完成本次练习即可。注册名要全局唯一，示例 xallor-robot 已被使用时换成自己的名称。完成本篇后得到的是已安装且权限正确的 App，不是一台已经工作的评论机器人。
+
 ## 能做什么、怎么用
 
 典型能力：
@@ -115,7 +130,8 @@ App **已安装后再加权限**，还须由安装账号批准权限更新，未
 | 读仓库基础信息 | Metadata Read |
 | 订阅某类事件（只收、不写） | 该类资源至少 Read（如 PR 事件要 Pull requests Read） |
 | Issue / PR **时间线**评论 | Issues **或** Pull requests 其一为 Read and write 即可 |
-| PR **行内**评论 | Pull requests Read and write，并订 `Pull request review comment` |
+| 主动创建 PR **行内**评论 | Pull requests Read and write；不要求订阅评论事件 |
+| 接收 PR 行内评论事件 | Pull requests Read，并订阅 `Pull request review comment` |
 | 读 CI 并评论 | 评论所需权限 + Checks Read（或 Actions Read） |
 | 推非默认分支 / 改文件 | Contents Read and write；仓库应对默认分支开保护（禁直推、需 PR，本 App 不进 bypass） |
 | 触发工作流运行 | Actions Read and write |
@@ -168,6 +184,15 @@ App 设置 → **Credentials** → **Key pairs** → **New key**
 ### 安装到仓库
 
 **Install App** → 选择组织/账号 → 勾选仓库 → Install。从安装成功页 URL 可抄 Installation ID。
+
+### 确认安装和权限已经生效
+
+1. 在实验仓库 Settings → Integrations → GitHub Apps 找到刚安装的 App，点击 Configure，确认账号和仓库选对了。
+2. 检查 Repository access 只包含实验仓库；Permissions 中 Pull requests 为读写、Metadata 为读取，其余符合上方最小场景。
+3. 回到 App 的 General → Webhook，确认 Active 未勾选；再到 Permissions & events 核对权限和事件订阅。如果曾增加权限而安装页显示待批准，先由安装管理员批准更新，再检查实际权限。
+4. 保存 App ID/Client ID 和 Installation ID 的用途说明，私钥保存在本机凭据存储中；不要把它提交进 lab 分支。关闭页面重新进入仍能看到该安装，说明注册和安装对象已建立。
+
+到此验证的是注册、安装范围与已批准权限。首次 API 调用还需要服务端签发 JWT、换取 installation token 并请求 API；单有 .pem 或安装成功不能证明评论已发送。后续实现评论服务时使用 [Issue comments API](https://docs.github.com/en/rest/issues/comments#create-an-issue-comment) 处理 PR 时间线评论；行内评论是另一套 [Review comments API](https://docs.github.com/en/rest/pulls/comments#create-a-review-comment-for-a-pull-request)，事件订阅不是写评论的前提。
 
 参考：[Choosing permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) · [Authenticating as a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) · [Webhook events](https://docs.github.com/en/webhooks/webhook-events-and-payloads)
 

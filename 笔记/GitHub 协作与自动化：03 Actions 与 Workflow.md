@@ -69,6 +69,8 @@ jobs:
 
 ## 4. `run` 和 `uses` 的区别
 
+第一次 PR 已经合并。现在从更新后的 master 新建 `lab/03-actions-events`；本节和下一节都在这个新分支编辑 hello.yml，完成后创建第二个 PR。不要复用已经删除的旧分支。
+
 `run` 写你要执行的命令；`uses` 引用可复用组件。要读取仓库中的文件，可以在原来的打印步骤前加：
 
 ```yaml
@@ -96,6 +98,10 @@ on:
 现在有三种入口：手动运行、推送到 `master`、指向该分支的 PR 发生受支持的变动。`pull_request.branches` 筛选的是 PR 的目标分支；更新 PR 来源分支通常会引起一次新检查。
 
 在 PR 阶段和合并后各运行一次很常见：前者检查待合并变更，后者检查主分支的新状态。触发行为以 [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) 为准。
+
+将 checkout、List files 和新的 on 配置一起提交，创建面向 master 的 PR。在 PR 的 Checks 中打开 Hello Actions：事件应为 pull_request，日志能列出仓库文件。再把打印文字改成另一句话并提交到同一来源分支，新 run 应显示新文字。
+
+检查通过后合并 PR，回到 Actions 找到 push 事件的运行。打开运行详情，对比触发事件、提交和日志：PR 运行用于检查待合并改动，push 运行对应合并后的 master。两者可能使用不同 SHA；PR 的默认 checkout 通常是测试合并提交。最后从 Run workflow 选择 master 再运行一次，事件应为 workflow_dispatch。
 
 ## 6. 并行和依赖
 
@@ -145,7 +151,42 @@ jobs:
 
 缓存丢失应只影响速度；artifact 是明确要保留或传递的结果。[Artifacts](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts) · [Caching](https://docs.github.com/en/actions/concepts/workflows-and-actions/dependency-caching)
 
-## 8. 常见问题与结果检查
+## 8. 身份、权限、配置和执行环境
+
+这些词回答不同的问题：谁在操作、允许做什么、输入什么配置、在哪里执行。不要把 GitHub 登录、Actions 身份和第三方 Agent 账号视为一个身份。
+
+| 对象 | 作用与配置位置 |
+| --- | --- |
+| GITHUB_TOKEN | GitHub 为 job 提供的临时仓库凭据，通常无需手工创建；workflow 的 permissions 调整其可用权限 |
+| PAT | 用户创建的个人访问令牌；由使用它的工具决定所需权限，第 07 篇给出具体案例 |
+| GitHub App installation token | 以某次 App 安装身份调用 API；由 App 服务换取，第 08 篇区分其与私钥 |
+| Secrets | 保存敏感输入，可在仓库、组织或部署环境级配置；不会自动授予凭据本身没有的权限 |
+| Variables / env | Variables 是 GitHub 保存的非敏感配置，通过 vars 引用；env 把值提供给步骤进程 |
+| 部署 Environment | job 引用的发布规则与配置集合，可要求审批、限制分支，不是运行程序的服务器 |
+| runner / Agent 执行环境 | 实际执行命令的机器或沙箱；GitHub Actions、Copilot Cloud、Cursor 各自配置，不自动共享 Secrets |
+
+### 用一个不含真实凭据的示例理解配置引用
+
+在当前仓库 Settings → Secrets and variables → Actions 的 Variables 标签中新建 `LAB_MESSAGE`，值为 `Hello config`；在 Secrets 标签中新建 `LAB_TOKEN`，填入任意无敏感性的练习值。这里不需要购买服务或生成真正的访问令牌。
+
+从最新 master 建立 `lab/03-config`，在 hello.yml 的 steps 最后插入：
+
+```yaml
+      - name: Check configuration
+        env:
+          LAB_MESSAGE: ${{ vars.LAB_MESSAGE }}
+          LAB_TOKEN: ${{ secrets.LAB_TOKEN }}
+        run: |
+          printf '%s\n' "$LAB_MESSAGE"
+          test -n "$LAB_TOKEN" || { echo "LAB_TOKEN is missing"; exit 1; }
+          echo "Practice value is available; its value is not printed"
+```
+
+通过 PR 合并后手动运行 master。日志应显示 `Hello config` 和存在性检查通过；这只能证明配置传入了步骤，不能证明真实 API 认证成功。删除 LAB_TOKEN 再运行会看到明确的缺失提示，恢复后通过。最后移除该练习步骤并合并，再删除两项练习配置，以免影响后续运行。
+
+这里的 PR 来源分支在同一操作仓库内。来自另一个 fork 的 PR 默认无法获得普通 Secrets；不要用提高事件信任级别来绕过它。仓库 Secret 与第 05 篇的 environment secret 作用域不同；GitHub 中保存的 Secret 也不会自动出现在 Cursor 中。[Secrets 配置与引用](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+
+## 9. 常见问题与结果检查
 
 | 现象 | 排查顺序 |
 |---|---|
