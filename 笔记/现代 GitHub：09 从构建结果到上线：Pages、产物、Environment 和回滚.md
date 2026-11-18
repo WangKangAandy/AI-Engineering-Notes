@@ -32,7 +32,7 @@ Artifact 不等于 Release，Environment 也不等于 Pull Request 审批。PR �
 - Name：release；
 - Required reviewers：选择能够批准部署的账号；
 - Deployment branches and tags：选择 Selected branches and tags，并只允许 main；
-- 添加规则：v*；
+- 本章不使用 tag 部署；如果另设 v* tag 流程，必须另建 workflow 和 Environment 规则；
 - Allow administrators to bypass protection rules：关闭；
 - Wait timer：本练习不设置；
 - Environment secrets：本练习不放秘密。
@@ -57,7 +57,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -126,7 +126,7 @@ jobs:
 1. Source 选择 GitHub Actions；
 2. 保存；
 3. 确认默认分支、仓库可见性和组织策略允许 Pages；
-4. 回到 Actions，打开 Publish resource site 的运行。
+4. 回到 Actions：先打开合并前的 PR run，确认 build 成功且 deploy 显示 Skipped；合入 main 后再打开 push run，确认 deploy 进入 release Environment。手动运行时在 Run workflow 页面选择 main；若选择其他分支，按分支规则预期拒绝或不进入部署。
 
 build 完成后，deploy job 会显示 Waiting。点击 Review deployments，选择 release，确认批准。批准后，deploy-pages action 才会执行。等待时间和页面生成时间取决于 GitHub 环境，不能用本地 YAML 解析代替。
 
