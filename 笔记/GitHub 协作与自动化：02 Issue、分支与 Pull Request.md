@@ -1,6 +1,6 @@
 ---
 title: GitHub 协作与自动化：02 Issue、分支与 Pull Request
-summary: 通过一个小改动学习 Issue、分支、提交和 Pull Request，完成创建、评审及合并的协作流程。
+summary: 从 GitHub 仓库、Issue 和 Pull Request 的含义开始，通过网页完成一次提出需求、修改文件和合并的练习，并提供本地 Git 对应路径。
 tags:
   - github
   - collaboration
@@ -12,11 +12,25 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇目标：在目标仓库走完 Issue → 分支 → PR → 合并。
+学习路线：[[GitHub 协作与自动化：01 学习路线]]。本篇面向已有 GitHub 账号、还没有做过 PR 的读者；网页主线不需要安装 Git，也不要求会写代码。完成后再读 [[GitHub 协作与自动化：02A 用 Issue 描述问题与拆解任务]] 和 [[GitHub 协作与自动化：02B 让 PR 关联 Issue 并完成评审合并]]。
 
-> 本篇实验分支：`lab/02-issue-pr`，PR 目标：当前操作仓库的 `master`。默认操作组织仓库；没有权限时使用下文的 fork 路径。
+> 本篇实验分支：`lab/02-issue-pr`，PR 目标：当前操作仓库的 `master`。公开读者先按第 2 节准备自己的 fork；组织成员仅在获准的仓库实验。
 
-## 1. 六个操作各自改变什么
+资料核对日期：2026-11-18。界面可能调整，关键是核对仓库归属、来源分支、目标分支与结果。
+
+## 1. 先理解 GitHub 上正在协作什么
+
+Git 负责记录文件版本；GitHub 在 Git 仓库之上提供托管、讨论和协作页面。仓库（repository，常简称 repo）不只是一个下载目录：Code 页面展示文件和提交历史，Issues 记录问题与任务，Pull requests 展示拟合入的修改。第一次练习可以全程在浏览器里完成，GitHub 网页会代你创建提交。[GitHub 入门练习](https://docs.github.com/en/get-started/start-your-journey/hello-world)
+
+打开仓库时先看左上角的 `OWNER/REPOSITORY`：前者是谁的仓库，后者是仓库名。再看 Code 页面的分支选择器。默认分支是这个仓库的主要整合位置，常叫 main 或 master；本系列仓库使用 master，这不是 GitHub 对所有仓库的固定命名。
+
+假设发现“学习记录没有说明要学哪些内容”。**Issue** 用来把这个问题说清楚：为什么要改、希望得到什么、怎样判断完成。它可以先存在，甚至由不会修改文件的人提出。打开一个 Issue 不会自动创建分支或改动文件，也不要求以后一定有 PR；讨论、调查或决定不做，都可以是处理结果。
+
+当你准备补上记录时，先从 master 建立一个分支，在该分支保存改动。**Pull Request（PR）** 则提出“请把这个来源分支的修改合入目标分支”。PR 中有文件差异、讨论、评审和合并状态；文档修改同样可以用 PR。它不是下载请求，也不是 Git 命令 `git pull`。
+
+Issue 让人看懂要解决什么，PR 让人检查具体怎么解决。一个小 Issue 可以由一个 PR 解决；较大的工作可能需要多个 PR。本篇先走最简单的一对一流程，拆解与关联的细节留到 02A、02B。
+
+### 各个动作改变了什么
 
 | 操作 | 改变什么 | 没有自动完成什么 |
 |---|---|---|
@@ -33,21 +47,54 @@ GitHub flow 的核心是分支、提交、PR、评审及合并。[官方流程�
 
 ## 2. 准备练习仓库
 
-打开 [组织仓库](https://github.com/xallor-ai/AI-Engineering-Notes)，确认分支选择器为 `master`。本篇新增 `笔记/GitHub 工作流实操记录.md`，不依赖仓库已有 README 或其他分支的文件。如果同名记录已经存在，更新其中的学习目标即可。
+打开 [组织仓库](https://github.com/xallor-ai/AI-Engineering-Notes)。没有组织写权限的读者点击 Fork，将仓库复制到自己的账号；随后确认地址栏已经变成 `你的账号/AI-Engineering-Notes`。接下来创建 Issue、分支和 PR 都在这个 fork 内完成，暂时不向组织仓库发实验 PR。
 
-网页与本地路径二选一，完成后继续第 03 篇；不要在同一仓库把两条路径重复做一遍。
+若自己的 fork 看不到 Issues，进入 Settings → General → Features，启用 Issues。看到 Issues 不代表你有其他仓库的管理权限；本例能配置，是因为你拥有自己的 fork。组织成员已有获准的实验仓库时，可以直接使用，不再建一份。
+
+回到当前操作仓库的 Code，确认分支选择器为 `master`。本篇新增 `笔记/GitHub 工作流实操记录.md`，不依赖其他分支的文件。如果同名记录已经存在，更新其中的学习目标即可。fork 是 GitHub 上另一份仓库；本地 clone 才是把仓库取到电脑上，本篇网页路径不需要 clone。
+
+网页与本地路径二选一，完成后继续 02A、02B；已经熟悉协作流程时可直接进入第 03 篇。不要在同一仓库把两条路径重复做一遍。
 
 ## 3. 全程网页练习
 
-1. 在当前操作仓库的 Issues 新建“添加 GitHub 工作流学习记录”，正文写：新增一篇记录，列出 PR、CI、Pages 三个学习目标。
-2. 记下 Issue 编号。下面用 `#1` 举例，实际使用自己的编号。
-3. 回到 Code，通过分支选择器从 `master` 创建 `lab/02-issue-pr`。
-4. 在该分支用 Add file → Create new file 新建 `笔记/GitHub 工作流实操记录.md`，填入下方模板后提交。网页保存操作会直接形成远程提交，不需要另做本地 push。
-5. 进入 Pull requests → New pull request。检查 `base: master`，`compare: lab/02-issue-pr`。
-6. 查看差异，确认只包含预期改动，创建 PR。
-7. PR 正文说明改了什么、怎样检查，并写 `Closes #1`。关联关闭通常在 PR 合并到默认分支后发生。
-8. 在 Files changed 阅读改动，在 Conversation 查看讨论和状态。此时还没配置 CI，没有自动测试结果是正常的。
-9. 使用页面允许的合并方式完成合并，再回到 `master` 验证文件内容。
+### 提出一个能完成的小需求
+
+在当前操作仓库选择 Issues → New issue。如果出现模板选择页，选合适模板；允许空白 Issue 时可选 Open a blank issue。本次标题写“添加 GitHub 工作流学习记录”，正文写：
+
+```markdown
+目前缺少一份能跟随本系列填写的学习记录。
+
+希望在笔记目录新增或补齐《GitHub 工作流实操记录》，列出 PR、CI、Pages 三个学习目标。
+
+完成条件：master 中能打开该文件，三个目标清楚可读。本次只写学习目标，不声称 CI 或 Pages 已配置成功。
+```
+
+点击 Submit new issue，记下页面标题旁的编号与地址。下面的 `#1` 只是占位示例，必须换成自己的编号。Issue 与 PR 使用仓库内同一套编号，因此你的第一个 Issue 不一定是 1，跨仓库的同一编号也不是同一个对象。[创建 Issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue)
+
+### 在分支上修改文件
+
+回到 Code，选中 master，再用分支选择器输入 `lab/02-issue-pr` 并创建分支。确认当前显示的是新分支，用 Add file → Create new file 新建 `笔记/GitHub 工作流实操记录.md`，填入下方模板；已有文件则打开它并点击编辑按钮。
+
+点击 Commit changes，填写提交说明 `docs: add workflow learning record`，确认提交到当前实验分支。网页保存会直接形成 GitHub 上的提交，不需要另做本地 push。切回 master 时暂时看不到这次改动，这是分支隔离的结果。
+
+### 提出 PR 并检查合并方向
+
+进入 Pull requests → New pull request。fork 的比较页面可能默认朝向原仓库；先把 **base repository** 选为自己的 fork，再确认以下方向：
+
+| 页面字段 | 本次应选 | 含义 |
+| --- | --- | --- |
+| base | master | 修改要进入哪里 |
+| head / compare | lab/02-issue-pr | 修改来自哪里 |
+
+确认两个仓库栏都是当前实验仓库。查看差异：增加的行通常带 `+`，删除的行带 `-`；文件列表应只有你准备修改的记录。点击 Create pull request，标题写“添加 GitHub 工作流学习记录”，正文写改动与检查方式，并单独写一行 `Closes #1`，替换实际编号后提交。
+
+创建 PR 后 Issue 暂时仍是 Open，这是正常的。`Closes` 在 PR 正文中声明解决对象；当前目标是默认分支且仓库启用自动关闭时，合并才会触发关闭。CI、Approve 和手动关闭 PR 都不能代替这次合并，详细机制见 02B。
+
+### 合并后同时检查文件和工作项
+
+在 Files changed 再读一遍完整改动，在 Conversation 查看讨论和合并条件。此时本例没有配置 CI，没有自动测试结果是正常的。自己创建的 PR 可以自查和评论，但不能给自己提交 Approve 评审；如果仓库要求别人批准，必须请符合规则的人评审，不能把自查当作批准。
+
+满足页面显示的合并条件后，使用允许的合并方式并确认。看到 PR 状态为 Merged，再回 Code → master 打开记录文件，核对三个目标。最后回 Issue 检查关闭状态及指向该 PR 的记录；若仍然 Open，按第 6 节排查，不将“按钮点过了”当作验收。
 
 可选删除已合并分支；这不会删除已进入主分支的内容。Issue 关联语法参见 [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)。
 
@@ -98,7 +145,7 @@ gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head lab/02-i
 添加 PR、CI 和 Pages 学习目标。"
 ```
 
-创建成功后打开 gh 返回的 PR URL，按第 3 节第 8～9 步检查并合并。确认当前仓库 master 已有实操记录、关联 Issue 已关闭，再更新本地 master 并进入下一篇。
+创建成功后打开 gh 返回的 PR URL，按第 3 节“合并后同时检查文件和工作项”检查并合并。确认当前仓库 master 已有实操记录、关联 Issue 已关闭，再更新本地 master 并进入下一篇。
 
 如果已有 checkout，直接进入它并确认 origin 指向当前操作仓库，不重复 clone。每章开始前确认工作区干净，再 `git switch master`、`git pull --ff-only`，最后 `git switch -c` 创建该章分支。PR 合并后回到 master 拉取新内容，再开始下一章。
 
@@ -124,9 +171,9 @@ gh pr create --repo YOUR_LOGIN/AI-Engineering-Notes --base master --head lab/02-
 个人 fork 中的工作流练习。"
 ```
 
-打开上述命令返回的 fork PR URL，按第 3 节第 8～9 步检查并合并；确认记录进入 fork master 且该 fork 的 Issue 关闭，再拉取本地 master。
+打开上述命令返回的 fork PR URL，按第 3 节“合并后同时检查文件和工作项”检查并合并；确认记录进入 fork master 且该 fork 的 Issue 关闭，再拉取本地 master。
 
-后续实验的 Issue、PR、Actions、Pages、Secrets 和 App 都选择这个 fork；确认 fork 默认分支仍为 master，按需启用 Actions。第 03～07 篇合并和运行的是 fork 的 master，不能记成组织仓库上线。
+后续主线实验的 Issue、PR、Actions、Pages、Secrets 和 App 都选择这个 fork；确认 fork 默认分支仍为 master，按需启用 Actions。第 03～07 篇主线合并和运行的是 fork 的 master，不能记成组织仓库上线；03A 自托管选学另建私有 runner-lab，不能把个人电脑注册到公开 fork。
 
 如果某项改动要正式贡献给组织，从组织最新 master 新建独立贡献分支，仅搬入准备提交的改动，避免将全部实验提交带入正式 PR：
 
@@ -162,10 +209,10 @@ gh pr create --repo xallor-ai/AI-Engineering-Notes --base master --head YOUR_LOG
 | 无法直接编辑原仓库 | 是否有写权限；没有时走 fork + PR |
 | 出现 merge conflict | 同一位置是否被其他提交改过；解决冲突后重新检查 |
 | PR 不能合并 | 页面是否要求检查、评审、解决讨论或更新分支 |
-| Issue 没关闭 | 编号和关联仓库是否正确；是否合入默认分支 |
+| Issue 没关闭 | PR 正文的关键词、编号和仓库是否正确；是否合入默认分支；仓库是否关闭了自动关闭功能，详见 02B |
 
 ## 7. 合并后发生了什么
 
-PR 合并后，切回 master 可以看到新增的实操记录；Issue 是否自动关闭，取决于关闭关键词是否正确关联该 Issue，以及 PR 是否合入默认分支。PR 尚未合并时，继续向同一来源分支推送提交，会更新现有 PR，通常不需要另建一个。
+PR 合并后，切回 master 可以看到新增的实操记录；本例的 Issue 是否自动关闭，取决于描述中的关闭关键词是否正确关联该 Issue、PR 是否合入默认分支，以及仓库是否启用了自动关闭。PR 尚未合并时，继续向同一来源分支推送提交，会更新现有 PR，通常不需要另建一个。
 
-下一篇：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
+继续入门：[[GitHub 协作与自动化：02A 用 Issue 描述问题与拆解任务]] → [[GitHub 协作与自动化：02B 让 PR 关联 Issue 并完成评审合并]]。已经熟悉这些协作动作的读者可直接进入 [[GitHub 协作与自动化：03 Actions 与 Workflow]]。
