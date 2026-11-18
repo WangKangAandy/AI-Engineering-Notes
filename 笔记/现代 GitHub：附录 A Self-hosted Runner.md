@@ -304,5 +304,5 @@ Get-Location
 
 如果仅为本实验修改了 CurrentUser 执行策略，结束后可在同一账号下用 Set-ExecutionPolicy 将该作用域恢复为第 3 节记录的原值；不要覆盖其他用途后来需要的配置。
 
-学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到[CI 与合并门禁](<现代 GitHub：09 从构建结果到上线：Pages、产物、Environment 和回滚.md>)时继续使用 resource-nav 及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。
+学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到[CI 与合并门禁](<现代 GitHub：08 让每个 PR 接受自动检查：Actions、CI 和合并门禁.md>)时继续使用 resource-nav 及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。
 
