@@ -146,15 +146,18 @@ needs 只表达执行依赖，不会自动复制文件。artifact 是明确的�
 
 ## 设置 required check
 
-在仓库 Settings → Branches 或 Rules → Rulesets 中，为 main 创建或编辑规则：
+本书选择 Rulesets 作为唯一配置路径。在仓库 Settings → Rules → Rulesets 中：
 
-1. 限制直接推送到 main；
-2. 要求 Pull Request；
-3. 要求分支在合并前是最新；
-4. 添加 Resource CI / Check resources 作为 required status check；
-5. 对管理员是否允许绕过作出明确选择。
+1. 点击 New ruleset，选择 New branch ruleset；
+2. Name 填 main pull request protection；
+3. Enforcement status 选择 Active；
+4. Target branches 选择 Include default branch，确认匹配 main；
+5. 开启 Require a pull request before merging，并要求至少一次 approval；
+6. 开启 Require status checks to pass，等待 Resource CI 至少成功运行一次后，选择 Check resources；
+7. 开启 Require branches to be up to date；
+8. 对 Bypass list 和管理员绕过作出明确选择，然后点击 Create。
 
-保存规则后，用一个故意失败的 PR 验证 Merge 按钮是否被阻止，再修复它并确认按钮恢复。不要只看规则页面写了必需检查；必须让一次红灯真正影响合并。
+保存规则后，用一个故意失败的 PR 验证 Merge 按钮是否被阻止，再修复它并确认按钮恢复。打开 PR 的 Checks 区域，确认规则选择的检查名与 workflow job 的 name 一致。不要只看规则页面写了必需检查；必须让一次红灯真正影响合并。
 
 如果检查名称找不到，先让 workflow 至少成功运行一次，确认 job 的 name 与规则中选择的名称一致。修改 workflow 名称后，旧规则可能仍指向旧检查。
 

@@ -38,7 +38,9 @@ status: draft
 - Copilot 请求凭据让 runner 调用模型；
 - GITHUB_TOKEN 或 safe output 机制负责读取 PR 和发布允许的评论。
 
-本章个人仓库可以使用一个有有效期的 Fine-grained PAT，授予 Copilot Requests 的 Read 权限，并把值保存为仓库 Secret COPILOT_GITHUB_TOKEN。不要把 token 放进命令、Markdown、workflow 输出或 Git。
+本章个人仓库可以使用一个有有效期的 Fine-grained PAT。进入 GitHub 头像菜单 → Settings → Developer settings → Fine-grained tokens → Generate new token：Resource owner 选择自己的账号，Expiration 选择较短期限，Account permissions 中将 Copilot Requests 设为 Read；只在需要访问仓库对象时选择对应的最小 repository permissions。创建后只复制一次 token。
+
+回到目标仓库 Settings → Secrets and variables → Actions → New repository secret，Name 填 COPILOT_GITHUB_TOKEN，Secret 粘贴刚才的值并保存。随后用一个只读的手动 run 验证 Secret 缺失或权限不足时的错误层；不要把 token 放进命令、Markdown、workflow 输出或 Git。
 
 组织集中计费的 copilot-requests: write 是另一条路径，需满足组织策略。本章不把两种认证混用；请按当前 gh-aw 官方文档核对可用方式。
 

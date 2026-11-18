@@ -46,13 +46,13 @@ Agent 的价值不是替你按下 Merge。它可以研究仓库、制定计划�
 
 ## 启动 Cloud Agent
 
-在 GitHub 的 Agents 面板、Issue 的任务入口或 Copilot Chat 中选择仓库，输入任务契约，并明确：
+本章选择一种可观察的入口：在 Issue 的评论框中输入 @copilot，明确要求它先研究并在分支中补充测试；发送后等待 GitHub 返回任务状态或 PR 链接。如果账号没有 @copilot 入口，改用 Agents 面板，并记录这只是产品资格差异，不把本地 IDE 修改写成 Cloud Agent 结果。
 
-- 基于哪个分支；
-- 是否先研究和给出计划；
-- 是否允许创建 Pull Request；
-- 必须运行哪些命令；
-- 哪些文件禁止改动。
+评论内容：
+
+~~~text
+@copilot 请处理本 Issue：只修改 test_catalog.py，增加两个资源会生成两个 li 元素的测试。先给出计划，完成后创建 Pull Request。运行 python -m unittest discover -s . -p 'test_*.py' -v。不要修改 catalog.py、build.py、workflow、Secrets 或权限。
+~~~
 
 GitHub Copilot cloud agent 会在自己的环境中工作，并在分支上提交修改。它与 IDE 中直接修改本地文件的 agent mode 不是同一个执行面。提交 PR 前先观察它的计划和修改范围。由于本任务补充的是已有行为的测试覆盖，测试首次通过也可以接受；不要为了制造红灯而修改断言或生产代码。
 
@@ -101,10 +101,10 @@ PR_NUMBER 要换成自己的编号。不要在 Agent 分支上直接继续做另
 
 ## 做一次纠偏
 
-假设 Agent 还修改了 .github/workflows/ci.yml。不要只在评论里说“不要改这个”。在 PR 中明确写：
+假设 Agent 还修改了 .github/workflows/ci.yml。不要只在评论里说“不要改这个”。在 Agent 创建的 PR 评论中输入 @copilot，明确触发继续处理：
 
 ~~~text
-请撤回对 .github/workflows/ci.yml、catalog.py 和 build.py 的修改，只保留 test_catalog.py 中的测试覆盖改动。重新运行完整 unittest，并在 PR 描述中列出实际修改文件。
+@copilot 请撤回对 .github/workflows/ci.yml、catalog.py 和 build.py 的修改，只保留 test_catalog.py 中的测试覆盖改动。重新运行完整 unittest，并在 PR 描述中列出实际修改文件。
 ~~~
 
 它更新后再次检查差异。纠偏后的 PR 仍由人决定是否合并；如果反复越界，关闭任务或关闭 PR，保留原因。

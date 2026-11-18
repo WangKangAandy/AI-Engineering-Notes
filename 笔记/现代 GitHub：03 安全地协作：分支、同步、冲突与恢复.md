@@ -257,18 +257,21 @@ git status
 
 ## 暂时移开未完成工作：stash
 
-当你需要切换分支，但当前修改还没到可以提交的程度：
+当你需要切换分支，但当前修改还没到可以提交的程度。先在独立的 stash 实验分支准备修改：
 
 ~~~bash
+git switch main
+git switch -c lab/stash
+printf '\n暂存中的实验修改\n' >> README.md
 git stash push -m "wip: before switching branch"
 git status --short
 git switch main
 ~~~
 
-回来后先切回原来的工作分支，再查看并恢复 stash：
+回来后切回这次实验的原分支，再查看并恢复 stash：
 
 ~~~bash
-git switch lab/recovery
+git switch lab/stash
 git stash list
 git stash show --stat stash@{0}
 git stash pop stash@{0}

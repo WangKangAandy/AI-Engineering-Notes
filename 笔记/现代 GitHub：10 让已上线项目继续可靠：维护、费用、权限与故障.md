@@ -55,7 +55,7 @@ status: draft
 git switch main
 git pull --ff-only origin main
 git switch -c maintenance/update-actions
-rg -n "actions/|python-version" .github/workflows
+git grep -n -E "actions/|python-version" -- .github/workflows
 ~~~
 
 修改后先运行本机测试，再让 CI 运行。一次 PR 只更新一类依赖，便于定位回归。

@@ -68,9 +68,16 @@ Issue 现在描述的是无需编程即可验收的文档任务。这样第 5 �
 
 ## 用 Projects 看工作在哪里
 
-为仓库创建一个项目视图，保留 Status、Assignees、Labels 和 Parent issue。将父 Issue 和两个子 Issue 加入项目，初始为 Todo；开始 README 子项时移动为 In progress，合并后移动为 Done。
+在仓库主页打开 Projects → New project，选择 Table，名称填写 Resource navigation work queue，然后创建。进入项目后：
 
-项目回答“现在有哪些工作、谁在做、哪些被阻塞”；Issue 回答“为什么做、什么算完成”。不要复制一份正文代替项目状态。
+1. 选择 Add item，搜索并加入父 Issue 和两个子 Issue；
+2. 保留默认 Status 字段，并新增或启用 Assignees、Labels 和 Parent issue；
+3. 将三个项目项初始设为 Todo；
+4. 开始 README 子项时把它改为 In progress；
+5. 合并对应 PR 后把它改为 Done；
+6. 打开父 Issue 的层级信息，确认子项进度与项目视图一致。
+
+如果你的仓库界面把 Projects 放在全局导航，先选择 New project，再用 Add item 搜索当前仓库的 Issue。项目回答“现在有哪些工作、谁在做、哪些被阻塞”；Issue 回答“为什么做、什么算完成”。不要复制一份正文代替项目状态。
 
 ## 用 gh 核对对象
 
