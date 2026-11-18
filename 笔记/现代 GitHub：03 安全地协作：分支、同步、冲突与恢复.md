@@ -87,6 +87,7 @@ git push -u origin lab/conflict-a
 cd /tmp/resource-nav-conflict-b
 git switch main
 git pull --ff-only origin main
+git switch -c lab/conflict-b
 printf '\n冲突实验：B 的版本\n' >> README.md
 git add README.md
 git commit -m "test: create conflict from B"
@@ -220,7 +221,7 @@ git push -u origin lab/recovery
 如果这条提交已经出现在共享分支或 Pull Request 中，不要移动别人已经看到的历史。用 revert 创建一个新的反向提交：
 
 ~~~bash
-git revert HEAD
+git revert --no-edit HEAD
 git log --oneline -3
 ~~~
 
@@ -241,10 +242,12 @@ git reset --soft HEAD~1
 git status
 ~~~
 
-现在修改回到暂存区。若希望修改回到工作区：
+现在修改回到暂存区。下面是另一种选择：请先从备份分支重新开始，不要在 soft reset 后紧接着再执行一次 HEAD~1。
 
 ~~~bash
-git reset HEAD~1
+git switch backup/before-reset
+git switch -c lab/reset-mixed
+git reset --mixed HEAD~1
 git status
 ~~~
 
@@ -262,9 +265,10 @@ git status --short
 git switch main
 ~~~
 
-回来后查看 stash：
+回来后先切回原来的工作分支，再查看并恢复 stash：
 
 ~~~bash
+git switch lab/recovery
 git stash list
 git stash show --stat stash@{0}
 git stash pop stash@{0}
@@ -280,7 +284,7 @@ git stash pop stash@{0}
 git reflog --date=local -10
 ~~~
 
-找到丢失提交的短哈希后，先创建恢复分支：
+找到丢失提交的短哈希后，把下面的 <commit-id> 连同尖括号一起替换为实际短哈希，再创建恢复分支：
 
 ~~~bash
 git switch -c recovery/from-reflog <commit-id>
