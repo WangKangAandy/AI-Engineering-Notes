@@ -16,8 +16,6 @@ status: learning
 
 资源导航已经能在本机校验清单、运行测试并生成页面。现在把“由人打开终端执行”逐步变为“仓库收到事件后执行”。本章先用一句打印命令建立配置、触发、执行、日志的对应关系；下一章再接入三条真实检查命令。
 
-开始前，在自己的 `YOUR_LOGIN/resource-nav` 仓库确认 `main` 已包含第 12 章的程序，并检查本地工作区没有未提交修改。然后从最新 `main` 创建 `lab/13-actions`；本章新增的 workflow 通过 PR 合入这个仓库的 `main`。
-
 ## 1. 从页面对应到对象
 
 ```text
@@ -34,7 +32,7 @@ Actions 平台
 
 ## 2. 创建最小流程
 
-在 `lab/13-actions` 中新增 `.github/workflows/hello.yml`，内容如下。提交、推送，并创建面向自己的 main 的 PR；检查后合并，才进行第 3 节的手动运行：
+在自己的 `resource-nav` 仓库中，从最新 `main` 创建 `lab/13-actions`，然后新增 `.github/workflows/hello.yml`。提交并创建面向 `main` 的 PR，检查后合并，再进行第 3 节的手动运行：
 
 ```yaml
 name: Hello Actions
