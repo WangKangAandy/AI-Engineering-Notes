@@ -23,13 +23,14 @@ status: draft
 
 - resources.csv 的校验规则保持不变；
 - build.py 使用已加载的资源数量生成页面摘要；
-- test_catalog.py 或新的构建测试覆盖数量为 0 和数量为 2 的结果；
+- test_catalog.py 或新的构建测试覆盖数量为 2 的结果；
+- 如果要测试空列表渲染，明确这是 render_page 的函数层测试；catalog.py 仍拒绝空 CSV；
 - Pull Request 关联新的 Issue；
 - CI 在 PR 上通过；
 - Pages 页面显示与当前资源清单一致的数量，或明确记录因账号/环境限制无法完成的验证；
 - 交付说明包含提交 SHA、run URL、页面 URL 或失败边界。
 
-这项需求与第 4～5 章已经完成的 category 数据和分组需求不同；不要重新复制已合并的任务。
+这项需求与第 4～5 章已经完成的文档协作任务不同，也不重复第 7 章的输入校验；它只增加构建结果中的数量摘要。
 
 ## 先确认起点
 
@@ -49,17 +50,17 @@ python -m unittest discover -s . -p 'test_*.py' -v
 
 创建 Issue，写出现状、结果、范围和完成条件。可以把工作拆为两个子 Issue：
 
-1. 数据校验与页面分组；
-2. 测试和文档验收。
+1. 在 build.py 中生成数量摘要；
+2. 为 render_page 和页面验收补测试与说明。
 
-如果你使用 Agent，只把第一个子项交给它，明确允许文件和禁止文件；如果不使用 Agent，就在自己的分支中完成同一契约。工具入口不同，验收标准不变。
+如果你使用 Agent，只把第二个子项交给它，明确允许文件和禁止文件；如果不使用 Agent，就在自己的分支中完成同一契约。工具入口不同，验收标准不变。
 
 ## 选择工作路径
 
 人工路径：
 
 ~~~bash
-git switch -c feature/group-resources
+git switch -c feature/resource-count
 ~~~
 
 Agent 路径：
