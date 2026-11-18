@@ -64,12 +64,22 @@ jobs:
 
 这里的 runs-on 决定执行环境；run 执行 shell 命令；uses 使用社区或官方 action。permissions 只授予读取仓库内容的 GITHUB_TOKEN 权限，先从最小范围开始。
 
-提交并推送：
+在 Git Bash 中从最新 main 创建本章分支：
 
 ~~~bash
+git switch main
+git pull --ff-only origin main
+git switch -c ci/resource-checks
 mkdir -p .github/workflows
-cp path/to/ci.yml .github/workflows/ci.yml
+~~~
+
+打开本章前面的完整 YAML，复制到仓库的 .github/workflows/ci.yml；不要使用未定义的 path/to/ci.yml 占位路径。保存后核对文件确实在仓库中：
+
+~~~bash
+git status --short
+git diff -- .github/workflows/ci.yml
 git add .github/workflows/ci.yml
+git diff --cached -- .github/workflows/ci.yml
 git commit -m "ci: validate resources on pull requests"
 git push -u origin ci/resource-checks
 ~~~

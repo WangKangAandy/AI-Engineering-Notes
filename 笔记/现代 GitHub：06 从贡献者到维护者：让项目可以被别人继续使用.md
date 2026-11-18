@@ -28,6 +28,14 @@ status: draft
 
 ## 最小贡献指南
 
+从干净 main 创建维护分支：
+
+~~~bash
+git switch main
+git pull --ff-only origin main
+git switch -c docs/contribution-templates
+~~~
+
 CONTRIBUTING.md 可以从以下内容开始：
 
 ~~~markdown

@@ -36,7 +36,7 @@ git switch -c docs/resource-contribution
 
 ## 如何贡献
 
-请先阅读 CONTRIBUTING.md，再从一个 Issue 或已有需求开始。不要直接向 main 推送。
+贡献指南将在下一项子任务中加入。现在先说明：贡献者应从一个 Issue 或已有需求开始，不要直接向 main 推送。
 ~~~
 
 保存后检查：
@@ -121,7 +121,7 @@ git pull --ff-only origin main
 git switch -c docs/contributing-guide
 ~~~
 
-创建 CONTRIBUTING.md，内容至少包括资源字段、提交前检查、PR 描述和不提交凭据。通过第二个 PR 合并，并在描述中写：
+创建 CONTRIBUTING.md，内容至少包括资源字段、提交前检查、PR 描述和不提交凭据；同时把 README 中“贡献指南将在下一项子任务中加入”改成相对链接 [CONTRIBUTING.md](CONTRIBUTING.md)。通过第二个 PR 合并，并在描述中写：
 
 ~~~text
 Closes #CONTRIBUTING_CHILD_ISSUE_NUMBER
