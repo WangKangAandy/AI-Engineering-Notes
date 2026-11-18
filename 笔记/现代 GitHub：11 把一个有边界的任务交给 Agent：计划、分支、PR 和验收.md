@@ -78,6 +78,8 @@ GitHub Copilot cloud agent 会在自己的环境中工作，并在分支上提�
 - 看提交 SHA，确认 PR 显示的 head 与当前分支一致；
 - 阅读 Agent 的说明，区分它声称做了什么和日志实际证明了什么。
 
+如果 PR 的 Checks 区域显示 Waiting for approval 或 workflow requires approval：先检查 Files changed，确认没有越界文件和不可信脚本；在确认来源可信后，点击 Approve and run workflows。授权后再区分三种状态：尚待授权、正在运行、已失败。不要把“没有自动运行”写成测试通过，也不要在未审查差异时批准任意 PR 的工作流。
+
 在本地取回同一 PR 的分支：
 
 ~~~bash

@@ -152,7 +152,7 @@ needs 只表达执行依赖，不会自动复制文件。artifact 是明确的�
 2. Name 填 main pull request protection；
 3. Enforcement status 选择 Active；
 4. Target branches 选择 Include default branch，确认匹配 main；
-5. 开启 Require a pull request before merging，并要求至少一次 approval；
+5. 开启 Require a pull request before merging；本书单人主线将 required approvals 设为 0，避免作者无法批准自己的 PR；需要第二名协作者时，再把数量提高到 1 作为扩展练习；
 6. 开启 Require status checks to pass，等待 Resource CI 至少成功运行一次后，选择 Check resources；
 7. 开启 Require branches to be up to date；
 8. 对 Bypass list 和管理员绕过作出明确选择，然后点击 Create。
