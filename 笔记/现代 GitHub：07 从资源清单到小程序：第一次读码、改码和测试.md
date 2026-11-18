@@ -13,7 +13,7 @@ status: draft
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-前六章已经让你能提出需求并交付文档和数据修改。本章第一次读代码，但目标很小：让资源导航知道每项资源属于哪个 category，并让测试证明这个行为。
+前六章已经让你能提出需求、评审文档并建立贡献入口。本章第一次创建可运行程序：先把完整的 resource-nav 示例放进自己的仓库，再理解 CSV 到 HTML 的链路，最后改进错误信息并用测试证明它。
 
 这不是完整 Python 课程。你只需要理解变量、函数、列表、字典、异常和断言在这个项目中的作用。
 
@@ -27,21 +27,31 @@ python --version
 
 如果命令不存在，先修复安装或 PATH，不要把 py、PowerShell 和 WSL 的路径混在一起。创建一个临时虚拟环境不是本章必须步骤；依赖只有 Python 标准库，先让读者理解程序和测试。
 
-在 resource-nav 的工作分支上准备文件：
+在 resource-nav 的工作分支上准备一个新的程序任务：
 
 ~~~bash
 cd ~/projects/resource-nav
 git switch main
 git pull --ff-only origin main
-git switch -c feature/resource-categories
+git switch -c feature/validate-resources
 ~~~
 
-将随书示例复制到自己的仓库。文件职责如下：
+将随书示例完整放进自己的仓库。对每个附件链接打开文件页面，点击 Raw，再将文件保存到 resource-nav 根目录；不要只复制其中一段函数：
 
 - [catalog.py](<_assets/modern-github/resource-nav/catalog.py>) 读取并检查 CSV；
 - [build.py](<_assets/modern-github/resource-nav/build.py>) 调用 catalog.py 并生成 site/index.html；
 - [test_catalog.py](<_assets/modern-github/resource-nav/test_catalog.py>) 用 unittest 验证输入和 HTML 转义；
-- resources.csv 是程序真正读取的数据。
+- [resources.csv](<_assets/modern-github/resource-nav/resources.csv>) 是程序真正读取的数据；
+- [.gitignore](<_assets/modern-github/resource-nav/.gitignore>) 防止把生成目录提交到仓库。
+
+保存后先确认四个 Python/CSV 文件和 .gitignore 都在仓库根目录：
+
+~~~bash
+find . -maxdepth 1 -type f -print | sort
+python -m unittest discover -s . -p 'test_*.py' -v
+~~~
+
+如果文件不在根目录，先移动它们再运行测试；不要让程序依赖一个只存在于书稿资源目录的路径。
 
 ## 先看输入如何变成输出
 
@@ -78,13 +88,13 @@ python build.py
 
 打开生成的 site/index.html，确认标题和资源链接出现。这个 HTML 是构建结果，不应手工编辑；想改变页面，就改 CSV 或 build.py 后重新运行。
 
-## 用一个失败测试理解需求
+## 用一个更具体的失败测试理解需求
 
-本次需求要求缺少 category 时必须失败。先在 test_catalog.py 中增加一个测试：
+程序已经会拒绝空 category。本次改进要求错误信息同时指出输入行号，方便维护者定位数据。先在 test_catalog.py 中增加一个测试：
 
 ~~~python
-def test_rejects_missing_category(self):
-    with self.assertRaises(ValueError):
+def test_reports_line_for_missing_category(self):
+    with self.assertRaisesRegex(ValueError, r"Line 2:.*category"):
         self.load("title,url,category\nDocs,https://example.com/,\n")
 ~~~
 
@@ -94,11 +104,11 @@ def test_rejects_missing_category(self):
 python -m unittest discover -s . -p 'test_*.py' -v
 ~~~
 
-如果测试通过，说明现有代码已经满足这个行为；如果测试失败，读失败信息判断是测试写错还是实现缺少检查。本项目当前的 any(not value for value in row.values()) 应该使它通过。这个过程仍然有价值：测试把需求变成了可重复证据。
+如果测试失败，读失败信息判断是测试写错还是实现没有把行号和字段写进错误。这里的测试必须先失败，修改实现后再通过；否则你没有真正验证本次改动。
 
 ## 做一个可观察的行为改进
 
-为了练习修改实现，把报错从通用的 fields must not be blank 改为能指出 category：
+为了让错误信息包含字段名称，把通用的 fields must not be blank 改为能指出 category：
 
 ~~~python
 if not row["category"]:
@@ -135,9 +145,9 @@ git diff -- catalog.py test_catalog.py
 提交并推送：
 
 ~~~bash
-git add catalog.py test_catalog.py
-git commit -m "test: explain missing resource categories"
-git push -u origin feature/resource-categories
+git add resources.csv catalog.py build.py test_catalog.py .gitignore
+git commit -m "test: report missing resource category lines"
+git push -u origin feature/validate-resources
 ~~~
 
 在 PR 描述中写清：
