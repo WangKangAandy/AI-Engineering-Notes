@@ -35,12 +35,73 @@ CONTRIBUTING.md 可以从以下内容开始：
 
 1. 先搜索已有 Issue，避免重复需求。
 2. 每个资源必须有 title、绝对 HTTP(S) URL 和 category。
-3. 提交前运行 python -m unittest discover -s . -p 'test_*.py' -v。
+3. 提交前运行 git diff --check，并在 PR 中说明尚未进行的程序验证。
 4. Pull Request 说明修改文件、测试结果和未验证部分。
 5. 不提交 Secrets、生成目录或个人凭据。
 ~~~
 
 Issue 表单和 PR 模板只收集完成工作所需的字段，不要把所有规则复制三遍。
+
+## 在正确路径创建模板
+
+在一个维护分支中创建两个文件：
+
+- .github/ISSUE_TEMPLATE/resource.yml
+- .github/pull_request_template.md
+
+resource.yml 的最小内容：
+
+~~~yaml
+name: Add a resource
+description: Suggest one learning resource
+title: "[Resource] "
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Resource title
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL
+    validations:
+      required: true
+  - type: input
+    id: category
+    attributes:
+      label: Category
+    validations:
+      required: true
+~~~
+
+pull_request_template.md 的最小内容：
+
+~~~markdown
+## What changed
+
+## Related issue
+
+## Verification
+- [ ] git diff --check
+- [ ] Tests or reason they are not applicable
+
+## Not verified
+
+~~~
+
+在 Git Bash 中核对路径并通过 PR 合入：
+
+~~~bash
+mkdir -p .github/ISSUE_TEMPLATE
+# 将上面两段内容分别保存到指定文件
+git add .github/ISSUE_TEMPLATE/resource.yml .github/pull_request_template.md
+git commit -m "docs: add contribution templates"
+git push -u origin docs/contribution-templates
+~~~
+
+合并后打开 New issue 和 New pull request，确认模板真的被 GitHub 加载。文件存在、PR 合入和页面加载是三个不同的证据。
 
 ## 谁可以做什么
 
