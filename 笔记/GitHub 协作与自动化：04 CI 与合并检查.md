@@ -1,187 +1,127 @@
 ---
-title: GitHub 协作与自动化：04 CI 与合并检查
-summary: 用 Python 示例接入 CI，经历失败、合并规则阻止、修复和通过，学习用检查保护主分支。
+title: 现代 GitHub：用 CI 和合并门禁保护修改
+summary: 把资源清单校验、测试和构建接入 CI，经历失败、门禁阻止、修复和合并，理解绿灯能证明什么。
 tags:
   - github
-  - ci
+  - actions
 created: 2026-11-16
 status: learning
 ---
 
-# GitHub 协作与自动化：04 CI 与合并检查
+# 现代 GitHub：用 CI 和合并门禁保护修改
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+本书第 14 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<GitHub 协作与自动化：03 Actions 与 Workflow.md>) · [下一章](<现代 GitHub：保存和传递一次运行的结果.md>)
 
-> 本篇实验基线：`master`；实验分支：`lab/04-ci`。先按第 02 篇的方法从最新 master 创建该分支；完成本篇所需的 PR 合并后再进入依赖它的下一篇。前置：[[GitHub 协作与自动化：03 Actions 与 Workflow]]。
+前一章已经让 Actions 响应仓库事件，现在让它执行第 12 章的三条真实命令。本章继续操作自己的 `YOUR_LOGIN/resource-nav`，默认分支 `main`，终端为 PowerShell 7；程序和有效清单已合入 main。第 13 章的 hello.yml 可以保留，它不是本章必需检查。
 
-本篇完成一个关键练习：故意提交错误，看到 PR 检查失败，再通过新提交修复，并理解如何要求检查通过后才能合并。
+CI（持续集成）让每次变更接受重复检查。检查的范围仍由我们编写：校验当前 CSV、测试程序行为、构建页面。单元测试使用自己的样例，因此即使九项测试全部通过，也不能替代对当前 resources.csv 的校验。构建成功也只说明生成文件成功，不说明网页已经发布或所有外部链接都能访问。
 
-## 1. CI 实际检查什么
+## 先让真实检查出现
 
-CI 把项目已有的检查命令接入每次变更。检查内容由项目自己定义，不会因为启用了 Actions 就自动产生充分的测试。
-
-| 检查 | 发现什么问题 | 常见局限 |
-|---|---|---|
-| 格式 / lint | 风格或静态规则问题 | 通过不代表逻辑正确 |
-| 单元测试 | 给定输入是否产生期望结果 | 没写到的场景可能漏掉 |
-| 集成测试 | 多个模块或服务是否配合工作 | 依赖测试环境 |
-| 构建 | 能否生成目标产物 | 生成成功不等于运行正常 |
-
-本练习采用 Python 标准库测试和静态页面构建，避免先安装应用框架。
-
-## 2. 准备三个文件
-
-在 `lab/04-ci` 分支准备以下三个文件和第 3 节的 ci.yml，放入同一个初始化 PR。确认初始化检查通过后再合并到 `master`，然后开始第 4 节。
-
-`app.py`：
-
-```python
-def greeting(name):
-    cleaned = name.strip()
-    if not cleaned:
-        raise ValueError("name must not be blank")
-    return f"Hello, {cleaned}!"
-```
-
-`test_app.py`：
-
-```python
-import unittest
-
-from app import greeting
-
-
-class GreetingTests(unittest.TestCase):
-    def test_normal_name(self):
-        self.assertEqual(greeting("GitHub"), "Hello, GitHub!")
-
-    def test_trims_spaces(self):
-        self.assertEqual(greeting("  GitHub  "), "Hello, GitHub!")
-
-    def test_rejects_blank(self):
-        with self.assertRaises(ValueError):
-            greeting("   ")
-
-
-if __name__ == "__main__":
-    unittest.main()
-```
-
-`build.py`：
-
-```python
-from html import escape
-from pathlib import Path
-
-from app import greeting
-
-
-output = Path("site")
-output.mkdir(exist_ok=True)
-message = escape(greeting("GitHub"))
-page = (
-    '<!doctype html><html lang="en"><head>'
-    '<meta charset="utf-8"><title>Workflow Lab</title>'
-    '</head><body>'
-    f'<h1>{message}</h1>'
-    '</body></html>'
-)
-(output / "index.html").write_text(page, encoding="utf-8")
-print("Built site/index.html")
-```
-
-如果本地安装了 Python，在练习仓库根目录执行：
+在自己的 resource-nav 根目录确认 `git status --short` 没有未完成工作，再逐条执行；某条失败就停止处理原因，不继续创建或推送分支：
 
 ```powershell
-python -m unittest discover -v
-python build.py
+git switch main
+git pull --ff-only
+git switch -c lab/14-ci
 ```
 
-Windows 只有 `py` 启动器时，把本地命令中的 `python` 换成 `py`；workflow 内仍用 `python`。没有本地 Python 也可以把文件提交后交给 Actions 执行。
-
-预期：发现并通过 3 个测试，产生 `site/index.html`。把生成的 `site/` 和 `__pycache__/` 加入 .gitignore，不提交构建输出。第 05、06 篇依赖这些 Python 文件，完成后续练习后再清理；清理时同时移除依赖它们的 workflow 和必需检查规则，避免之后每个 PR 都失败。
-
-## 3. 接入 CI
-
-同一个初始化 PR 中新增 `.github/workflows/ci.yml`：
+新建 `.github/workflows/ci.yml`，完整内容如下：
 
 ```yaml
-name: CI
+name: Resource CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test-and-build:
-    name: Test and build
+  check:
+    name: Check resources
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+      - name: Validate catalog
+        run: python catalog.py resources.csv
       - name: Run tests
         run: python -m unittest discover -v
       - name: Build site
         run: python build.py
+
 ```
 
-这里使用 GitHub 托管的 Ubuntu runner。`setup-python` 的作用是选择 Python 版本，不负责替你编写测试；本例仅用标准库，所以没有安装依赖步骤。[setup-python 官方仓库](https://github.com/actions/setup-python)
+`Resource CI` 是流程名，`check` 是 job ID，`Check resources` 是显示名称，后面设置门禁时选择实际产生的检查项。三个 run 分开写，是为了在日志中直接定位数据校验、测试或构建哪一步失败。默认情况下前一步失败，后续普通步骤跳过；不要给它们加 `continue-on-error` 来制造绿灯。
 
-配置合并后，打开 Actions → CI，验证日志确实出现 3 个测试和构建输出。**零个测试的成功退出也可能显示绿灯**，所以要看执行了哪些测试。
+Ubuntu runner 与本机 Windows 不同，但两边选用 Python 3.12 和相同程序。本例只有标准库，所以无需 pip install，也不需要凭据。[setup-python 用法](https://github.com/actions/setup-python) · [Workflow 语法](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
 
-## 4. 制造失败，先保留红灯
+如果仓库已有第 10 章创建的 `CONTRIBUTING.md`，先编辑其中的验证方法，保留人工核对资源来源、用途和分类，并补上 `py -3.12 catalog.py resources.csv`、`py -3.12 -m unittest discover -v`、`py -3.12 build.py`；同时写明 启用必需检查规则后，PR 当前提交的 **Check resources** 必须通过才能合并。把这次指南更新和 workflow 一起加入本章 PR。若文件尚未存在，在 PR 描述中记录待办，完成第 10 章后再写入。
 
-1. 从最新 `master` 创建 `lab/04-break-ci`，并在 `笔记/GitHub 工作流实操记录.md` 末尾增加一句“本仓库通过 CI 检查 greeting 函数并构建练习页面”。保留这项说明性改动，避免修复故意制造的错误后，整个 PR 与 master 完全相同而没有可合并内容。
-2. 仅把 `app.py` 的返回值改为 `return f"Hi, {cleaned}!"`，不修改测试。
-3. 提交并创建面向 `master` 的 PR。
-4. 打开 PR 的检查区域，进入 **Test and build**，展开 **Run tests**。
-5. 应看到期望 `Hello` 与实际 `Hi` 不一致；本例前两个测试失败，后续构建步骤默认跳过。
-6. 先保持这个 PR 打开且检查失败，继续下一节配置规则。此时不要修复或合并。
+本地先按第 12 章用 `py -3.12` 依次校验、测试、构建，再检查并提交：
 
-重新运行旧提交的失败任务并不会自动修复代码。先改变原因，再运行验证。
+```powershell
+git diff --check
+if (Test-Path -LiteralPath CONTRIBUTING.md) { git add -- CONTRIBUTING.md }
+git add .github/workflows/ci.yml
+git diff --staged
+git commit -m "ci: validate test and build resource catalog"
+git push -u origin lab/14-ci
+gh pr create --repo YOUR_LOGIN/resource-nav --base main --head lab/14-ci --title "Add resource CI" --body "Validate resources.csv, run unit tests, and build the static page."
+```
 
-## 5. 让红灯真正阻止合并
+把命令中的 YOUR_LOGIN 换成自己的账号。打开这个 PR 的 Checks，进入 **Check resources**，检查真实清单的条数、九项测试及 `Built site/index.html`。条数取决于前面加入了多少资源，不硬编码为两条。确认通过后合并初始化 PR，再从 main 拉取更新。不能把本地 YAML 能解析当成 Actions 已成功运行。
 
-有检查结果和“必须通过”是两件事。在有管理权限且支持 ruleset 的练习仓库中：
+## 制造一次可解释的失败
 
-1. 打开 Settings → Rules → Rulesets，创建面向默认分支的 branch ruleset。
-2. 将执行状态设为 Active，目标明确匹配 `master`，与本练习 PR base 和 ci.yml 的 branches 一致。
-3. 启用 **Require a pull request before merging**。个人练习将所需审批人数设为 0，保留“经过 PR”这项要求；不要误配成必须由另一位审阅者批准。
-4. 独立启用 **Require status checks to pass**，添加先前真实运行出现过的 **Test and build** 检查；不要用 workflow 文件名 ci.yml 替代检查名称。保存前确认目标仍是 master、状态为 Active，且没有给自己的实验账号加入 bypass。
-5. 保存后回到仍然失败的练习 PR，确认当前提交的 **Test and build** 未通过，并观察普通合并被阻止。记录当前提交和阻止原因，不使用历史失败 run 代替这一步。
-6. 在同一个来源分支把返回值改回 `Hello`，保留实操记录中的说明，提交并 push。
-7. 等待新提交的检查通过，确认该必需检查不再阻止合并。若没有其他未满足的规则，此时可以正常合并这个 PR。
+从更新后的 main 新建 `lab/14-break-ci`。用编辑器做两项修改：
 
-个人练习仓库不必要求另一人批准，否则只有自己时可能无法满足评审条件。管理者若有 bypass 权限，界面可能仍提供绕过入口；要区分“规则生效”和“某账号有例外权限”。套餐或组织策略不支持该设置时，可以先理解检查结果，但不能声称已经配置强制门禁。[Ruleset 规则说明](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
+1. README.md 增加真实说明：“本仓库通过 CI 校验资源清单、运行单元测试并生成静态页面。”
+2. resources.csv 中任意选一条有效记录，完整复制到文件末尾，故意产生重复 URL。
 
-如果当前仓库不能配置 ruleset，仍可执行修复并观察检查通过，但此时失败检查只是状态提示，不能据此判断合并已受保护。完整练习顺序是：**失败 → 配置规则 → 确认阻止合并 → 修复 → 检查通过 → 合并**。
+保留 README 改动有实际用途：修复重复行后，PR 仍有一项应该合并的说明更新。不要改校验程序来容忍重复，也不要删测试。
 
-## 6. 常见误解
+本地运行 `py -3.12 catalog.py resources.csv`，应出现 `duplicate URL`；紧接着运行 `$LASTEXITCODE` 应得到 1。确认 diff 只有上述改动后提交、推送，并创建面向 main 的 PR：
 
-| 误解 | 应怎样检查 |
-|---|---|
-| Agent 说测试通过就够了 | 看当前提交的 CI 结果和具体测试日志 |
-| 本地通过就必然云端通过 | 对比 Python 版本、系统、依赖和环境变量 |
-| 所有 PR 检查测试的都是来源分支单独状态 | 默认 PR checkout 通常检出测试合并提交，结合 base + head 检查 |
-| 必需检查永远 pending 就是 runner 慢 | 看 workflow 是否被过滤、检查名称是否已变更 |
-| 测试失败就改成允许失败 | 先判断测试还是实现出了问题；跳过检查改变了验证含义 |
+```powershell
+git add README.md resources.csv
+git diff --staged
+git commit -m "docs: explain CI and demonstrate invalid catalog"
+git push -u origin lab/14-break-ci
+gh pr create --repo YOUR_LOGIN/resource-nav --base main --head lab/14-break-ci --title "Explain CI and exercise its failure gate" --body "Keep this PR open while observing the duplicate URL failure; remove the deliberate duplicate before merging."
+```
 
-PR 默认检出行为见 [checkout](https://github.com/actions/checkout)。
+在 PR 中找到新 run。预期 **Validate catalog** 失败，测试和构建步骤跳过。这里不是“九项单测失败”，而是当前输入在第一关就不合格。先保持红灯和打开的 PR，继续设置门禁。
 
-## 7. 对比失败与修复后的结果
+## 把检查结果变成合并条件
 
-失败 run 的日志应显示 `Hi` 与期望的 `Hello` 不一致；修复后的新 run 应通过三个测试并完成构建。两个 run 对应不同提交。启用规则后，PR 在失败时被阻止合并，最新提交通过后才解除这个阻止条件；历史失败记录仍会保留，但不代表当前提交失败。
+检查结果与必须通过是两件事。管理员可以在 Settings → Rules → Rulesets 创建 branch ruleset。公开仓库在 GitHub Free 可使用 ruleset；私有仓库的可用性取决于套餐，组织还可能有额外策略。没有管理权限或当前套餐不支持时，记录“只观察到检查，尚未验证强制门禁”，不要声称失败已阻止合并。[Rulesets 可用条件](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets)
 
-下一篇：[[GitHub 协作与自动化：05 构建、发布与部署]]。
+在支持的个人练习仓库中设置：
+
+1. 命名规则，例如 `Protect main`；Enforcement status 设为 **Active**。
+2. Target branches 明确包含 `main`，确认没有排除它。
+3. 启用 **Require a pull request before merging**。个人独自练习把 required approvals 设为 **0**，否则无法用自己的批准满足他人评审条件。
+4. 启用 **Require status checks to pass**，从真实运行记录选择 **Check resources**。不要填 workflow 名 Resource CI、文件名 ci.yml 或 job ID check。
+5. Bypass list 不添加自己的练习账号或管理员角色。保存后重新检查目标和启用状态。
+
+回到仍然失败的 PR，确认当前提交的 Check resources 未通过，并观察普通合并被阻止的具体说明。若仍能直接合并，检查规则是否 Active、目标是否 main、账号是否绕过规则，以及选中的是否为真实检查。管理员可绕过的入口不等于检查通过。[必需检查规则](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
+
+此时才回到同一来源分支，删除刚复制的错误行，保留 README 说明；运行三条本地命令，检查 diff，提交修复并 push。新提交应触发新 run，不是重跑旧错误提交。等待新检查通过，再确认原先由 Check resources 造成的阻止已经解除。其他规则也满足时，正常合并 PR。
+
+## 红灯消失后仍要看证据
+
+PR 默认 checkout 通常检出平台生成的测试合并提交，用于检查目标分支与来源分支组合后的状态。因此 PR run 的 SHA 可能不是来源分支最新提交 SHA；合并后的 push run 又对应 main 的提交。[checkout 的 PR 行为](https://github.com/actions/checkout)
+
+检查一直 pending 时，先看流程是否真的被触发、分支/路径过滤是否排除了这次变更，以及检查名称是否被改过。必需检查名称也是协作契约：后面章节保留 **Check resources**，避免规则等待一个再也不会出现的名字。不要用跳过、放宽规则或忽略失败来代替定位原因。
+
+把失败 run、修复 run 和 PR 的地址记在自己的学习记录中，分别写清事件、提交、首次失败步骤和合并阻止原因。本章完成的证据链是：有效程序已入 main → 重复输入触发失败 → 规则阻止当前 PR → 新提交移除错误 → 最新检查通过 → PR 合并。只有前半段时，就只报告前半段；绿灯不代表没有未覆盖的缺陷。

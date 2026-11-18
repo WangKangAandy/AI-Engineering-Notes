@@ -1,5 +1,5 @@
 ---
-title: GitHub 协作与自动化：03A 用自己的电脑运行 CI：Self-hosted Runner
+title: 现代 GitHub：用自己的电脑运行 CI
 summary: 围绕特殊工具链、个人重型 CI 和托管计算额度不足，配置 Windows 自托管 Runner，完成注册、标签路由、单元测试、服务运行和退出清理。
 tags:
   - github
@@ -9,11 +9,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# GitHub 协作与自动化：03A 用自己的电脑运行 CI：Self-hosted Runner
+# 现代 GitHub：用自己的电脑运行 CI
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。前置：能完成 [[GitHub 协作与自动化：03 Actions 与 Workflow]] 的手动运行，并理解 job 与 runner 的关系。本篇选学，不改变第 04～09 篇使用托管执行环境的主线。
+本书执行环境专题。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [Actions 基础](<GitHub 协作与自动化：03 Actions 与 Workflow.md>)。前置是能手动运行 workflow 并理解 job 与 runner；本专题另用私有 runner-lab，结束后返回公开 resource-nav 主线。
 
 你已经有一台能运行测试的电脑，但 GitHub 提供的机器没有所需 SDK，内存不够，或者个人私有项目的托管计算额度已经用完。Self-hosted Runner 可以把 job 放到自己的机器上执行，同时继续在 GitHub 查看日志与状态。
 
@@ -44,9 +44,9 @@ Runner 是在本机运行的程序，不是你的编辑器。`actions/checkout` 
 
 ### 本篇使用独立的私有实验仓库
 
-不要把日常个人电脑注册到本系列的公开组织仓库或它的公开 fork。GitHub 官方建议自托管 Runner 只用于私有仓库；私有仓库也不自动保证代码可信，协作者提交和第三方 action 同样会在机器上执行。[官方安全提示](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)
+不要把日常个人电脑注册到本书公开的 resource-nav 实验仓库或其他公开 fork。GitHub 官方建议自托管 Runner 只用于私有仓库；私有仓库也不自动保证代码可信，协作者提交和第三方 action 同样会在机器上执行。[官方安全提示](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)
 
-在自己的 GitHub 账号新建 **Private** 仓库 `runner-lab`，勾选初始化 README，确认默认分支；下文固定使用 `master`。若默认是 main，可在仓库分支设置中将默认分支重命名为 master，或将本篇所有 master 引用一起改为 main。它是本模块专用仓库，结束后回原实验仓库学习第 04 篇，不复制整套现有公开 workflow 进来。
+在自己的 GitHub 账号新建 **Private** 仓库 `runner-lab`，勾选初始化 README，确认默认分支；下文固定使用 `main`。若账号创建的默认分支不是 main，可在这个全新的私有实验仓库中先重命名默认分支，或在本文所有分支引用处一致使用实际名字。它是本模块专用仓库，结束后回 resource-nav 主线学习第 14 章，不复制整套现有公开 workflow 进来。
 
 首轮只允许手动触发，不配置 `pull_request`、`pull_request_target` 或接收外部输入的脚本。用自己确认过的提交和 action，优先选择独立机器或专用账号，避免使用保存生产密钥的工作环境。手动触发减少意外运行，但不构成沙箱；有权改 workflow 的人仍可能让它执行其他命令。
 
@@ -86,7 +86,8 @@ Get-ExecutionPolicy
 3. 执行页面生成的注册命令。下面只展示结构，URL 与临时 token 必须取自刚打开的 runner-lab 页面：
 
 ```powershell
-Set-Location C:\actions-runner
+Set-Location -LiteralPath 'C:\actions-runner' -ErrorAction Stop
+Get-Location
 .\config.cmd --url https://github.com/YOUR_LOGIN/runner-lab --token REPLACE_WITH_REGISTRATION_TOKEN
 ```
 
@@ -113,7 +114,7 @@ runs-on: [self-hosted, windows, x64, lab-windows]
 
 ## 5. 跑通一个本机单元测试
 
-本节所有文件都在 **runner-lab**，不写进公开博客仓库。通过 GitHub 网页或本地 Git，从 master 创建 `lab/self-hosted-ci`，添加两个文件。
+本节所有文件都在 **runner-lab**，不写进公开的 resource-nav 或本书源仓库。通过 GitHub 网页或本地 Git，从 main 创建 `lab/self-hosted-ci`，添加两个文件。
 
 `app.py`：
 
@@ -141,7 +142,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-再添加 `.github/workflows/local-ci.yml`。它只手动运行，只接受默认示例分支 master，使用 Windows PowerShell，不依赖本机另装 PowerShell 7：
+再添加 `.github/workflows/local-ci.yml`。它只手动运行，只接受默认示例分支 main，使用 Windows PowerShell，不依赖本机另装 PowerShell 7：
 
 ```yaml
 name: Local Windows CI
@@ -154,7 +155,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   test:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, windows, x64, lab-windows]
     timeout-minutes: 20
     defaults:
@@ -181,9 +182,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 ```
 
-reviewed revision 是步骤名称，不是自动审查机制。创建面向 runner-lab 的 master 的 PR，检查文件和 action 引用后合并。此时没有自动 CI 是预期行为，因为只声明了 workflow_dispatch。
+reviewed revision 是步骤名称，不是自动审查机制。创建面向 runner-lab 的 main 的 PR，检查文件和 action 引用后合并。此时没有自动 CI 是预期行为，因为只声明了 workflow_dispatch。
 
-现在进入 Actions → Local Windows CI → Run workflow，选择 master 并运行。检查以下对应关系：
+现在进入 Actions → Local Windows CI → Run workflow，选择 main 并运行。检查以下对应关系：
 
 - GitHub 的 run 对应刚合并的提交，test job 被分配给 `lab-win-x64`。
 - 本机终端显示开始处理该 job，GitHub Runner 页面暂时显示 Busy。
@@ -193,11 +194,11 @@ reviewed revision 是步骤名称，不是自动审查机制。创建面向 runn
 
 ### 确认失败也能回传
 
-从最新 master 新建 `lab/break-local-ci`，把 square 的返回值临时改成 `value + value`，不改测试。检查并合并这个实验 PR，再手动运行 master。两个测试应失败，命令非零退出，job 显示失败。本例显式检查 `$LASTEXITCODE`，避免 Windows 脚本忽略原生命令的失败。
+从最新 main 新建 `lab/break-local-ci`，把 square 的返回值临时改成 `value + value`，不改测试。检查并合并这个实验 PR，再手动运行 main。两个测试应失败，命令非零退出，job 显示失败。本例显式检查 `$LASTEXITCODE`，避免 Windows 脚本忽略原生命令的失败。
 
-再从 master 建立修复分支，将函数恢复为乘法，经 PR 合并后运行新提交，结果应恢复通过。这里是在专用私有仓库验证失败传播，不要把故意破坏测试的提交合入正式项目。
+再从 main 建立修复分支，将函数恢复为乘法，经 PR 合并后运行新提交，结果应恢复通过。这里是在专用私有仓库验证失败传播，不要把故意破坏测试的提交合入正式项目。
 
-手动运行可以在 Actions 展示结果，但本例没有自动 PR 检查，不能直接把它当作合并前必需检查。第 04 篇仍使用自己的 CI 配置学习门禁。
+手动运行可以在 Actions 展示结果，但本例没有自动 PR 检查，不能直接把它当作合并前必需检查。第 14 章仍在 resource-nav 使用托管 Runner 学习 CI 门禁。
 
 ## 6. 将真正的 CI 接到本机
 
@@ -213,10 +214,10 @@ reviewed revision 是步骤名称，不是自动审查机制。创建面向 runn
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [main]
 ```
 
-修改经 PR 合入 master 后，应出现 push 事件的 run。原来的 job.if 与标签保持一致。这仍是合并后检查；要做自动 PR 门禁，需要另行评估哪些分支提交者能执行本机代码、设置所需事件与规则，不能机械复制公开仓库的 pull_request 配置。
+修改经 PR 合入 main 后，应出现 push 事件的 run。原来的 job.if 与标签保持一致。这仍是合并后检查；要做自动 PR 门禁，需要另行评估哪些分支提交者能执行本机代码、设置所需事件与规则，不能机械复制公开仓库的 pull_request 配置。
 
 先用小批测试验证，再逐步增加真实数据量与并发。示例的 timeout-minutes 为 20；迁移重任务时，根据实际耗时设置合理的超时，并核查 Actions 当前的 job 时长限制，避免把正常长任务提前取消。单个 Runner 进程通常串行处理 job，matrix 会创建多个 job，并不会让一台机器自动获得更多执行槽位。不要为了消除 queued 在同一台个人电脑上注册大量 Runner，造成 CPU、内存和磁盘争用。
 
@@ -286,7 +287,8 @@ Runner 应用默认自动更新，操作系统、Python、驱动和其他工具�
 永久移除：先停用使用它的 workflow，或把相应 job 改回合适的 runner；然后 Settings → Actions → Runners → 点击本次 Runner → Remove，按页面给出的实时移除命令在安装目录执行。服务模式请使用管理员 PowerShell，以便卸载对应服务。命令形式如下：
 
 ```powershell
-Set-Location C:\actions-runner
+Set-Location -LiteralPath 'C:\actions-runner' -ErrorAction Stop
+Get-Location
 .\config.cmd remove --token REPLACE_WITH_REMOVAL_TOKEN
 ```
 
@@ -294,4 +296,4 @@ Set-Location C:\actions-runner
 
 如果仅为本实验修改了 CurrentUser 执行策略，结束后可在同一账号下用 Set-ExecutionPolicy 将该作用域恢复为第 3 节记录的原值；不要覆盖其他用途后来需要的配置。
 
-学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到 [[GitHub 协作与自动化：04 CI 与合并检查]] 时继续使用原实验仓库及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。
+学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到[CI 与合并门禁](<GitHub 协作与自动化：04 CI 与合并检查.md>)时继续使用 resource-nav 及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。

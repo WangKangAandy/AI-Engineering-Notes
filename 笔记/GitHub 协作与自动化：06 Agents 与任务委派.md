@@ -1,137 +1,122 @@
 ---
-title: GitHub 协作与自动化：06 Agents 与任务委派
-summary: 理解仓库 Agents 页面中的 session，学习描述任务、跟踪修改，并通过 PR 和 CI 检查交付结果。
+title: 现代 GitHub：把一个有边界的任务交给 Agent
+summary: 用 GitHub Copilot Cloud Agent 完成一次小而可验收的资源导航改进，理解会话、环境、分支、PR 与权限的边界。
 tags:
   - github
+  - copilot
   - agents
 created: 2026-11-16
 status: learning
 ---
 
-# GitHub 协作与自动化：06 Agents 与任务委派
+# 现代 GitHub：把一个有边界的任务交给 Agent
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[[GitHub 协作与自动化：01 学习路线]]。
+学习路线：[GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)。
 
-> 本篇选择当前操作仓库的 `master` 为基础，由 Agent 创建自己的工作分支和面向 master 的 PR，无需预建固定分支。
+前面章节已经让资源导航仓库能在本地测试、构建并通过 CI。这里第一次把一个**有边界的一次性任务**交给 AI。主线选 GitHub Copilot 的 **Cloud** 环境：它在 GitHub 托管的隔离环境中工作，完成后把分支和 PR 交回仓库。它不是本地终端，也不是第 22 章的 Actions 自动化。相同仓库不代表相同登录、凭据或执行环境。
 
-## 1. 先读懂 Sessions 页面
+## 先确定任务和验收
 
-以 `github/gh-aw` 仓库的 Agents → Sessions 页面为例：如果选择 Completed，并输入 `is:closed author:@me`，可以这样理解页面内容。
+好的 Agent 任务同时写清输入、允许修改的范围、命令和停止条件。第 12 章的练习仓库根目录已有 `test_catalog.py`。其中 `test_rejects_blank_field` 已验证标题为空；本次只增加一个针对性的断言，验证 **category 为空**也被拒绝。不要借任务重写解析器、改 workflow 或增加新的数据格式。
 
-| 页面内容 | 怎么理解 |
-|---|---|
-| Agents 标签 | 仓库的 Agent 会话入口 |
-| Actions 标签 | 仓库自动化流程的运行入口 |
-| Sessions | 一次次 Agent 工作记录 |
-| Active / Completed | 按会话状态切换查看范围 |
-| `is:closed author:@me` | 当前只查符合关闭状态、作者为自己的记录 |
-| Author / Status / Type / Agent | 进一步筛选会话 |
-| No sessions match your filters | 当前筛选没有匹配结果 |
+这一项只有几行，人工通常更快；这里用它学习委派和验收，并不意味着所有小改动都值得调用付费模型。
 
-从这个空列表只能判断“没有匹配当前筛选的会话”，不能判断仓库完全没用过 Agent，也不能判断你的账户是否有启动权限。先清除筛选、切换状态，再检查账户和仓库权限。
-
-`github/gh-aw` 是这个例子中的仓库名。Agents 是 GitHub 的产品入口，不是该仓库额外实现的页面。不要直接在这个上游仓库做写入练习；用第 01 篇定义的目标仓库。
-
-## 2. Session、PR、Actions run 如何对应
-
-一个 session 是 Agent 的工作上下文。它可能只是调查问题，也可能修改代码并创建 PR。PR 用于讨论、检查和合并变更；Actions run 是一套自动化配置的一次执行。
-
-```mermaid
-flowchart LR
-    A[任务描述或 Issue] --> B[Agent session]
-    B --> C[分析与文件修改]
-    C --> D[Pull Request]
-    D --> E[Actions CI 检查]
-    E --> F[人工评审与合并]
-    F --> G[部署流程]
-```
-
-这是本教程练习链路，不是所有会话的固定生命周期。当前官方入口区分 Cloud sandbox 和 Actions 等执行环境，所以“每个 session 都等于一个普通 workflow run”不成立。[启动任务说明](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
-
-## 3. 启动前检查三件事
-
-首先确认你能访问并修改练习仓库；其次确认账号具有所选 Agent 的使用资格；最后确认组织没有禁用该能力。能看到别人的公开仓库，不等于能在那个仓库委派 Agent 改代码。
-
-会话产生的 AI 使用及执行资源按所选产品和账户计量。实际使用前看账户的使用量和预算页面；本教程不固定价格或套餐名称，避免操作时已经变化。入口缺失时优先核对 [官方可用条件](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)，不要反复改仓库文件猜原因。
-
-## 4. 第一个任务：给现有函数加输入检查
-
-先完成 [[GitHub 协作与自动化：04 CI 与合并检查]]，确认 master 已有三个 Python 文件和 ci.yml；没有完成第 05 篇也能做本次 Agent 练习。本篇选用 **GitHub Copilot + Cloud** 主线，不使用第三方 Agent 或 Actions 执行环境。
-
-1. 打开当前操作仓库的 Agents 页；也可从 [Copilot 会话页](https://github.com/copilot) 进入。确认仓库选择器是组织实验仓库或自己的 fork。
-2. 在任务输入框的 Agent 选择器选择 Copilot；模型可保留该账户的默认可用模型。
-3. 打开 **Environment**，选择 **Cloud**，即 GitHub 托管沙箱。这里的 Environment 选择机器与工具，不是第 05 篇 Settings → Environments 的发布审批。
-4. 在 base branch 选择器选择 master，粘贴下方任务描述并发送。无需先创建 lab 分支，Agent 会建立自己的工作分支。
-5. 任务应出现在会话列表。打开该 session，观察状态和工具日志；首先确认它找到 app.py/test_app.py，而不是在另一个仓库从零创建程序。
-
-若没有 Copilot 或 Cloud 选项，先在账号 Copilot 设置核对资格、使用量及组织策略；不能靠改 workflow 文件“开启”账户能力。不要随意改选 Actions 后仍假定配置完全一样。Actions 是另一条执行环境路径，需按对应环境要求准备，本篇不并行展开。[官方任务启动步骤](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
-
-复制以下任务描述：
+可直接复制下面的任务描述（把仓库和默认分支换成自己的值）：
 
 ```text
-请修改 app.py 中的 greeting，并创建一个面向 `master` 的 Pull Request。
+在我的资源导航仓库中，完成一项最小测试改进：
 
-需求：
-1. name 不是字符串时，抛出 TypeError，消息为 name must be a string。
-2. 保持正常名字、首尾空格处理和空白名字拒绝行为不变。
-3. 在 test_app.py 中覆盖 None、整数，以及现有三种行为。
-
-验证：运行 python -m unittest discover -v 和 python build.py。
-范围：只修改实现和相关测试，不修改 GitHub workflow，不合并 PR。
-结果说明：列出修改文件、执行命令、测试结果；没有执行的检查明确说明。
+- 只修改test_catalog.py；
+- 在现有空字段测试旁增加一个 category 为空的测试，保持现有实现和错误判据；
+- 在仓库根目录运行 python -m unittest discover -v、python catalog.py resources.csv 和 python build.py；
+- 有变更时创建面向 main 的 PR；
+- 不修改 catalog.py、resources.csv、workflow 或文档；
+- 不合并 Pull Request。完成后列出修改文件、实际执行的命令和结果。
 ```
 
-这个任务可以从三处观察结果：实现是否拒绝非字符串输入，测试是否覆盖新增情况，以及是否创建了 PR。提示中写明“创建 PR”，是因为从 prompt 发起的会话不必自动创建 PR。
+这份请求有明确的文件边界和可复现命令。它也故意让 Agent 做一个小 diff：任务越大，越难从会话记录中判断哪个结果来自哪项要求。
 
-另一种入口是先新建包含同样内容的 Issue，再通过 Assignees 指派 Copilot。官方将 Issue 指派描述为创建 PR 的入口；不同 Agent App 的行为以自己的文档为准。[启动任务的两种入口](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
+## 选择 Cloud 并启动会话
 
-## 5. 过程中怎么看、怎么纠偏
+GitHub 文档目前说明，Copilot cloud agent 面向付费 Copilot 计划；仓库还可能受“托管用户账号”或管理员策略限制。启动前先确认自己的账号、仓库写权限和可用量。看得到仓库不能推出你有权让 Agent 推送分支。[官方可用条件与入口](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/start-copilot-sessions)
 
-进入 session，查看进度、操作日志和修改。日志应能找到测试命令、发现的测试与退出结果；如果环境找不到 Python，先让 Agent 报告可用解释器和具体错误，再按错误准备环境，不能把“计划运行”当作已测试。如果 Agent 改了无关文件，在可用的会话输入框中补充约束，例如“保留当前函数签名，只补输入类型检查”。
+在目标仓库打开 **Agents**，或进入 `github.com/copilot` 的会话页：
 
-对 Issue 指派的任务，后续新增的 Issue 评论不应假定会自动进入既有任务；使用会话的 steering 入口或关联 PR 的受支持交互方式补充要求。
+1. 在仓库选择器中选择自己的 `YOUR_LOGIN/resource-nav`，不要选上游示例仓库。
+2. 在 Agent/环境选择器中选择 Copilot 和 **Cloud**。Cloud 指 GitHub 托管沙箱，不是 Actions 的 Environment 审批。
+3. 选择 `main` 作为基础分支，粘贴任务描述并启动。
+4. 在 session 日志中确认它找到已有的 `catalog.py` 和测试文件，再等待它提出修改或 PR。
 
-完成时核对：它是否真的执行了测试命令、是否报告失败、是否给出了修改或 PR。Completed 表示会话完成，不意味着功能已验收或代码已合并。[会话管理说明](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)
+从 Issue 指派 Copilot 时，官方行为是完成后创建 PR；从 prompt 启动时，可以在会话中要求创建 PR，也可以在完成后手动创建。[启动任务的三种入口](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)
 
-不再需要执行时，在 session 日志页选择 **Stop session**。停止后检查它是否已推送提交或创建 PR；停止会话不会撤销这些已有改动。需要放弃修改时再关闭对应 PR，不要误关其他任务的 PR。[会话管理](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)
+## 观察环境和结果
 
-## 6. 从完成会话到可合并 PR
+Cloud Agent 使用自己的临时开发环境。会话日志可以显示它读取的文件、工具调用、测试命令和提交；这些记录帮助你复核“它说做过什么”。它的环境并不会改变你的本地工作区，也不会继承你本地 `gh` 的登录状态。官方文档把会话日志、提交追踪和测试能力分开说明。[会话管理与日志](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)
 
-1. 从 session 的 PR 链接打开 Pull Request；没有 PR 时，使用会话中的创建 PR 操作，或发送“请把当前变更创建为面向 master 的 PR，不要合并”。检查仓库、base master 和来源分支。
-2. 在 Files changed 中确认只修改 `app.py`、`test_app.py`。
-3. 查看是否覆盖 None、整数和原有三种情况。
-4. 在 PR 的 Checks 中查看当前提交的 **Test and build**。如果合并区域显示 **Approve and run workflows**，先阅读文件差异，再由有权限的用户点击批准运行，等待 CI。这里批准的是运行代码，不是批准合并，也不是 Pages 的部署审批；不要把这三个按钮混用。
-5. 需要修改时在支持的交互入口提出具体要求，等待更新后再次核查。
-6. 只有满足原有检查及评审要求后再合并。若保留第 05 篇的 Pages 配置，master push 会触发构建，部署仍需在 run 中人工批准；没有配置 Pages 就不会部署。
+看到以下情况时，先停下来判断，不要用一句“看起来完成了”覆盖证据：
 
-“Agent 自测”提供一次执行记录；“PR CI”提供仓库约定的统一检查；“评审”判断需求与改动是否匹配。三者各有用途。
+| 观察 | 应得出的结论 |
+| --- | --- |
+| session 显示完成 | Agent 的会话结束，不等于需求验收或 PR 可合并 |
+| 测试命令出现在日志且退出成功 | 这次环境中的测试通过；仍要查看 diff 和 CI |
+| 修改了额外文件 | 越界，需要让 Agent 回退或在 PR 中人工修正 |
+| 没有测试输出 | 测试未验证；补充请求或在本地/CI 运行 |
+| 只有一个提交 | 只说明提交存在，不说明内容正确 |
 
-## 7. Custom agent、AGENTS.md 和 gh-aw
+如果方向开始偏离，可在会话输入框发送一次具体纠偏，例如“保留现有实现，只修改测试文件；请撤销其他文件的变更”。每次 steering 都消耗额度，且不能替代最终评审。
 
-| 名称 | 用途 | 会不会自己启动任务 |
-|---|---|---|
-| Agents 页面 | 发起、查看和管理会话 | 用户从入口启动，或配置自动化触发 |
-| Custom agent | 定义某类任务的角色、提示和工具范围 | 定义本身不是定时任务 |
-| `AGENTS.md` | 支持它的工具读取的仓库工作约定 | 单独放置不会自动启动云端任务 |
-| `gh-aw` | 定义并编译由 Agent 执行的仓库自动化 | 生成的 workflow 按配置事件触发 |
+## PR 是验收面
 
-GitHub 自定义 Agent 的仓库配置常见于 `.github/agents/*.agent.md`，先跑通默认 Agent 再做专门角色。[自定义 Agent 官方说明](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/create-custom-agents)
+从会话链接打开 PR，检查四件事：
 
-[[GitHub 协作与自动化：08 GitHub App 注册与权限配置]] 讲解如何注册自己的 GitHub App、配置权限并安装到仓库；[[GitHub 协作与自动化：09 Cursor GitHub Agent 接入]] 则讲安装现成的 Cursor App。App 提供集成身份和授权；是否具有 Agent 能力、是否出现在 Sessions 中，取决于具体实现。
+- base 是 `main`，来源分支属于本任务；
+- `Files changed` 只有 `test_catalog.py`；
+- 新测试确实传入空 `category`，而不是仍在测空标题；
+- PR Checks 包含 `python -m unittest discover -v`，并且是当前提交的结果。
 
-## 8. 常见问题与结果检查
+基线 `test_catalog.py` 有 9 个测试，`test_rejects_blank_field` 只把 title 设为空；实现已经对所有列执行 strip 和空值判断。因此合理改动是新增一个测试，而不是重写实现。下面是可对照的最小用例，放在 `CatalogTests` 类中：
 
-| 现象 | 先检查 |
-|---|---|
-| Sessions 空白 | 清除作者、状态等筛选，确认所在仓库 |
-| 有页面但不能发任务 | 写权限、Agent 资格、组织策略、可用入口 |
-| 会话完成却没有 PR | 任务是否仅要求分析；是否明确要求创建 PR |
-| 已修改但测试没跑 | 会话环境、安装步骤、工具日志及错误 |
-| PR 没有 CI 结果 | workflow 事件和分支条件，是否等待授权运行 |
-| 提示额度不足 | Agent 使用量、执行资源及账户预算，不只看 GitHub 登录状态 |
+```python
+    def test_rejects_blank_category(self):
+        with self.assertRaises(ValueError):
+            self.load("title,url,category\nDocs,https://example.com/, \n")
+```
 
-一次任务可以产生会话记录、代码修改、测试输出和 PR。Session 显示完成但没有 PR 时，先核对任务是否要求创建 PR；PR 已创建但检查未通过时，继续修复并等待新提交的检查结果，不能仅凭会话状态决定合并。
+空格会在实现中被去掉，因而该输入应该抛出 `ValueError`。新增后应发现 10 个测试；如果项目后来增加过其他测试，就按原数量加一，不把固定数字当成功标准。这个用例没有修改正常资源，也没有证明外部 URL 可访问。
 
-下一篇：[[GitHub 协作与自动化：07 gh-aw 与智能自动化]]。
+Cloud Agent 的分支和提交在远端，不会自动出现在你的本地工作区。如果要在本机复核对应 PR，先在本地 resource-nav 确认工作区干净，再用实际 PR 编号取得它的 head：
+
+```powershell
+$prNumber = 123  # 换成会话创建的实际 PR 编号
+git status --short
+if (git status --porcelain) { throw '先处理本地未提交修改' }
+git fetch origin "pull/$prNumber/head:agent/$prNumber"
+git switch "agent/$prNumber"
+git rev-parse HEAD
+git diff main...HEAD -- test_catalog.py
+```
+
+核对这里的 SHA 与 PR 页面 head SHA 一致，再运行本地命令。若 Agent 创建的是其他仓库分支或 PR 尚未创建，先从会话结果取得真实来源，不能猜分支名。完成验收后切回 main；是否删除本地临时分支由你决定，不用强制删除：
+
+```powershell
+py -3.12 -m unittest discover -v
+py -3.12 catalog.py resources.csv
+py -3.12 build.py
+git switch main
+```
+
+命令应在读者自己 resource-nav 仓库根目录执行；它们分别证明测试、清单校验和页面生成。静态看到命令不等于命令成功。CI 还会有自己的运行记录。只有 diff、测试输出和仓库检查互相对应，才足以决定是否合并。
+
+## 这次练习的边界
+
+Cloud Agent 可以修改分支、提交并按请求创建 PR，但不会替你批准、合并或判断产品需求。你仍负责检查资源数据、测试含义和 CI 范围。不要把 Copilot 的账号资格、Cloud 沙箱网络或会话额度写进项目代码；这些是执行条件。
+
+如果会话卡住或任务不再需要，使用 session 的 **Stop**，然后检查已经产生的提交和 PR。停止不会自动撤销已推送的修改；需要放弃时再关闭或删除自己的 PR。完成后保留可追溯记录：任务文字、session 链接、PR、diff、测试结果和未验证项。
+
+下一篇把这次任务里的临时说明整理成项目长期上下文：[现代 GitHub：把项目知识与工作约定交给 Agent](<现代 GitHub：把项目知识与工作约定交给 Agent.md>)。
+
+本书将相同新增用例放入临时副本实际运行：10 项 unittest、清单校验和页面构建均退出 0。该副本使用附件的两项初始数据；读者主线还包含第 8 章的 Pro Git，因此条目数应随自己的 CSV 增长。这是本地测试证据，不能替代自己的 Cloud 和 PR CI 结果。
+
+**来源与限制（2026-11-18 核对）**：GitHub 的 [启动任务文档](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task)、[云端会话入口](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/start-copilot-sessions) 和 [会话管理文档](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents) 支持本文关于 Cloud、入口、日志和停止的说明。本文未启动云端 Agent，也未创建真实 PR；本地命令是否通过应以读者自己的仓库和运行结果为准。
