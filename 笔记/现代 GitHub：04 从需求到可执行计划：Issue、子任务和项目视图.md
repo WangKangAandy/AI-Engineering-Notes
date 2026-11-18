@@ -1,6 +1,6 @@
 ---
 title: 现代 GitHub：从需求到可执行计划：Issue、子任务和项目视图
-summary: 把一次资源导航升级写成可验收的 Issue，拆成子 Issue，表达依赖，并用项目视图跟踪实际进度。
+summary: 把一次贡献入口改进写成可验收的 Issue，拆成子 Issue，表达依赖，并用项目视图跟踪实际进度。
 tags:
   - github
   - issues
@@ -13,101 +13,90 @@ status: draft
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-Issue 不是“把想法发在网上”。它应该让接手工作的人知道现状、预期结果、完成条件和下一步。子 Issue 解决的是一项工作太大、不能由一个 Pull Request 清楚完成的问题；Projects 用来观察进展，不是复制一份 Issue 内容。
+到本章为止，项目只有 README 和网页贡献的历史，还没有 Python 程序。我们先用不需要编程的任务学习 Issue、子 Issue 和 Projects：让新读者知道资源应该怎样提交。
 
 ## 从模糊想法写出完成条件
 
-先在自己的 resource-nav 仓库创建 Issue：
+在自己的 resource-nav 仓库创建 Issue：
 
 标题：
 
 ~~~text
-让资源导航按类别分组
+让新贡献者知道如何提交资源
 ~~~
 
 正文：
 
 ~~~markdown
 ## 现状
-当前页面按 CSV 文件顺序展示资源，读者需要通读列表才能找到同一类别的资源。
+README 只说明项目用途，没有告诉新贡献者资源需要哪些字段、怎样提交和怎样验证。
 
 ## 预期结果
-页面按 category 分组，并在页面上显示每组资源数量。
+README 能说明资源格式和最小贡献路径。
 
 ## 范围
-本次只修改资源数据、校验程序和页面输出，不引入数据库或新的前端框架。
+本次只修改 README 和贡献说明，不添加程序、不修改 Actions、不改变页面构建。
 
 ## 完成条件
-- [ ] CSV 中每项资源有非空 category
-- [ ] 校验程序拒绝缺少 category 的行
-- [ ] 页面按 category 分组
-- [ ] 测试覆盖一个空 category 的失败样例
+- [ ] README 说明资源名称、链接和分类的填写要求
+- [ ] README 链接到贡献指南
 - [ ] Pull Request 关联本 Issue
+- [ ] 修改通过网页可读性检查
 ~~~
 
-这几个部分分别回答为什么改、改成什么样、不改什么、如何判断完成。没有完成条件的 Issue 很容易在评审时变成“看起来差不多”。
+Issue 现在描述的是无需编程即可验收的文档任务。这样第 5 章的 PR 有真实输入，第 7 章才会另行引入程序。
 
 ## 什么时候拆成子 Issue
 
-如果一个 PR 可以在不依赖另一个 PR 的情况下独立评审，就可以拆成一个子 Issue。为本次需求创建两个子项：
+把工作拆成两个可以独立评审的子项：
 
-1. 增加 category 数据并检查缺失值；
-2. 修改页面生成逻辑并补测试。
+1. 在 README 增加资源格式和贡献步骤；
+2. 建立 CONTRIBUTING.md，写清提交前检查和 PR 描述要求。
 
-在父 Issue 页面底部选择 Create sub-issue，分别填写标题和完成条件。也可以使用 Add existing issue，把已经存在的 Issue 放入父项。GitHub 会在父 Issue 中显示子项数量和关闭进度。
+在父 Issue 页面底部选择 Create sub-issue，分别填写标题和完成条件。也可以选择 Add existing issue，把已经存在的 Issue 放入父项。GitHub 会在父 Issue 中显示子项数量和关闭进度。
 
-子 Issue 不是普通的编号引用。它有父子关系，可以在父项中展开，也可以在 Projects 中按层级分组。不要只在正文里写“见 #2”来代替关系。
+子 Issue 不是正文里的普通编号引用。它有父子关系，可以在父项中展开，也可以在 Projects 中按层级分组。
 
 ## 表达依赖，而不是表达顺序
 
-页面生成依赖数据校验，因此第二个子项要等第一个子项提供 category 数据后才能完成。在子 Issue 的 Relationships 或 Development 区域添加依赖，选择“blocked by”或“blocking”时先读清方向：
+第二个子项依赖第一个子项确定的字段名称，因此把第二个子项设置为 blocked by 第一个子项。保存后重新打开两个 Issue，确认方向：
 
 - A blocked by B：A 等待 B；
 - A blocking B：A 阻塞 B。
 
-保存后重新打开两个 Issue，确认父项、子项和依赖方向都显示正确。方向错误会让项目视图给出相反的进度判断。
-
-如果你的账号或仓库还没有 Issue dependencies，正文中保留一个明确的文本说明，并用父 Issue 和 PR 关联完成主线；不要为了展示按钮创建虚假的状态。
+如果账号或仓库没有 Issue dependencies，保留父子关系，并在父 Issue 中写明“先完成 README 字段约定，再写贡献指南”；不要为了展示按钮创建虚假的状态。
 
 ## 用 Projects 看工作在哪里
 
-为仓库创建一个项目视图，至少保留：
+为仓库创建一个项目视图，保留 Status、Assignees、Labels 和 Parent issue。将父 Issue 和两个子 Issue 加入项目，初始为 Todo；开始 README 子项时移动为 In progress，合并后移动为 Done。
 
-- Status：Todo、In progress、Done；
-- Assignees；
-- Labels；
-- Parent issue 或 Sub-issue progress。
+项目回答“现在有哪些工作、谁在做、哪些被阻塞”；Issue 回答“为什么做、什么算完成”。不要复制一份正文代替项目状态。
 
-将父 Issue 和两个子 Issue 加入项目，状态初始为 Todo。开始第一项时只移动第一项为 In progress；完成后再移动为 Done。父 Issue 的完成度应来自子项，而不是手工复制一段进度文字。
+## 用 gh 核对对象
 
-项目视图回答的是“现在有哪些工作、谁在做、哪些被阻塞”。Issue 正文回答的是“为什么做和什么算完成”。两者职责不同。
-
-## 用 gh 创建和核对对象
-
-网页操作完成后，在 Git Bash 中查看同一对象：
+网页操作完成后，在 Git Bash 中查看：
 
 ~~~bash
 gh issue list --repo YOUR_LOGIN/resource-nav
-gh issue view ISSUE_NUMBER --repo YOUR_LOGIN/resource-nav
+gh issue view PARENT_ISSUE_NUMBER --repo YOUR_LOGIN/resource-nav
 ~~~
 
 创建子 Issue 时，GitHub CLI 支持 parent 参数：
 
 ~~~bash
-gh issue create --repo YOUR_LOGIN/resource-nav --title "增加 category 数据" --body "Closes parent requirement" --parent PARENT_NUMBER
+gh issue create --repo YOUR_LOGIN/resource-nav --title "补充贡献说明" --body "写清提交前检查" --parent PARENT_ISSUE_NUMBER
 ~~~
 
-先使用网页核对父子关系，再用 gh issue view 读回；命令成功只代表请求被接受，不代表关系方向正确。
+命令成功只代表请求被接受；仍要打开父 Issue，核对子项关系和依赖方向。
 
 ## 本章结束状态
 
-在进入下一章前，应该有：
+进入下一章前应该有：
 
-- 一个父 Issue，写清现状、预期、范围和完成条件；
-- 两个子 Issue，分别代表数据校验和页面改造；
+- 一个只涉及 README/贡献说明的父 Issue；
+- 两个文档子 Issue；
 - 一个明确的依赖方向；
-- 一个 Projects 视图，能看到 Todo、In progress 和 Done；
-- 你知道下一步先完成哪个子 Issue。
+- 一个 Projects 视图；
+- main 中仍没有 Python 程序，下一章只交付文档。
 
-下一章会选择第一个子 Issue，走完分支、PR、评审、合并和关闭关键词。父 Issue 会在所有子项完成后才作为整体验收，不会因为第一个 PR 合并就假装完成。
-
+下一章会完成第一个子 Issue 的 PR、评审和合并；第二个子 Issue 会让第 6 章的维护入口有真实文件可验收。
