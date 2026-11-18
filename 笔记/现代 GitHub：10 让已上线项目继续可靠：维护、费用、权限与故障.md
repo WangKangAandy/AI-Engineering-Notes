@@ -64,7 +64,7 @@ rg -n "actions/|python-version" .github/workflows
 
 ## 收紧权限和清理凭据
 
-查看 workflow 顶层和 job 级 permissions。只读任务优先使用：
+在已存在的 .github/workflows 文件中查看 workflow 顶层和 job 级 permissions。只读任务优先使用：
 
 ~~~yaml
 permissions:
@@ -76,7 +76,7 @@ permissions:
 清理 Secret 前先搜索使用者：
 
 ~~~bash
-rg -n "secrets\.|vars\.|GITHUB_TOKEN|COPILOT" .github .cursor
+git grep -n -E "secrets\.|vars\.|GITHUB_TOKEN|COPILOT" -- .github
 ~~~
 
 然后在 Settings → Secrets and variables 中核对名称。删除 Secret 不会自动修复引用；下一次运行可能直接失败。更换凭据时先添加新值、更新引用、验证运行，再删除旧值。
