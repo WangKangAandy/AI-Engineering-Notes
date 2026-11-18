@@ -14,7 +14,7 @@ status: ready
 
 API 专题让我们主动询问“现在有哪些 PR”。如果每分钟查询一次，即使没有变化也要请求，还只能在下一轮发现新 PR。Webhook 则在订阅的事件发生时，由 GitHub 向配置好的服务发送 HTTP 请求。推送解决发现变化的入口问题；程序仍可能通过 API 读取当前状态或写评论，两者可以组合使用。[Webhook 概述](https://docs.github.com/en/webhooks/about-webhooks)
 
-本篇是自建集成专题，前置为 [现代 GitHub：S2 通过 API 操作仓库对象](<现代 GitHub：S2 通过 API 操作仓库对象.md>) 和第 12 章的 Python 运行基础。主线 Copilot、Cursor 或 Actions 自动化不要求你搭建公网接收服务。我们使用 Python 3.12 标准库完成离线验签实验：没有服务器、隧道或远端写入，输出只落在进程内存。这样可以先理解信任边界，再决定是否值得部署服务。
+本篇是自建集成专题，前置为 [现代 GitHub：S2 通过 API 操作仓库对象](<现代 GitHub：附录 B GitHub CLI、API 和 GitHub App.md>) 和第 12 章的 Python 运行基础。主线 Copilot、Cursor 或 Actions 自动化不要求你搭建公网接收服务。我们使用 Python 3.12 标准库完成离线验签实验：没有服务器、隧道或远端写入，输出只落在进程内存。这样可以先理解信任边界，再决定是否值得部署服务。
 
 ## 签名证明的是哪一份内容
 
@@ -26,12 +26,12 @@ API 专题让我们主动询问“现在有哪些 PR”。如果每分钟查询�
 
 ## 用反例检查验签与去重
 
-把附件和 [test_webhook_fixture.py](./_assets/modern-github/integration/test_webhook_fixture.py) 下载到同一个本地目录，在该目录打开 PowerShell 7：
+把附件和 [test_webhook_fixture.py](./_assets/modern-github/integration/test_webhook_fixture.py) 下载到同一个本地目录，在该目录打开 Git Bash：
 
-```powershell
-py -3.12 --version
-py -3.12 -B -m unittest -v test_webhook_fixture
-```
+~~~bash
+python --version
+python -B -m unittest -v test_webhook_fixture
+~~~
 
 示例内的 `local-fixture-only` 是公开教学值，绝不能用于真实 Webhook。测试首先使用 GitHub 文档公布的固定向量，避免签名生成和验签函数出现同一种错误时互相蒙混过关。随后它检查以下行为：
 
@@ -59,5 +59,5 @@ py -3.12 -B -m unittest -v test_webhook_fixture
 
 实验结束，在该 Webhook 设置取消 Active 并保存，或删除专用测试 Webhook；另行停止自己的接收服务并清理不再需要的 secret。停用推送不会撤销某个 API token，正如撤销 token 也不会自动停止所有事件接收。
 
-完成离线部分后，你已验证字节验签、过滤和有限去重，并能说明尚未验证公网交付。若要让自建程序以机器人身份调用 API，继续 [现代 GitHub：S4 注册 GitHub App 并验证安装身份](<现代 GitHub：S4 注册 GitHub App 并验证安装身份.md>)；否则返回 [现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)，无需为了主线去部署服务。
+完成离线部分后，你已验证字节验签、过滤和有限去重，并能说明尚未验证公网交付。若要让自建程序以机器人身份调用 API，继续 [现代 GitHub：S4 注册 GitHub App 并验证安装身份](<现代 GitHub：附录 B GitHub CLI、API 和 GitHub App.md>)；否则返回 [现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)，无需为了主线去部署服务。
 
