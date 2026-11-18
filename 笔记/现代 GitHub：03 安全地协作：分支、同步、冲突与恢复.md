@@ -81,7 +81,7 @@ git commit -m "test: create conflict from A"
 git push -u origin lab/conflict-a
 ~~~
 
-在第二个克隆中，先把 A 合入 main，再创建 B 的工作：
+在第二个克隆中保持 main 的原始内容，创建独立的 B 工作分支：
 
 ~~~bash
 cd /tmp/resource-nav-conflict-b
