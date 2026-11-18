@@ -32,6 +32,14 @@ status: learning
 
 当前官方计费说明将 self-hosted runner 列为不消耗包含计算用量的使用方式；公开仓库的标准 GitHub-hosted runner 也在免费范围内。因此，遇到公开仓库任务失败不能直接推断“免费分钟用完”。Artifact/cache 存储有自己的计量，改成自托管不会自动免除这些费用；电费、硬件、网络和维护成本由自己承担。[Actions 计费](https://docs.github.com/en/billing/concepts/product-billing/github-actions)
 
+### 额度耗尽时的页面信号
+
+下面是一张账户用量通知截图：页面明确显示本计费周期已使用 100% 的 Actions 分钟，并提示后续用量可能计费或被预算设置阻止。它适合帮助你识别“额度耗尽”这一真实场景；截图中的账户、分钟数和重置日期只属于该账户和计费周期，不是所有 GitHub 账户的固定套餐结论。
+
+![GitHub Actions 包含分钟数已用完的账户提示](./_assets/modern-github/self-hosted-runner/actions-minutes-exhausted.png)
+
+*示例截图：具体额度、预算、重置时间和是否允许继续使用，以自己账号的 Billing/Actions 用量页面为准。Self-hosted Runner 改变 job 的执行位置，不会自动消除 artifact、缓存、组织预算或其他产品用量。*
+
 普通短测试且托管环境已满足要求时，继续使用托管 runner 通常更省维护。自托管的价值在于把已有资源和特殊环境接入 CI；它不保证更快，也不会自动为任务补足内存或安装驱动。
 
 ## 2. GitHub 调度，本机执行
