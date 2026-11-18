@@ -80,6 +80,8 @@ Draft 表示还不要求最终合并，但可以先收集反馈。
 2. 字段名称是否与 Issue 一致；
 3. 链接和示例是否能让新读者照做。
 
+提交 Review 时选择 Comment、Approve 或 Request changes：Comment 只留下意见，Approve 表示当前审阅者认为可以继续，Request changes 表示修复前不应合并。一个人维护自己的练习仓库时可以用 Comment 记录自查，但不要伪装成另一名协作者的批准。填写审阅摘要后点击 Submit review；评论存在不等于 Review 已提交。
+
 如果发现字段名称不一致，在具体行评论，再在原分支修订：
 
 ~~~bash
