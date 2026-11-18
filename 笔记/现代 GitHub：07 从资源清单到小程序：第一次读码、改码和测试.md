@@ -166,7 +166,8 @@ git push -u origin feature/validate-resources
 
 ~~~markdown
 ## What changed
-- 对空 category 给出明确错误。
+- 首次引入 resources.csv、catalog.py、build.py、test_catalog.py 和 .gitignore。
+- 对空 category 给出包含行号的明确错误。
 - 增加空 category 的失败测试。
 
 ## Verification
