@@ -73,6 +73,16 @@ build.py 调用 load_resources，收到列表后将每一项转成 HTML。escape
 
 test_catalog.py 中的每个 test_ 方法都是一个可重复的判断。self.assertRaises 期待某种输入失败，self.assertIn 期待输出包含某段安全文本。
 
+### 零基础读码只需要抓住五个连接
+
+- resources 是一个列表；load_resources 每读一行，就创建一个 row 字典并追加到列表。
+- for raw in reader 表示逐行处理 CSV，不是一次把整个文件变成字符串。
+- row["category"] 取出当前字典的一个字段；if not 判断它是否为空。
+- raise ValueError 会让当前命令失败；reader.line_num 提供出错行号。
+- unittest.TestCase 是测试的父类，self 表示当前测试对象；测试方法必须缩进在 CatalogTests 类中。
+
+先只追踪一行数据如何从 resources.csv 进入 row，再追踪 row 如何进入 render_page。不要试图在第一次阅读时理解所有标准库 API。
+
 ## 先运行已有测试和构建
 
 在 Git Bash 中：
@@ -135,14 +145,16 @@ git diff --check
 
 ## 形成一次代码 PR
 
-查看差异：
+查看并暂存完整的首次程序交付：
 
 ~~~bash
 git status --short
-git diff -- catalog.py test_catalog.py
+git add resources.csv catalog.py build.py test_catalog.py .gitignore
+git diff --cached --stat
+git diff --cached -- resources.csv catalog.py build.py test_catalog.py .gitignore
 ~~~
 
-提交并推送：
+确认 staged diff 同时包含数据、校验器、构建器、测试和忽略规则后再提交：
 
 ~~~bash
 git add resources.csv catalog.py build.py test_catalog.py .gitignore
