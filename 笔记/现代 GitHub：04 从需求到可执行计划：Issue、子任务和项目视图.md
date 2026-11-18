@@ -39,7 +39,7 @@ README 能说明资源格式和最小贡献路径。
 
 ## 完成条件
 - [ ] README 说明资源名称、链接和分类的填写要求
-- [ ] README 链接到贡献指南
+- [ ] README 先说明贡献入口，第二个子任务完成后再链接到 CONTRIBUTING.md
 - [ ] Pull Request 关联本 Issue
 - [ ] 修改通过网页可读性检查
 ~~~
