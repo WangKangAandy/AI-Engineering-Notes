@@ -17,17 +17,19 @@ status: draft
 
 ## 新需求
 
-让资源导航页面按 category 分组，并在每个分组标题旁显示资源数量。
+让页面在标题下显示“共 N 项资源”，其中 N 来自经过 catalog.py 校验的资源数量。
 
 完成条件：
 
-- resources.csv 中每项资源都有非空 category；
-- catalog.py 和 build.py 保持输入、校验和输出职责清晰；
-- test_catalog.py 有一个分组数量或缺失 category 的测试；
-- Pull Request 关联 Issue；
+- resources.csv 的校验规则保持不变；
+- build.py 使用已加载的资源数量生成页面摘要；
+- test_catalog.py 或新的构建测试覆盖数量为 0 和数量为 2 的结果；
+- Pull Request 关联新的 Issue；
 - CI 在 PR 上通过；
-- Pages 页面显示分组后的结果，或明确记录因账号/计划无法完成的验证；
+- Pages 页面显示与当前资源清单一致的数量，或明确记录因账号/环境限制无法完成的验证；
 - 交付说明包含提交 SHA、run URL、页面 URL 或失败边界。
+
+这项需求与第 4～5 章已经完成的 category 数据和分组需求不同；不要重新复制已合并的任务。
 
 ## 先确认起点
 

@@ -54,7 +54,7 @@ Runner 是在本机运行的程序，不是你的编辑器。`actions/checkout` 
 
 不要把日常个人电脑注册到本书公开的 resource-nav 实验仓库或其他公开 fork。GitHub 官方建议自托管 Runner 只用于私有仓库；私有仓库也不自动保证代码可信，协作者提交和第三方 action 同样会在机器上执行。[官方安全提示](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/add-runners)
 
-在自己的 GitHub 账号新建 **Private** 仓库 `runner-lab`，勾选初始化 README，确认默认分支；下文固定使用 `main`。若账号创建的默认分支不是 main，可在这个全新的私有实验仓库中先重命名默认分支，或在本文所有分支引用处一致使用实际名字。它是本模块专用仓库，结束后回 resource-nav 主线学习第 14 章，不复制整套现有公开 workflow 进来。
+在自己的 GitHub 账号新建 **Private** 仓库 `runner-lab`，勾选初始化 README，确认默认分支；下文固定使用 `main`。若账号创建的默认分支不是 main，可在这个全新的私有实验仓库中先重命名默认分支，或在本文所有分支引用处一致使用实际名字。它是本模块专用仓库，结束后回 resource-nav 主线学习第 8 章，不复制整套现有公开 workflow 进来。
 
 首轮只允许手动触发，不配置 `pull_request`、`pull_request_target` 或接收外部输入的脚本。用自己确认过的提交和 action，优先选择独立机器或专用账号，避免使用保存生产密钥的工作环境。手动触发减少意外运行，但不构成沙箱；有权改 workflow 的人仍可能让它执行其他命令。
 
@@ -206,7 +206,7 @@ reviewed revision 是步骤名称，不是自动审查机制。创建面向 runn
 
 再从 main 建立修复分支，将函数恢复为乘法，经 PR 合并后运行新提交，结果应恢复通过。这里是在专用私有仓库验证失败传播，不要把故意破坏测试的提交合入正式项目。
 
-手动运行可以在 Actions 展示结果，但本例没有自动 PR 检查，不能直接把它当作合并前必需检查。第 14 章仍在 resource-nav 使用托管 Runner 学习 CI 门禁。
+手动运行可以在 Actions 展示结果，但本例没有自动 PR 检查，不能直接把它当作合并前必需检查。第 8 章仍在 resource-nav 使用托管 Runner 学习 CI 门禁。
 
 ## 6. 将真正的 CI 接到本机
 

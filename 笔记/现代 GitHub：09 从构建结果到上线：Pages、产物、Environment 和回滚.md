@@ -47,6 +47,8 @@ Artifact 不等于 Release，Environment 也不等于 Pull Request 审批。PR �
 name: Publish resource site
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -98,6 +100,7 @@ jobs:
 
   deploy:
     name: Deploy site
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -114,7 +117,7 @@ jobs:
 
 这个示例中的 provenance.json 是本流程真实生成的文件，包含仓库、提交 SHA、run ID 和尝试次数。它不是签名证明，也不替代 artifact attestations；它只是让读者能从页面追到这次构建的来源。
 
-将 pages.yml 放入工作分支，提交并创建 PR。PR 中先验证 build job，不要直接从未检查的 main 部署。
+将 pages.yml 放入工作分支，提交并创建 PR。PR 事件只运行 build，deploy job 会跳过；合入 main 或手动从 main 运行时才进入 release Environment。这样可以先验证构建，再决定是否部署。
 
 ## 启用 Pages
 
