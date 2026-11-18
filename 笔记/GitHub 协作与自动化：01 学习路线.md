@@ -20,7 +20,7 @@ GitHub 上的一次改动，通常从需求讨论开始，经过分支修改、P
 
 ## 实操对象与分支约定
 
-实操对象为 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，默认分支为 `master`。每章从最新 `master` 建立功能分支，PR 的目标、CI 分支过滤、必需检查规则和部署分支都统一使用 `master`。分支只是代码版本，Actions、Pages、App 安装与第三方用量属于仓库或账号资源。
+主线实操对象为 [xallor-ai/AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，默认分支为 `master`。涉及代码修改的章节从最新 `master` 建立功能分支，PR 的目标、CI 分支过滤、必需检查规则和部署分支都统一使用 `master`；03A 另建私有实验仓库。分支只是代码版本，Actions、Pages、App 安装与第三方用量属于仓库或账号资源。
 
 正文按组织仓库中具有相应权限的成员路径讲解：提交文件需要写权限，合并要满足仓库规则，调整 ruleset、Pages、Secrets 或 App 安装需要相应管理权限。没有这些权限时，采用第 02 篇的 fork 路径：在自己的 fork 中完成实验、合并到该 fork 的 `master` 并验证；只有准备贡献的改动才另建指向组织 `master` 的正式 PR。fork 的测试结果不代表组织环境已经验证。
 
@@ -28,6 +28,7 @@ GitHub 上的一次改动，通常从需求讨论开始，经过分支修改、P
 |---|---|---|
 | 02 | `lab/02-issue-pr` | 新建实操记录，完成 Issue 与 PR |
 | 03 | `lab/03-actions` | workflow 合入 master，手动运行并查看日志 |
+| 03A | 私有 runner-lab 的 Runner 设置与手动运行 | 接入自己的 Windows 环境并执行单元测试 |
 | 04 | `lab/04-ci`；随后 `lab/04-break-ci` | 初始化检查，再观察失败、阻止合并、修复通过 |
 | 05 | `lab/05-pages` | 从 master 构建并部署页面 |
 | 06 | Agents 选择 master，Agent 创建工作分支 | 审阅 Agent 产生的 PR 与 CI |
@@ -35,15 +36,16 @@ GitHub 上的一次改动，通常从需求讨论开始，经过分支修改、P
 | 08 | GitHub App 设置页 | 注册、设置权限、安装到指定仓库 |
 | 09 | Cursor 集成和 Automations 页面 | 连接目标仓库，完成一次审查或任务 |
 
-第 02～05 篇构成基础实操主线；第 06 篇复用第 04 篇的程序，第 07 篇是独立报告任务，08～09 是按需接入。关闭未合并的前置 PR 不会把所需文件带入下一篇。Pages 部署、报告 Issue、App 安装和第三方自动化按各篇说明启用与停用；不会因为删除实验分支就自动停止。
+第 02～05 篇构成基础实操主线；03A 是在第 03 篇之后可读的自托管 Runner 选学，使用独立私有 runner-lab 仓库，不沿用本系列的公开仓库；第 06 篇复用第 04 篇的程序，第 07 篇是独立报告任务，08～09 是按需接入。关闭未合并的前置 PR 不会把所需文件带入下一篇。Pages 部署、报告 Issue、App 安装和第三方自动化按各篇说明启用与停用；不会因为删除实验分支就自动停止。
 
 ### 开始前选好操作仓库
 
-公开读者通常没有组织仓库写权限，先按第 02 篇创建自己的 fork，后续页面与命令都在该 fork 操作。组织成员仅在获准的仓库实验；共享站点、规则或已安装 App 不作为临时练习对象。
+公开读者通常没有组织仓库写权限，先按第 02 篇创建自己的 fork，主线后续页面与命令都在该 fork 操作；03A 切换到单独创建的私有 runner-lab，完成后再回到 fork。组织成员仅在获准的仓库实验；共享站点、规则或已安装 App 不作为临时练习对象。
 
 | 阶段 | 开始时已有内容 | 额外条件 |
 | --- | --- | --- |
 | 02～03 | GitHub 账号；当前仓库默认分支 master | 仓库写权限；fork 按页面提示启用 Actions |
+| 03A（选学） | 已理解 job 与 runner；有可维护的 Windows x64 电脑 | 自建私有 runner-lab；本机 Git、Python 与联网条件 |
 | 04 | 已能运行 hello.yml | 配置 ruleset 需 admin 或相应自定义权限 |
 | 05 | app.py、test_app.py、build.py、ci.yml 已合入 master | Pages 可用；配置 Environment 需仓库 owner/admin；审批能力受套餐与可见性限制 |
 | 06 | 第 04 篇的程序和检查 | 可用的 Copilot 资格、组织策略和预算 |
@@ -92,6 +94,7 @@ Agents 的产品含义是 Agent 会话管理入口；官方说明可见 [Agent m
 |---|---|---|
 | 02 | [[GitHub 协作与自动化：02 Issue、分支与 Pull Request]] | 一个合并的 PR，以及关联的 Issue |
 | 03 | [[GitHub 协作与自动化：03 Actions 与 Workflow]] | 一次手动执行成功的 workflow，能找到 step 日志 |
+| 03A | [[GitHub 协作与自动化：03A 用自己的电脑运行 CI：Self-hosted Runner]] | 特殊环境、重型 CI 与额度不足时接入本机 Runner |
 | 04 | [[GitHub 协作与自动化：04 CI 与合并检查]] | 同一个 PR 从失败变为通过，知道如何阻止带错误的合并 |
 | 05 | [[GitHub 协作与自动化：05 构建、发布与部署]] | 一个由主分支构建并部署的网站，以及版本记录 |
 | 06 | [[GitHub 协作与自动化：06 Agents 与任务委派]] | 一次有明确验收条件的 Agent 任务及可评审结果 |
