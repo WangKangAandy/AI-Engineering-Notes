@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：看懂 GitHub 上的一个项目
+title: 现代 GitHub：01 看懂 GitHub 上的一个项目
 summary: 从一个公开仓库认识项目说明、源码、历史、讨论和发布，知道如何判断项目用途、寻找答案并选择参与入口。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：看懂 GitHub 上的一个项目
+# 现代 GitHub：01 看懂 GitHub 上的一个项目
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 1 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [下一章](<GitHub 协作与自动化：02 Issue、分支与 Pull Request.md>)
+本书第 1 章。[全书导读](<现代 GitHub：00 导读.md>) · [下一章](<现代 GitHub：02 建立练习仓库并完成第一次网页贡献.md>)
 
 你可能第一次来到 GitHub，是为了下载工具、找一份学习资料，或打开别人分享的代码链接。页面上有 Code、Issues、Pull requests、Actions 等入口，但“看到了文件”还不等于知道怎样使用项目。
 

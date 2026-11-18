@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：持续维护权限、凭据与依赖安全
+title: 现代 GitHub：18 持续维护权限凭据与依赖安全
 summary: 对已有 CI、部署和依赖做一次有证据的维护审计，处理真实发现，区分未发现问题与尚未验证。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：持续维护权限、凭据与依赖安全
+# 现代 GitHub：18 持续维护权限凭据与依赖安全
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 18 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<GitHub 协作与自动化：05 构建、发布与部署.md>) · [下一章](<GitHub 协作与自动化：06 Agents 与任务委派.md>)
+本书第 18 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：17 从构建产物到发布部署与回滚.md>) · [下一章](<现代 GitHub：19 把有边界的任务交给 Agent.md>)
 
 前面已经在首次使用处区分登录身份、GITHUB_TOKEN、Secrets 和部署权限。本章把它们放在同一张实际系统地图中检查：现在还有谁能写仓库，哪些代码会拿到凭据，哪些依赖需要更新？继续使用自己的 `YOUR_LOGIN/resource-nav`，以已完成第 17 章的 main 为基线。没有安全告警也可以完成本章，不需要故意加入漏洞或推送真实令牌。
 

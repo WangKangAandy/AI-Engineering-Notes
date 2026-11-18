@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：让资源导航可以运行和验证
+title: 现代 GitHub：12 让资源导航可以运行和验证
 summary: 将已经维护的资源清单接入小型 Python 校验与页面生成程序，理解输入、输出、测试、失败和构建，为 CI 准备真实命令。
 tags:
   - github
@@ -9,11 +9,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：让资源导航可以运行和验证
+# 现代 GitHub：12 让资源导航可以运行和验证
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 12 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<现代 GitHub：让多项工作有可见的进度.md>) · [下一章](<GitHub 协作与自动化：03 Actions 与 Workflow.md>)
+本书第 12 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：11 让多项工作有可见的进度.md>) · [下一章](<现代 GitHub：13 Actions 怎样执行一次任务.md>)
 
 此前我们靠人检查资源清单。条目增多后，漏填分类、重复添加链接会变得难以察觉；每次手工排版页面，也会重复同样的劳动。本章给已有的 `resources.csv` 加一套小程序：先检查输入，再把有效数据变成静态页面。
 

@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：接收和验证 Webhook 事件
+title: 现代 GitHub：S3 接收和验证 Webhook 事件
 summary: 用可运行的离线验签实验理解 Webhook 原始字节、事件过滤与 delivery ID 去重，并明确公网交付和业务幂等尚需哪些条件。
 tags:
   - github
@@ -8,13 +8,13 @@ created: 2026-11-18
 status: ready
 ---
 
-# 现代 GitHub：接收和验证 Webhook 事件
+# 现代 GitHub：S3 接收和验证 Webhook 事件
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
 API 专题让我们主动询问“现在有哪些 PR”。如果每分钟查询一次，即使没有变化也要请求，还只能在下一轮发现新 PR。Webhook 则在订阅的事件发生时，由 GitHub 向配置好的服务发送 HTTP 请求。推送解决发现变化的入口问题；程序仍可能通过 API 读取当前状态或写评论，两者可以组合使用。[Webhook 概述](https://docs.github.com/en/webhooks/about-webhooks)
 
-本篇是自建集成专题，前置为 [现代 GitHub：通过 API 操作仓库对象](<现代 GitHub：通过 API 操作仓库对象.md>) 和第 12 章的 Python 运行基础。主线 Copilot、Cursor 或 Actions 自动化不要求你搭建公网接收服务。我们使用 Python 3.12 标准库完成离线验签实验：没有服务器、隧道或远端写入，输出只落在进程内存。这样可以先理解信任边界，再决定是否值得部署服务。
+本篇是自建集成专题，前置为 [现代 GitHub：S2 通过 API 操作仓库对象](<现代 GitHub：S2 通过 API 操作仓库对象.md>) 和第 12 章的 Python 运行基础。主线 Copilot、Cursor 或 Actions 自动化不要求你搭建公网接收服务。我们使用 Python 3.12 标准库完成离线验签实验：没有服务器、隧道或远端写入，输出只落在进程内存。这样可以先理解信任边界，再决定是否值得部署服务。
 
 ## 签名证明的是哪一份内容
 
@@ -59,4 +59,4 @@ py -3.12 -B -m unittest -v test_webhook_fixture
 
 实验结束，在该 Webhook 设置取消 Active 并保存，或删除专用测试 Webhook；另行停止自己的接收服务并清理不再需要的 secret。停用推送不会撤销某个 API token，正如撤销 token 也不会自动停止所有事件接收。
 
-完成离线部分后，你已验证字节验签、过滤和有限去重，并能说明尚未验证公网交付。若要让自建程序以机器人身份调用 API，继续 [GitHub 协作与自动化：08 GitHub App 注册与权限配置](<GitHub 协作与自动化：08 GitHub App 注册与权限配置.md>)；否则返回 [GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)，无需为了主线去部署服务。
+完成离线部分后，你已验证字节验签、过滤和有限去重，并能说明尚未验证公网交付。若要让自建程序以机器人身份调用 API，继续 [现代 GitHub：S4 注册 GitHub App 并验证安装身份](<现代 GitHub：S4 注册 GitHub App 并验证安装身份.md>)；否则返回 [现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)，无需为了主线去部署服务。

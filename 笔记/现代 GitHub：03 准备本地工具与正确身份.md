@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：准备本地工具与正确身份
+title: 现代 GitHub：03 准备本地工具与正确身份
 summary: 在 PowerShell 中安装 Git 与 gh，区分提交署名和账号权限，并克隆、核验自己的练习仓库。
 tags:
   - GitHub
@@ -8,7 +8,7 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：准备本地工具与正确身份
+# 现代 GitHub：03 准备本地工具与正确身份
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
@@ -144,4 +144,4 @@ git status --short
 
 ---
 
-[上一章：现代 GitHub：建立练习仓库，完成第一次网页贡献](<GitHub 协作与自动化：02 Issue、分支与 Pull Request.md>) · [下一章：现代 GitHub：一次修改怎样成为提交](<现代 GitHub：一次修改怎样成为提交.md>) · [返回导读](<GitHub 协作与自动化：01 学习路线.md>)
+[上一章：现代 GitHub：建立练习仓库，完成第一次网页贡献](<现代 GitHub：02 建立练习仓库并完成第一次网页贡献.md>) · [下一章：现代 GitHub：04 一次修改怎样成为提交](<现代 GitHub：04 一次修改怎样成为提交.md>) · [返回导读](<现代 GitHub：00 导读.md>)

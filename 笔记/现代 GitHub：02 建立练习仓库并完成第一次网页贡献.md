@@ -12,7 +12,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 2 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<现代 GitHub：看懂 GitHub 上的一个项目.md>) · [下一章](<现代 GitHub：准备本地工具与正确身份.md>)
+本书第 2 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：01 看懂 GitHub 上的一个项目.md>) · [下一章](<现代 GitHub：03 准备本地工具与正确身份.md>)
 
 本章只需要 GitHub 账号与浏览器。我们创建自己的 `resource-nav` 仓库，用一项很小的需求完成第一次贡献。后续章节继续使用这个仓库，不要求你获得本书所属组织的写权限。
 

@@ -13,7 +13,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)。
+学习路线：[现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)。
 
 前面由人在 Copilot Cloud 中发起一次任务；这里由 GitHub Actions 事件发起任务。仓库仍是自己的公开 `YOUR_LOGIN/resource-nav`、默认分支仍是 `main`，但运行环境、模型认证、日志入口全部改变。第 19 章的 Cloud 登录不会自动变成 Actions 中可用的模型凭据。
 
@@ -170,6 +170,6 @@ Git Reference,https://git-scm.com/docs,Git
 
 不要改成 `pull_request_target` 后检出并运行外部 head 来“解决 secret 缺失”：那会把高权限上下文交给不可信代码。本章没有为外部贡献建立带 secret 的自动 AI 审阅路线，外部 PR 可以继续使用受限的普通 CI 和人工审阅。[Actions 的 fork 事件与凭据限制](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)
 
-本章结果应是两份同步的 workflow 文件、一条手动预览记录、一条手动发布评论、一个真实事件及其评论。凭据缺失、编译通过但未运行、模型返回却未写入，分别是不同进度。下一篇：[让 AI 自动化可观察、可停止、可持续](<现代 GitHub：让 AI 自动化可观察、可停止、可持续.md>)。
+本章结果应是两份同步的 workflow 文件、一条手动预览记录、一条手动发布评论、一个真实事件及其评论。凭据缺失、编译通过但未运行、模型返回却未写入，分别是不同进度。下一篇：[让 AI 自动化可观察、可停止、可持续](<现代 GitHub：23 让 AI 自动化可观察可停止可持续.md>)。
 
 验证边界：本文配置依据 2026-11-18 的官方文档编写；本轮未调用云端模型、触发 Actions 或发布评论。手动版、事件版已经用官方 v1.2.2 在本机临时仓库成功编译，并核对触发过滤、同仓库条件与输出配置；这不证明远端凭据或模型可用。读者仍需在自己的版本上通过编译并逐阶段验收。

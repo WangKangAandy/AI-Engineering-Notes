@@ -13,7 +13,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-这是第 7 章。前一章是[改错以后如何恢复](<现代 GitHub：改错以后如何恢复.md>)；全书入口见[导读](<GitHub 协作与自动化：01 学习路线.md>)。
+这是第 7 章。前一章是[改错以后如何恢复](<现代 GitHub：06 改错以后如何恢复.md>)；全书入口见[导读](<现代 GitHub：00 导读.md>)。
 
 前六章已经让你能在自己的 `YOUR_LOGIN/resource-nav` 仓库修改和同步文件。现在 `main` 上有 README 和 `resources.csv`，清单至少包含 GitHub Docs、Python Docs 两条资源。我们要补充 Git 学习资源，并让新读者知道这些分类的区别。本章先把任务讲清楚，下一章再修改文件。
 
@@ -91,4 +91,4 @@ Open 只表示尚未关闭。一个 Open Issue 可能还没开始，也可能已
 
 本章结束时，应有一个描述整体目的的父 Issue，以及 A、B 两个子 Issue；B 的依赖指向 A，A 有负责人，三项都还未完成。仓库文件没有因为创建这些对象而变化。下一章的第一个 PR 只完成 A，因此只声明关闭 A；第二个 PR 完成 B，最后再对照父项整体验收。关闭但选择 Not planned 表示不再计划做，并不是已经实现；Reopen 也只改变工作项状态，不会回滚文件。[关闭 Issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/administering-issues/closing-an-issue)
 
-继续阅读第 8 章：[用 PR 完成评审与验收](<GitHub 协作与自动化：02B 让 PR 关联 Issue 并完成评审合并.md>)。
+继续阅读第 8 章：[用 PR 完成评审与验收](<现代 GitHub：08 用 PR 完成评审与验收.md>)。

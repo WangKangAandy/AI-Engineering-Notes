@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：改错以后如何恢复
+title: 现代 GitHub：06 改错以后如何恢复
 summary: 从修改所在位置判断恢复方法，用隔离仓库比较 restore、revert 与 reset，并保留未完成工作。
 tags:
   - GitHub
@@ -8,7 +8,7 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：改错以后如何恢复
+# 现代 GitHub：06 改错以后如何恢复
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
@@ -170,4 +170,4 @@ git status
 
 ---
 
-[上一章：现代 GitHub：分支、远程同步与冲突](<现代 GitHub：分支、远程同步与冲突.md>) · [下一章：现代 GitHub：用 Issue 把需求变成可执行工作](<GitHub 协作与自动化：02A 用 Issue 描述问题与拆解任务.md>) · [返回导读](<GitHub 协作与自动化：01 学习路线.md>)
+[上一章：现代 GitHub：05 分支、远程同步与冲突](<现代 GitHub：05 分支、远程同步与冲突.md>) · [下一章：现代 GitHub：用 Issue 把需求变成可执行工作](<现代 GitHub：07 用 Issue 把需求变成可执行工作.md>) · [返回导读](<现代 GitHub：00 导读.md>)

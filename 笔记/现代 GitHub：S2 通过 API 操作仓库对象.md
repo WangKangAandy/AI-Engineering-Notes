@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：通过 API 操作仓库对象
+title: 现代 GitHub：S2 通过 API 操作仓库对象
 summary: 从 gh api 的请求与响应理解仓库、Issue 和 PR，再对自己的练习 Issue 完成一次可读回核验的评论写入。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: ready
 ---
 
-# 现代 GitHub：通过 API 操作仓库对象
+# 现代 GitHub：S2 通过 API 操作仓库对象
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-读过 [现代 GitHub：用 gh 串起日常协作](<现代 GitHub：用 gh 串起日常协作.md>) 后，你已经能用 `gh issue view` 查看需求。API 专题进一步回答：当现成命令没有提供某个字段，程序怎样访问同一个对象？本篇仍使用自己的公开仓库 `YOUR_LOGIN/resource-nav`，终端为 PowerShell 7，`gh` 已安装并登录。API 操作远端对象，不取决于当前 Git 分支；即使本地停在 `main`，评论也不会变成一次 Git 提交。
+读过 [现代 GitHub：09 用 gh 串起日常协作](<现代 GitHub：09 用 gh 串起日常协作.md>) 后，你已经能用 `gh issue view` 查看需求。API 专题进一步回答：当现成命令没有提供某个字段，程序怎样访问同一个对象？本篇仍使用自己的公开仓库 `YOUR_LOGIN/resource-nav`，终端为 PowerShell 7，`gh` 已安装并登录。API 操作远端对象，不取决于当前 Git 分支；即使本地停在 `main`，评论也不会变成一次 Git 提交。
 
 ## 从网页对象走到请求与响应
 
@@ -93,4 +93,4 @@ Remove-Item -LiteralPath $bodyPath
 
 对限流，观察 `x-ratelimit-remaining`、`x-ratelimit-reset` 和 `retry-after`。未认证公开请求通常是每 IP 每小时 60 次，常见用户认证额度是每小时 5,000 次，但搜索、安装身份及次级限流另有规则。不能把 5,000 当成每个 API 的固定配额。遇到限流按服务端等待要求退避，不用密集重试验证它是否解除。[REST 限流](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)
 
-完成本篇意味着你能解释目标、身份、请求体和返回对象，并对一条受控写入留下可读回的证据。需要监听变化时进入 [现代 GitHub：接收和验证 Webhook 事件](<现代 GitHub：接收和验证 Webhook 事件.md>)；需要独立机器人身份时进入 [GitHub 协作与自动化：08 GitHub App 注册与权限配置](<GitHub 协作与自动化：08 GitHub App 注册与权限配置.md>)。不做自建集成可直接返回 [GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)，继续主线。
+完成本篇意味着你能解释目标、身份、请求体和返回对象，并对一条受控写入留下可读回的证据。需要监听变化时进入 [现代 GitHub：S3 接收和验证 Webhook 事件](<现代 GitHub：S3 接收和验证 Webhook 事件.md>)；需要独立机器人身份时进入 [现代 GitHub：S4 注册 GitHub App 并验证安装身份](<现代 GitHub：S4 注册 GitHub App 并验证安装身份.md>)。不做自建集成可直接返回 [现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)，继续主线。

@@ -13,7 +13,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书执行环境专题。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [Actions 基础](<GitHub 协作与自动化：03 Actions 与 Workflow.md>)。前置是能手动运行 workflow 并理解 job 与 runner；本专题另用私有 runner-lab，结束后返回公开 resource-nav 主线。
+本书执行环境专题。[全书导读](<现代 GitHub：00 导读.md>) · [Actions 基础](<现代 GitHub：13 Actions 怎样执行一次任务.md>)。前置是能手动运行 workflow 并理解 job 与 runner；本专题另用私有 runner-lab，结束后返回公开 resource-nav 主线。
 
 你已经有一台能运行测试的电脑，但 GitHub 提供的机器没有所需 SDK，内存不够，或者个人私有项目的托管计算额度已经用完。Self-hosted Runner 可以把 job 放到自己的机器上执行，同时继续在 GitHub 查看日志与状态。
 
@@ -304,4 +304,4 @@ Get-Location
 
 如果仅为本实验修改了 CurrentUser 执行策略，结束后可在同一账号下用 Set-ExecutionPolicy 将该作用域恢复为第 3 节记录的原值；不要覆盖其他用途后来需要的配置。
 
-学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到[CI 与合并门禁](<GitHub 协作与自动化：04 CI 与合并检查.md>)时继续使用 resource-nav 及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。
+学完本篇后，已有的调度平台没有变化：GitHub 仍记录事件、run、job 和检查结果。改变的是命令实际运行的位置，以及由谁维护那台机器。回到[CI 与合并门禁](<现代 GitHub：14 用 CI 和合并门禁保护修改.md>)时继续使用 resource-nav 及其托管 Runner；只有确认需要且能维护自托管环境的项目，才迁移真实 CI。

@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：验收、纠偏与结束 AI 任务
+title: 现代 GitHub：21 验收纠偏与结束 AI 任务
 summary: 用需求、diff、测试和日志验收 Copilot 结果，处理越界或失败，并在不需要时停止会话。
 tags:
   - github
@@ -9,11 +9,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：验收、纠偏与结束 AI 任务
+# 现代 GitHub：21 验收纠偏与结束 AI 任务
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)。
+学习路线：[现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)。
 
 第 19 章的会话完成，只是“Agent 停止工作”的事实；第 20 章的规则被读取，只是“输入包含了上下文”的事实。验收要把需求、改动、测试和运行记录拼起来。不要因为 AI 说“已完成”就跳过第 8 章已经学过的 PR 评审。
 
@@ -79,6 +79,6 @@ GitHub 官方说明可以监控、steer、停止或归档会话；提交可追�
 
 “会话完成”“Agent 自测通过”“PR 检查通过”“人工批准”“已合并”是五个不同状态。把它们分开，后续自动化才有可靠的输入。
 
-下一篇将同样的验收思想放进 Actions 里的 gh-aw：先手动编译和试跑，再让一个真实 PR 事件产生受控评论。[GitHub 协作与自动化：07 gh-aw 与智能自动化](<GitHub 协作与自动化：07 gh-aw 与智能自动化.md>)
+下一篇将同样的验收思想放进 Actions 里的 gh-aw：先手动编译和试跑，再让一个真实 PR 事件产生受控评论。[现代 GitHub：22 从手动试跑到事件驱动自动化](<现代 GitHub：22 从手动试跑到事件驱动自动化.md>)
 
 **来源与限制（2026-11-18 核对）**：依据 GitHub [Kick off a task](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/kick-off-a-task) 与 [Managing agent sessions](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/manage-and-track-agents)。本文未运行云端模型，也未对真实 PR 发表评论；示例是可审计的验收模板，不是运行结果声明。

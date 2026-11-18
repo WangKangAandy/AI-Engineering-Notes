@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：用 gh 串起日常协作
+title: 现代 GitHub：09 用 gh 串起日常协作
 summary: 用明确的账号、仓库和对象编号操作 Issue 与 PR，通过正文文件完成一轮可核验的命令行协作。
 tags:
   - GitHub
@@ -8,7 +8,7 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：用 gh 串起日常协作
+# 现代 GitHub：09 用 gh 串起日常协作
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
@@ -202,4 +202,4 @@ gh pr merge --help
 
 ---
 
-[上一章：现代 GitHub：用 PR 完成评审与验收](<GitHub 协作与自动化：02B 让 PR 关联 Issue 并完成评审合并.md>) · [下一章：现代 GitHub：从个人修改到共同维护](<现代 GitHub：从个人修改到共同维护.md>) · [返回导读](<GitHub 协作与自动化：01 学习路线.md>)
+[上一章：现代 GitHub：用 PR 完成评审与验收](<现代 GitHub：08 用 PR 完成评审与验收.md>) · [下一章：现代 GitHub：10 从个人修改到共同维护](<现代 GitHub：10 从个人修改到共同维护.md>) · [返回导读](<现代 GitHub：00 导读.md>)

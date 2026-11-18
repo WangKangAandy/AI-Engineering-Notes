@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：一次修改怎样成为提交
+title: 现代 GitHub：04 一次修改怎样成为提交
 summary: 通过资源清单的一次修改理解工作区、暂存区、提交和历史，并观察忽略规则的实际边界。
 tags:
   - GitHub
@@ -8,7 +8,7 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：一次修改怎样成为提交
+# 现代 GitHub：04 一次修改怎样成为提交
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
@@ -120,4 +120,4 @@ git log -1 --oneline ch04/catalog-title
 
 ---
 
-[上一章：现代 GitHub：准备本地工具与正确身份](<现代 GitHub：准备本地工具与正确身份.md>) · [下一章：现代 GitHub：分支、远程同步与冲突](<现代 GitHub：分支、远程同步与冲突.md>) · [返回导读](<GitHub 协作与自动化：01 学习路线.md>)
+[上一章：现代 GitHub：03 准备本地工具与正确身份](<现代 GitHub：03 准备本地工具与正确身份.md>) · [下一章：现代 GitHub：05 分支、远程同步与冲突](<现代 GitHub：05 分支、远程同步与冲突.md>) · [返回导读](<现代 GitHub：00 导读.md>)

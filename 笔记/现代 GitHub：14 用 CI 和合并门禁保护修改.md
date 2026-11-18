@@ -12,7 +12,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 14 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<GitHub 协作与自动化：03 Actions 与 Workflow.md>) · [下一章](<现代 GitHub：保存和传递一次运行的结果.md>)
+本书第 14 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：13 Actions 怎样执行一次任务.md>) · [下一章](<现代 GitHub：15 保存和传递一次运行的结果.md>)
 
 前一章已经让 Actions 响应仓库事件，现在让它执行第 12 章的三条真实命令。本章继续操作自己的 `YOUR_LOGIN/resource-nav`，默认分支 `main`，终端为 PowerShell 7；程序和有效清单已合入 main。第 13 章的 hello.yml 可以保留，它不是本章必需检查。
 

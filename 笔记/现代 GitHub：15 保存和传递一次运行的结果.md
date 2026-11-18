@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：保存和传递一次运行的结果
+title: 现代 GitHub：15 保存和传递一次运行的结果
 summary: 保存资源页面产物，跨 job 传递条目数量与文件，并把下载结果追溯到指定仓库、提交和运行。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：保存和传递一次运行的结果
+# 现代 GitHub：15 保存和传递一次运行的结果
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 15 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<GitHub 协作与自动化：04 CI 与合并检查.md>) · [下一章](<现代 GitHub：按需求扩展和改进工作流.md>)
+本书第 15 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：14 用 CI 和合并门禁保护修改.md>) · [下一章](<现代 GitHub：16 按需求扩展和改进工作流.md>)
 
 第 14 章的 CI 已在自己的 `YOUR_LOGIN/resource-nav` main 上工作，**Check resources** 已成为必需检查。现在的问题是：runner 结束后，怎样拿到它生成的页面？另一个 job 又怎样知道自己拿到的是正确结果？
 

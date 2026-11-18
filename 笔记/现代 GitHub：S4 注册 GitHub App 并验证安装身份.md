@@ -13,9 +13,9 @@ status: ready
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本篇是自建集成专题，前置为 [现代 GitHub：通过 API 操作仓库对象](<现代 GitHub：通过 API 操作仓库对象.md>)。目标是让一个独立机器人读取自己 `YOUR_LOGIN/resource-nav` 的 PR，并在你明确选择时发一条时间线评论。仅注册、下载私钥或看到安装存在，都不能证明 API 调用已经成功。
+本篇是自建集成专题，前置为 [现代 GitHub：S2 通过 API 操作仓库对象](<现代 GitHub：S2 通过 API 操作仓库对象.md>)。目标是让一个独立机器人读取自己 `YOUR_LOGIN/resource-nav` 的 PR，并在你明确选择时发一条时间线评论。仅注册、下载私钥或看到安装存在，都不能证明 API 调用已经成功。
 
-使用现成 Copilot 或 Cursor 服务的读者无需自建 App；按服务的安装与授权流程即可。这里不训练模型、不接收 Webhook，也不搭建公网服务。需要理解推送与验签时，另读 [现代 GitHub：接收和验证 Webhook 事件](<现代 GitHub：接收和验证 Webhook 事件.md>)。
+使用现成 Copilot 或 Cursor 服务的读者无需自建 App；按服务的安装与授权流程即可。这里不训练模型、不接收 Webhook，也不搭建公网服务。需要理解推送与验签时，另读 [现代 GitHub：S3 接收和验证 Webhook 事件](<现代 GitHub：S3 接收和验证 Webhook 事件.md>)。
 
 ## 为什么不继续用个人登录
 
@@ -119,4 +119,4 @@ Remove-Item Env:APP_CLIENT_ID
 Remove-Item Env:APP_PRIVATE_KEY_PATH
 ```
 
-完成本篇后，你应能分别拿出注册配置、安装范围、首次读取和单条评论的证据，而不是用一张安装成功截图代替全部验证。第三方服务路线见 [GitHub 协作与自动化：09 Cursor GitHub Agent 接入](<GitHub 协作与自动化：09 Cursor GitHub Agent 接入.md>)；返回 [GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>) 可继续 AI 协作主线。
+完成本篇后，你应能分别拿出注册配置、安装范围、首次读取和单条评论的证据，而不是用一张安装成功截图代替全部验证。第三方服务路线见 [现代 GitHub：S5 将协作方法迁移到 Cursor](<现代 GitHub：S5 将协作方法迁移到 Cursor.md>)；返回 [现代 GitHub：00 导读](<现代 GitHub：00 导读.md>) 可继续 AI 协作主线。

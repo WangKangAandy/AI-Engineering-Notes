@@ -13,7 +13,7 @@ status: learning
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)。
+学习路线：[现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)。
 
 这是第五部分的替代路线。你已经会描述有边界的任务、读 diff、运行测试和验收 PR；现在把这些方法迁移到 Cursor。选择现成服务不需要先注册自己的 GitHub App。你需要授权 Cursor 已有的集成访问练习仓库，不能把“安装服务 App”和“自己开发 App”混为一谈。
 

@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：按需求扩展和改进工作流
+title: 现代 GitHub：16 按需求扩展和改进工作流
 summary: 通过独立手动实验理解多版本检查、可复用工作流和并发控制，根据真实瓶颈决定是否需要缓存。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：按需求扩展和改进工作流
+# 现代 GitHub：16 按需求扩展和改进工作流
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 16 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<现代 GitHub：保存和传递一次运行的结果.md>) · [下一章](<GitHub 协作与自动化：05 构建、发布与部署.md>)
+本书第 16 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：15 保存和传递一次运行的结果.md>) · [下一章](<现代 GitHub：17 从构建产物到发布部署与回滚.md>)
 
 本章是工程化深化，可以直接跳到第 17 章。入口是第 15 章的 resource-nav main、ci.yml 和 resource-site 产物；出口仍保持这些对象不变。只有实际出现兼容性、重复配置或过期任务的问题，才需要采用对应方案。
 

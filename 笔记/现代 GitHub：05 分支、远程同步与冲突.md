@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：分支、远程同步与冲突
+title: 现代 GitHub：05 分支、远程同步与冲突
 summary: 理解分支与远端跟踪关系，在隔离仓库中复现同步冲突、先中止再解决，最后回到干净的主线。
 tags:
   - GitHub
@@ -8,7 +8,7 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：分支、远程同步与冲突
+# 现代 GitHub：05 分支、远程同步与冲突
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
@@ -188,4 +188,4 @@ git status
 
 ---
 
-[上一章：现代 GitHub：一次修改怎样成为提交](<现代 GitHub：一次修改怎样成为提交.md>) · [下一章：现代 GitHub：改错以后如何恢复](<现代 GitHub：改错以后如何恢复.md>) · [返回导读](<GitHub 协作与自动化：01 学习路线.md>)
+[上一章：现代 GitHub：04 一次修改怎样成为提交](<现代 GitHub：04 一次修改怎样成为提交.md>) · [下一章：现代 GitHub：06 改错以后如何恢复](<现代 GitHub：06 改错以后如何恢复.md>) · [返回导读](<现代 GitHub：00 导读.md>)

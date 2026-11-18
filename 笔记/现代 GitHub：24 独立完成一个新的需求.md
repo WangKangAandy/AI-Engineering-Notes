@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：独立完成一个新的需求
+title: 现代 GitHub：24 独立完成一个新的需求
 summary: 用资源导航的一项新需求串起问题描述、本地修改、PR、CI、交付和受控 AI 协作，以实际证据检验独立处理能力。
 tags:
   - github
@@ -8,11 +8,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：独立完成一个新的需求
+# 现代 GitHub：24 独立完成一个新的需求
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-本书第 24 章。[全书导读](<GitHub 协作与自动化：01 学习路线.md>) · [上一章](<现代 GitHub：让 AI 自动化可观察、可停止、可持续.md>)
+本书第 24 章。[全书导读](<现代 GitHub：00 导读.md>) · [上一章](<现代 GitHub：23 让 AI 自动化可观察可停止可持续.md>)
 
 前面的章节给出了操作路径。本章换一项没有逐步实现答案的需求，检验你能否选择合适的方法、完成变更，并用证据说明结果。仍使用自己的 resource-nav，不需要创建另一套产品、开通所有专题服务或运行多个 AI 平台。
 

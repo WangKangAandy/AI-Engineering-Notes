@@ -1,5 +1,5 @@
 ---
-title: 现代 GitHub：把项目知识与工作约定交给 Agent
+title: 现代 GitHub：20 把项目知识与工作约定交给 Agent
 summary: 将资源导航项目的事实、测试命令和协作约定放进可维护的上下文文件，验证 Copilot 能读到它们，并区分规则与权限。
 tags:
   - github
@@ -10,11 +10,11 @@ created: 2026-11-18
 status: learning
 ---
 
-# 现代 GitHub：把项目知识与工作约定交给 Agent
+# 现代 GitHub：20 把项目知识与工作约定交给 Agent
 
 > 本文收录于 [AI-Engineering-Notes](https://github.com/xallor-ai/AI-Engineering-Notes)，分享 AI 技术研究、工程实践与应用探索。欢迎 Star 关注后续更新，也欢迎通过 Issue 交流和纠错。
 
-学习路线：[GitHub 协作与自动化：01 学习路线](<GitHub 协作与自动化：01 学习路线.md>)。
+学习路线：[现代 GitHub：00 导读](<现代 GitHub：00 导读.md>)。
 
 第 19 章把一次说明写进 prompt。每次都重复同一段话既容易漂移，也让 Agent 先花时间猜项目。第 20 章把稳定事实和工作约定放进仓库能维护的文件，同时接受一个限制：**被读取的规则不是权限授予**。文件可以要求“不要改 workflow”，却不能阻止一个已有写权限的操作者改它；权限仍由 GitHub、Actions 和执行环境控制。
 
@@ -82,6 +82,6 @@ Cursor 的项目规则使用 `.cursor/rules/*.mdc`，也支持 `AGENTS.md`；`.m
 
 规则文件本身进入 PR 和 CI 的审查范围。项目命令变更时，同一 PR 更新规则，避免“文档说三条命令、脚本已换命令”。删除失效规则比保留一长串历史提醒更安全。规则只写稳定事实和验收方式；账号资格、PAT、Actions token 与 Copilot 额度写在对应的安全说明中，不写进公开仓库。
 
-下一篇：[现代 GitHub：验收、纠偏与结束 AI 任务](<现代 GitHub：验收、纠偏与结束 AI 任务.md>)。
+下一篇：[现代 GitHub：21 验收纠偏与结束 AI 任务](<现代 GitHub：21 验收纠偏与结束 AI 任务.md>)。
 
 **来源与限制（2026-11-18 核对）**：依据 GitHub [仓库自定义指令](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions)、[Agent Skills](https://docs.github.com/en/copilot/concepts/customizations/agent-skills) 和 Cursor [Rules](https://cursor.com/docs/rules)。本文只展示可复制的规则文本和读取验证方法，未声称本仓库已启用某客户端的所有规则类型；实际支持以账号、客户端版本和官方文档为准。
