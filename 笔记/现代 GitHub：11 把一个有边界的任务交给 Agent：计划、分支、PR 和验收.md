@@ -24,20 +24,20 @@ Agent 的价值不是替你按下 Merge。它可以研究仓库、制定计划�
 
 ~~~markdown
 ## 任务
-为资源校验测试增加一个“缺少 category”的失败样例。
+为页面渲染增加一个“每项资源都生成一个列表项”的测试。
 
 ## 允许修改
 - test_catalog.py
-- 必要时修改 catalog.py 的错误信息
+- 不修改 catalog.py 或 build.py
 
 ## 禁止修改
 - resources.csv 的现有资源
-- .github/workflows/
+- catalog.py、build.py 和 .github/workflows/
 - Secrets、权限和发布设置
 
 ## 验收条件
-- 测试先在缺少 category 的输入上失败
-- 修改后测试通过
+- 新测试先失败，再在 test_catalog.py 中通过
+- 现有测试全部通过
 - 现有测试全部通过
 - Pull Request 只包含允许修改的文件
 ~~~
@@ -56,7 +56,7 @@ Agent 的价值不是替你按下 Merge。它可以研究仓库、制定计划�
 
 GitHub Copilot cloud agent 会在自己的环境中工作，并在分支上提交修改。它与 IDE 中直接修改本地文件的 agent mode 不是同一个执行面。提交 PR 前先观察它的计划和修改范围。
 
-如果你的账号没有 cloud agent 入口，不能把本地 IDE 生成的代码写成“Cloud Agent 已验证”。本章仍可用手工方式模拟：在 feature/agent-category-test 分支中按同一契约完成修改，再用 PR 验收。
+如果你的账号没有 cloud agent 入口，不能把本地 IDE 生成的代码写成“Cloud Agent 已验证”。本章仍可用手工方式模拟：在 feature/agent-test-coverage 分支中按同一契约完成修改，再用 PR 验收。
 
 ## 观察四类证据
 
@@ -86,7 +86,7 @@ git switch main
 git pull --ff-only origin main
 gh pr checkout PR_NUMBER --repo YOUR_LOGIN/resource-nav
 git status --short --branch
-git diff main...HEAD -- test_catalog.py catalog.py
+git diff main...HEAD -- test_catalog.py
 python -m unittest discover -s . -p 'test_*.py' -v
 ~~~
 
@@ -104,7 +104,7 @@ PR_NUMBER 要换成自己的编号。不要在 Agent 分支上直接继续做另
 假设 Agent 还修改了 .github/workflows/ci.yml。不要只在评论里说“不要改这个”。在 PR 中明确写：
 
 ~~~text
-请撤回对 .github/workflows/ci.yml 的修改，并只保留 test_catalog.py 与必要的 catalog.py 改动。重新运行完整 unittest，并在 PR 描述中列出实际修改文件。
+请撤回对 .github/workflows/ci.yml、catalog.py 和 build.py 的修改，只保留 test_catalog.py 中的测试覆盖改动。重新运行完整 unittest，并在 PR 描述中列出实际修改文件。
 ~~~
 
 它更新后再次检查差异。纠偏后的 PR 仍由人决定是否合并；如果反复越界，关闭任务或关闭 PR，保留原因。
