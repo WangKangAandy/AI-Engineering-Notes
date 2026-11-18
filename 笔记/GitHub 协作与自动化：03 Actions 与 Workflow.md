@@ -16,7 +16,7 @@ status: learning
 
 资源导航已经能在本机校验清单、运行测试并生成页面。现在把“由人打开终端执行”逐步变为“仓库收到事件后执行”。本章先用一句打印命令建立配置、触发、执行、日志的对应关系；下一章再接入三条真实检查命令。
 
-本章始终操作自己的 `YOUR_LOGIN/resource-nav`，默认分支 main。第 12 章的程序已合入 main，本机工作区干净。先从最新 main 创建 `lab/13-actions`；前后每个实验 PR 都明确合入本仓库 main，不向书的源仓库提交练习文件。
+开始前，在自己的 `YOUR_LOGIN/resource-nav` 仓库确认 `main` 已包含第 12 章的程序，并检查本地工作区没有未提交修改。然后从最新 `main` 创建 `lab/13-actions`；本章新增的 workflow 通过 PR 合入这个仓库的 `main`。
 
 ## 1. 从页面对应到对象
 
@@ -71,7 +71,7 @@ jobs:
 
 ## 4. `run` 和 `uses` 的区别
 
-第一次 PR 已经合并。现在从更新后的 main 新建 `lab/13-events`；本节和下一节都在这个新分支编辑 hello.yml，完成后创建第二个 PR。不要复用已经删除的旧分支。
+要比较 `pull_request` 与 `push` 的事件差异，需要先让最小 workflow 合入 `main`，再从最新 `main` 创建 `lab/13-events`。这个额外分支只用于本章的事件对照；完成修改后通过 PR 合回 `main`。
 
 `run` 写你要执行的命令；`uses` 引用可复用组件。要读取仓库中的文件，可以在原来的打印步骤前加：
 
@@ -171,7 +171,7 @@ jobs:
 
 在当前仓库 Settings → Secrets and variables → Actions 的 Variables 标签中新建 `LAB_MESSAGE`，值为 `Hello config`；在 Secrets 标签中新建 `LAB_TOKEN`，填入任意无敏感性的练习值。这里不需要购买服务或生成真正的访问令牌。
 
-从最新 main 建立 `lab/13-config`，在 hello.yml 的 steps 最后插入：
+作为可选的配置练习，从最新 `main` 建立 `lab/13-config`，在 hello.yml 的 steps 最后插入：
 
 ```yaml
       - name: Check configuration
