@@ -57,8 +57,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.event_name }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.event.pull_request.number) || 'pages-deploy' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
