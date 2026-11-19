@@ -6,7 +6,7 @@ tags:
   - actions
   - self-hosted-runner
 created: 2026-11-18
-status: learning
+status: ready
 ---
 
 # 现代 GitHub：附录 A Self-hosted Runner

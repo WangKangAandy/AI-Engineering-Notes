@@ -7,7 +7,7 @@ tags:
   - copilot
   - code-review
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：把一个有边界的任务交给 Agent：计划、分支、PR 和验收
@@ -38,7 +38,6 @@ Agent 的价值不是替你按下 Merge。它可以研究仓库、制定计划�
 ## 验收条件
 - 新测试覆盖两个资源时生成两个列表项的结果
 - 现有测试全部通过；本任务是补充覆盖率，不要求修改生产实现
-- 现有测试全部通过
 - Pull Request 只包含允许修改的文件
 ~~~
 

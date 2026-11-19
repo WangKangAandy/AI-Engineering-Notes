@@ -6,7 +6,7 @@ tags:
   - issues
   - project-management
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从需求到可执行计划：Issue、子任务和项目视图

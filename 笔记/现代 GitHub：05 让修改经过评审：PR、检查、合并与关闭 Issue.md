@@ -6,7 +6,7 @@ tags:
   - pull-request
   - code-review
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：让修改经过评审：PR、检查、合并与关闭 Issue

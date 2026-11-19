@@ -8,7 +8,7 @@ tags:
   - ai
   - book
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从入门到实战与 AI 自动化

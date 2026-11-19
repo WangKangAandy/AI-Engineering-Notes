@@ -6,7 +6,7 @@ tags:
   - actions
   - engineering
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：附录 D Actions 工程化选择

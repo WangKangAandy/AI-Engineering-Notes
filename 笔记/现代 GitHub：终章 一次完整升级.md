@@ -6,7 +6,7 @@ tags:
   - practice
   - capstone
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：终章 一次完整升级

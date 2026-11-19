@@ -7,7 +7,7 @@ tags:
   - security
   - actions
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：让已上线项目继续可靠：维护、费用、权限与故障

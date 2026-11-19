@@ -6,7 +6,7 @@ tags:
   - governance
   - maintenance
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从贡献者到维护者：让项目可以被别人继续使用

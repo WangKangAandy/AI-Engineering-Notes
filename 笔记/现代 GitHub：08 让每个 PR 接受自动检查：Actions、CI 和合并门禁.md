@@ -6,7 +6,7 @@ tags:
   - actions
   - ci
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：让每个 PR 接受自动检查：Actions、CI 和合并门禁

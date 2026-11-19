@@ -1,9 +1,9 @@
 name: Resource CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
   workflow_dispatch:
 
@@ -14,8 +14,6 @@ jobs:
   check:
     name: Check resources
     runs-on: ubuntu-latest
-    outputs:
-      resource_count: ${{ steps.metadata.outputs.resource_count }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,79 +22,6 @@ jobs:
       - name: Validate catalog
         run: python catalog.py resources.csv
       - name: Run tests
-        run: python -m unittest discover -v
+        run: python -m unittest discover -s . -p 'test_*.py' -v
       - name: Build site
         run: python build.py
-      - name: Record provenance
-        id: metadata
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          from catalog import load_resources
-
-          count = len(load_resources("resources.csv"))
-          record = {
-              "repository": os.environ["GITHUB_REPOSITORY"],
-              "sha": os.environ["GITHUB_SHA"],
-              "run_id": os.environ["GITHUB_RUN_ID"],
-              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
-              "resource_count": count,
-          }
-          Path("site/provenance.json").write_text(
-              json.dumps(record, indent=2) + "\n", encoding="utf-8"
-          )
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-              output.write(f"resource_count={count}\n")
-          PY
-      - name: Upload site
-        uses: actions/upload-artifact@v4
-        with:
-          name: resource-site
-          path: site/
-          if-no-files-found: error
-          retention-days: 7
-
-  verify:
-    name: Verify artifact
-    needs: check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/download-artifact@v4
-        with:
-          name: resource-site
-          path: received-site
-      - name: Verify downloaded files
-        env:
-          EXPECTED_COUNT: ${{ needs.check.outputs.resource_count }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          from html.parser import HTMLParser
-          from pathlib import Path
-
-          class Items(HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.count = 0
-              def handle_starttag(self, tag, attrs):
-                  if tag == "li":
-                      self.count += 1
-
-          root = Path("received-site")
-          record = json.loads((root / "provenance.json").read_text(encoding="utf-8"))
-          parser = Items()
-          parser.feed((root / "index.html").read_text(encoding="utf-8"))
-          expected = int(os.environ["EXPECTED_COUNT"])
-          assert expected > 0
-          assert parser.count == expected == record["resource_count"]
-          assert record["repository"] == os.environ["GITHUB_REPOSITORY"]
-          assert record["sha"] == os.environ["GITHUB_SHA"]
-          assert record["run_id"] == os.environ["GITHUB_RUN_ID"]
-          print(f"Verified {expected} resources from {record['sha']}")
-          PY

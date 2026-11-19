@@ -6,7 +6,7 @@ tags:
   - beginner
   - pull-request
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从一个仓库开始：看懂项目、Issue、提交和 PR

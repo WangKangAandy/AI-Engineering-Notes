@@ -6,7 +6,7 @@ tags:
   - git
   - gh
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：把一次修改带回本地：Git Bash、Git 和 gh
@@ -138,7 +138,20 @@ git status --short --branch
 git push origin main
 ~~~
 
-如果 main 受到分支保护，push 会被拒绝。这是保护生效的信号，不要用强制推送绕过；下一章会用工作分支和 Pull Request 继续。
+如果 main 受到分支保护，push 会被拒绝。这是保护生效的信号，不要用强制推送绕过。此时提交仍在本地 main，远程 origin/main 没有它；先把提交保留到工作分支，再恢复本地 main：
+
+~~~bash
+git switch -c docs/local-readme
+git push -u origin docs/local-readme
+# 现在可以用 GitHub 网页或 gh 创建 Pull Request
+
+git switch main
+git fetch origin
+git reset --hard origin/main
+git status --short --branch
+~~~
+
+这样本地 main 回到远程的干净状态，提交仍在 docs/local-readme 中，可以按下一章的 PR 流程继续。reset 只作用于尚未共享的本地 main；不要对已经与他人共享的分支这样做。
 
 ## 用 gh 查看同一个项目
 

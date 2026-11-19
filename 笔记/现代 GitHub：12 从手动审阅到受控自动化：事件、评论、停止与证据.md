@@ -7,7 +7,7 @@ tags:
   - automation
   - security
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从手动审阅到受控自动化：事件、评论、停止与证据

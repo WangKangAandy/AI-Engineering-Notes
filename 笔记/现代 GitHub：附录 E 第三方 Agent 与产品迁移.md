@@ -7,7 +7,7 @@ tags:
   - cursor
   - agent
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：附录 E 第三方 Agent 与产品迁移

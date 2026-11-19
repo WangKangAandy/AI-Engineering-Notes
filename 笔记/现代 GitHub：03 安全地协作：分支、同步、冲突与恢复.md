@@ -6,7 +6,7 @@ tags:
   - git
   - collaboration
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：安全地协作：分支、同步、冲突与恢复

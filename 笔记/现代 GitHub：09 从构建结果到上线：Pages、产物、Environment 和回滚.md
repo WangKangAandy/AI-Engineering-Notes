@@ -8,7 +8,7 @@ tags:
   - deployment
   - release
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从构建结果到上线：Pages、产物、Environment 和回滚

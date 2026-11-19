@@ -7,7 +7,7 @@ tags:
   - api
   - github-app
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：附录 B GitHub CLI、API 和 GitHub App
@@ -101,6 +101,52 @@ gh api repos/YOUR_LOGIN/resource-nav/issues/ISSUE_NUMBER/comments \
 7. 最后撤销安装或删除密钥。
 
 App 安装成功不等于服务端已经能工作；服务端读回一个仓库对象才是另一层证据。
+
+## 运行随书的最小 App 实验
+
+随书的 [app_practice.py](<_assets/modern-github/integration/app_practice.py>) 将上面的阶段串成一个只针对 `resource-nav` 的实验。它使用 PyJWT 生成短期 App JWT，换取 installation token，读取一个 PR；`comment` 模式才申请 Pull requests write，并在写入后读回评论，最后撤销 installation token。
+
+先在 Git Bash 创建临时虚拟环境并安装依赖：
+
+~~~bash
+python -m venv .venv-app
+source .venv-app/Scripts/activate
+python -m pip install PyJWT
+~~~
+
+在 GitHub App 的 Credentials 页面复制 App 的 Client ID，在本机保存刚下载的 PEM 私钥，然后只在当前 Git Bash 会话设置环境变量：
+
+~~~bash
+export APP_CLIENT_ID='YOUR_APP_CLIENT_ID'
+export APP_PRIVATE_KEY_PATH="$PWD/app-private-key.pem"
+~~~
+
+不要把 PEM 文件、Client ID 或环境变量值加入 Git。确认 App 已安装到自己的 `resource-nav`，并且有 Pull requests read 权限。先运行只读实验：
+
+~~~bash
+python _assets/modern-github/integration/app_practice.py read \
+  --repo YOUR_LOGIN/resource-nav \
+  --pr PR_NUMBER
+~~~
+
+成功时应看到 App、installation、目标仓库、短期 token 到期时间和 PR 读回结果，随后看到 Installation token revoked。这里的 PR_NUMBER 换成自己的开放 PR 编号。
+
+只有在确认只读实验成功后才运行受控评论。为评论准备一个不含密钥的文本文件：
+
+~~~bash
+cat > app-comment.md <<'EOF'
+App 实验评论：已完成一次受控读回。
+EOF
+python _assets/modern-github/integration/app_practice.py comment \
+  --repo YOUR_LOGIN/resource-nav \
+  --pr PR_NUMBER \
+  --body-file app-comment.md \
+  --confirm YOUR_LOGIN/resource-nav#PR_NUMBER
+~~~
+
+`comment` 模式需要 App 的 Pull requests write 权限；脚本会打印写入回执，再按评论 ID 读回正文和机器人身份。若读回失败，不要立即重试，先使用回执检查评论是否已经写入。实验结束后删除 PEM、临时 body 文件和虚拟环境，或撤销 App 安装。
+
+本实验未验证云端部署，也不要求把 App 私钥放进仓库或 Actions Secret；它只证明本机服务可以用最小 installation token 读回和可选评论。
 
 ## 权限最小化
 

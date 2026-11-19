@@ -6,7 +6,7 @@ tags:
   - python
   - testing
 created: 2026-11-18
-status: draft
+status: ready
 ---
 
 # 现代 GitHub：从资源清单到小程序：第一次读码、改码和测试
