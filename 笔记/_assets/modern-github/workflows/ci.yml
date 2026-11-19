@@ -1,0 +1,27 @@
+name: Resource CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check resources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate catalog
+        run: python catalog.py resources.csv
+      - name: Run tests
+        run: python -m unittest discover -s . -p 'test_*.py' -v
+      - name: Build site
+        run: python build.py
